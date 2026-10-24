@@ -1,6 +1,7 @@
 import type { SampleCandle } from "./chart-data";
 
 export type LiveQuote = { value: number; changePercent: number; timestamp: string };
+export type IntradayPoint = { timestamp: string; price: number };
 
 const SYMBOLS: Record<string, string> = {
   SPX: ".SPX.US", NDX: ".NDX.US", DJI: ".DJI.US",
@@ -48,4 +49,26 @@ export function parseCandles(raw: unknown): SampleCandle[] {
     output.push({ time: item.timestamp.slice(0, 10), open, high, low, close, volume });
   }
   return output.sort((a, b) => a.time.localeCompare(b.time));
+}
+
+export function parseIntraday(raw: unknown): IntradayPoint[] {
+  if (!Array.isArray(raw)) return [];
+  const points = new Map<string, IntradayPoint>();
+  for (const value of raw) {
+    const item = record(value);
+    if (!item || typeof item.timestamp !== "string" || !/^\d{4}-\d\d-\d\dT/.test(item.timestamp) || !Number.isFinite(Date.parse(item.timestamp))) continue;
+    const price = number(item.price);
+    if (price === null || price <= 0) continue;
+    points.set(item.timestamp, { timestamp: item.timestamp, price });
+  }
+  return [...points.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+function newYorkDate(timestamp: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(timestamp));
+}
+
+export function matchTrendToQuote(points: IntradayPoint[], quote: LiveQuote): IntradayPoint[] {
+  const date = newYorkDate(quote.timestamp);
+  return points.filter((point) => newYorkDate(point.timestamp) === date);
 }

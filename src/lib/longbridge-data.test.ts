@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCandles, parseQuotes, toLongbridgeSymbol } from "./longbridge-data";
+import { matchTrendToQuote, parseCandles, parseIntraday, parseQuotes, toLongbridgeSymbol } from "./longbridge-data";
 
 describe("Longbridge market data", () => {
   it("maps only verified catalog symbols", () => {
@@ -17,5 +17,29 @@ describe("Longbridge market data", () => {
     expect(parseCandles([{ timestamp: "2026-10-23T04:00:00Z", open: "10", high: "12", low: "9", close: "11", volume: "100" }]))
       .toEqual([{ time: "2026-10-23", open: 10, high: 12, low: 9, close: 11, volume: 100 }]);
     expect(parseCandles([{ timestamp: "2026-10-23T04:00:00Z", open: "10", high: "12", low: "9", close: "" }])).toEqual([]);
+  });
+
+  it("keeps valid intraday prices in timestamp order", () => {
+    expect(parseIntraday([
+      { timestamp: "2026-10-23T13:31:00Z", price: "350.8" },
+      { timestamp: "2026-10-23T13:30:00Z", price: "350.75" },
+      { timestamp: "2026-10-23T13:31:00Z", price: "350.8" },
+      { timestamp: "2026-10-23T13:32:00Z", price: "" },
+      { timestamp: "bad", price: "350" },
+    ])).toEqual([
+      { timestamp: "2026-10-23T13:30:00Z", price: 350.75 },
+      { timestamp: "2026-10-23T13:31:00Z", price: 350.8 },
+    ]);
+  });
+
+  it("does not pair a quote with another trading day's trend", () => {
+    const quote = { value: 347.725, changePercent: -0.14, timestamp: "2026-10-23T20:00:01Z" };
+    const trend = [
+      { timestamp: "2026-10-22T19:59:00Z", price: 348.22 },
+      { timestamp: "2026-10-23T13:30:00Z", price: 350.75 },
+      { timestamp: "2026-10-23T19:59:00Z", price: 347.725 },
+    ];
+    expect(matchTrendToQuote(trend, quote)).toEqual(trend.slice(1));
+    expect(matchTrendToQuote(trend.slice(0, 1), quote)).toEqual([]);
   });
 });

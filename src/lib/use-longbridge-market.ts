@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { SampleCandle } from "./chart-data";
-import type { LiveQuote } from "./longbridge-data";
+import type { IntradayPoint, LiveQuote } from "./longbridge-data";
 
 type RefreshResult = {
   quotes: Record<string, LiveQuote>;
+  trendsBySymbol?: Record<string, IntradayPoint[]>;
   candlesByInterval?: Partial<Record<"1D" | "1W" | "1M", SampleCandle[]>>;
   unsupported: string[];
   asOf: string;

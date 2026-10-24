@@ -11,6 +11,8 @@ describe("dashboard", () => {
     render(<Dashboard />);
     expect(await screen.findByRole("heading", { name: "宏观资产" })).toBeInTheDocument();
     expect(screen.getAllByTestId("asset-card")).toHaveLength(8);
+    expect(screen.queryByText("4,126.80")).not.toBeInTheDocument();
+    expect(screen.queryAllByRole("img")).toHaveLength(0);
   });
 
   it("searches Chinese names and adds a symbol only once", async () => {
@@ -49,7 +51,7 @@ describe("dashboard", () => {
   it("updates visible quotes only when the user presses refresh", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ connected: true }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { AAPL: { value: 347.725, changePercent: -0.14, timestamp: "2026-10-23T20:00:01Z" } }, unsupported: [], asOf: "2026-10-24T00:00:00Z" }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { AAPL: { value: 347.725, changePercent: -0.14, timestamp: "2026-10-23T20:00:01Z" } }, trendsBySymbol: { AAPL: [{ timestamp: "2026-10-23T13:30:00Z", price: 350.75 }, { timestamp: "2026-10-23T19:59:00Z", price: 347.725 }] }, unsupported: ["XAUUSD", "US10Y"], asOf: "2026-10-24T00:00:00Z" }) });
     vi.stubGlobal("fetch", fetchMock);
     render(<Dashboard />);
     const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
@@ -59,6 +61,12 @@ describe("dashboard", () => {
     const card = screen.getByText("苹果").closest('[data-testid="asset-card"]') as HTMLElement;
     await waitFor(() => expect(within(card).getByText("347.73")).toBeInTheDocument());
     expect(within(card).getByText(/Longbridge/)).toBeInTheDocument();
+    expect(within(card).getByRole("img", { name: /最近交易日分时走势/ })).toBeInTheDocument();
+    expect(within(card).queryByText("示例走势")).not.toBeInTheDocument();
+    const gold = screen.getByText("黄金 / 美元").closest('[data-testid="asset-card"]') as HTMLElement;
+    expect(within(gold).getByText("行情不可用")).toBeInTheDocument();
+    expect(within(gold).queryByText("4,126.80")).not.toBeInTheDocument();
+    expect(within(gold).queryByRole("img")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
