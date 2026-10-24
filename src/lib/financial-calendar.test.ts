@@ -26,4 +26,10 @@ describe("financial calendar", () => {
     expect(merged.some((event) => event.id === "sony-2026-q2")).toBe(true);
     expect(merged.some((event) => event.id === "provider-sony")).toBe(false);
   });
+  it("includes officially announced Taiwan and Hong Kong earnings", () => {
+    expect(CURATED_EVENTS).toEqual(expect.arrayContaining([
+      expect.objectContaining({ region: "TW", symbol: "2317.TW", start: "2026-11-12", category: "earnings" }),
+      expect.objectContaining({ region: "HK", symbol: "00700.HK", start: "2026-11-18", category: "earnings" }),
+    ]));
+  });
 });

@@ -32,6 +32,24 @@ describe("calendar API", () => {
     expect(body.partial).toBe(true);
     expect(body.missing).toContain("JP report");
     expect(body.events).toEqual(expect.arrayContaining([expect.objectContaining({ title: "微软 财报", start: eventDate })]));
-    expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "finance_calendar", expect.objectContaining({ category: "report", market: "US", start, end }));
+    expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "finance_calendar", expect.objectContaining({ category: "macrodata", market: "US", start, end }));
+    expect(callLongbridgeTool.mock.calls.filter((call) => call[2]?.category === "report" && call[2]?.market === "US").length).toBeGreaterThan(1);
+  });
+  it("collects earnings in short windows when a full-month provider query omits them", async () => {
+    const first = new Date();
+    first.setUTCDate(1);
+    first.setUTCMonth(first.getUTCMonth() + 1);
+    const month = first.toISOString().slice(0, 7);
+    const target = `${month}-10`;
+    callLongbridgeTool.mockImplementation(async (_session, _name, args) => {
+      if (!args || args.category !== "report" || args.market !== "US") return { list: [] };
+      const span = (Date.parse(`${args.end}T00:00:00Z`) - Date.parse(`${args.start}T00:00:00Z`)) / 86_400_000;
+      if (span > 6 || args.start > target || args.end < target) return { list: [] };
+      return { list: [{ date: target, infos: [{ id: "apple", symbol: "AAPL.US", counter_name: "苹果", content: "季度业绩" }] }] };
+    });
+    const response = await GET(new NextRequest(`http://127.0.0.1:3100/api/calendar?month=${month}`));
+    const body = await response.json();
+    expect(body.events).toEqual(expect.arrayContaining([expect.objectContaining({ symbol: "AAPL.US", start: target })]));
+    expect(callLongbridgeTool.mock.calls.filter((call) => call[2]?.category === "report" && call[2]?.market === "US").length).toBeGreaterThan(1);
   });
 });
