@@ -26,6 +26,12 @@ describe("watchlist", () => {
     expect(removeSymbol(added, "AAPL")).toEqual({ macro: [], stocks: [] });
   });
 
+  it("keeps a valid Longbridge US symbol after reload", () => {
+    const next = addSymbol(DEFAULT_WATCHLIST, "ADBE.US");
+    expect(next.stocks).toContain("ADBE.US");
+    expect(loadWatchlist({ getItem: () => JSON.stringify(next) }).stocks).toContain("ADBE.US");
+  });
+
   it("saves the watchlist under a stable key", () => {
     let key = "";
     let value = "";

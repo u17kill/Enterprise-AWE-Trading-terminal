@@ -1,5 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { findSymbol } from "../lib/catalog";
 import { ChartWorkspace } from "./chart-workspace";
 
@@ -31,6 +31,7 @@ beforeAll(() => {
   };
 });
 beforeEach(() => window.localStorage.clear());
+afterEach(() => vi.unstubAllGlobals());
 
 describe("chart workspace", () => {
   it("mounts a candle chart with interval, indicator and drawing controls", () => {
@@ -73,5 +74,91 @@ describe("chart workspace", () => {
     fireEvent.pointerDown(overlay, { clientX: 200, clientY: 170, pointerId: 1 });
     fireEvent.pointerUp(overlay, { clientX: 200, clientY: 170, pointerId: 1 });
     expect(screen.getByText(/1\s*个/)).toBeInTheDocument();
+  });
+
+  it("allows MA5 and MA20 to be displayed together and independently hidden", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const ma5 = screen.getByRole("checkbox", { name: "MA5" });
+    const ma20 = screen.getByRole("checkbox", { name: "MA20" });
+    fireEvent.click(ma5);
+    expect(ma5).toBeChecked();
+    expect(ma20).toBeChecked();
+    fireEvent.click(ma20);
+    expect(ma5).toBeChecked();
+    expect(ma20).not.toBeChecked();
+  });
+
+  it("offers MA50 alongside the other moving averages", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const ma50 = screen.getByRole("checkbox", { name: "MA50" });
+    fireEvent.click(ma50);
+    expect(ma50).toBeChecked();
+  });
+
+  it("explains when the selected interval lacks enough bars for a moving average", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "MA250" }));
+    expect(screen.getByText(/MA250 需要至少 250 根 K 线/)).toBeInTheDocument();
+  });
+
+  it("shows MACD and RSI in independent lower panes and explains breadth availability", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    expect(screen.queryByRole("region", { name: "MACD 指标" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "MACD" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "RSI" }));
+    expect(screen.getByRole("region", { name: "MACD 指标" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "RSI 指标" })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "标普 500 宽度 MA50" })).not.toBeInTheDocument();
+    expect(screen.getByText(/完整的标普 500 成分股/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "MACD" }));
+    expect(screen.queryByRole("region", { name: "MACD 指标" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "RSI 指标" })).toBeInTheDocument();
+  });
+
+  it("deletes an older drawing directly while preserving newer drawings", () => {
+    const key = "awe-chart-drawings:v1:SPX:1D";
+    window.localStorage.setItem(key, JSON.stringify([
+      { id: "older", kind: "line", color: "#2563eb", a: { index: 10, price: 120 }, b: { index: 20, price: 140 } },
+      { id: "newer", kind: "fib", color: "#ef6c65", a: { index: 30, price: 130 }, b: { index: 40, price: 150 } },
+    ]));
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const overlay = screen.getByLabelText("保存的图表绘图");
+    fireEvent.pointerDown(overlay.querySelectorAll(".drawing-hit")[0]);
+    fireEvent.click(screen.getByRole("button", { name: "删除这条绘图" }));
+    expect(JSON.parse(window.localStorage.getItem(key) || "[]").map((item: { id: string }) => item.id)).toEqual(["newer"]);
+    expect(screen.getByText(/1\s*个/)).toBeInTheDocument();
+  });
+
+  it("loads Longbridge candles only after pressing the chart refresh button", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ connected: true }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { SPX: { value: 7623.68, changePercent: -0.52, timestamp: "2026-10-23T21:03:30Z" } }, candlesByInterval: { "1D": [
+        { time: "2026-10-22", open: 7600, high: 7700, low: 7500, close: 7663, volume: 100 },
+        { time: "2026-10-23", open: 7637, high: 7660, low: 7612, close: 7623, volume: 120 },
+      ] }, unsupported: [], asOf: "2026-10-24T00:00:00Z" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const refresh = screen.getByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(refresh);
+    await waitFor(() => expect(screen.getByText("7,623.68")).toBeInTheDocument());
+    expect(screen.getAllByText(/Longbridge K 线/).length).toBeGreaterThan(0);
+    expect(setDataMock).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ time: "2026-10-23", close: 7623 })]));
+  });
+
+  it("does not keep the sample K-line after a quote-only refresh", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ connected: true }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { SPX: { value: 7623.68, changePercent: -0.52, timestamp: "2026-10-23T21:03:30Z" } }, candlesByInterval: { "1D": [] }, unsupported: [], asOf: "2026-10-24T00:00:00Z" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const refresh = screen.getByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    await waitFor(() => expect(screen.getByText("7,623.68")).toBeInTheDocument());
+    expect(screen.getByText("K 线暂不可用，请稍后重新更新数据。")).toBeInTheDocument();
+    expect(screen.queryByText(/报价已更新，但历史 K 线不可用，图表仍为演示/)).not.toBeInTheDocument();
+    expect(setDataMock).toHaveBeenLastCalledWith([]);
   });
 });

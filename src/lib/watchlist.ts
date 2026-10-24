@@ -1,4 +1,5 @@
 import { findSymbol, type SymbolGroup } from "./catalog";
+import { isUsStockId } from "./custom-symbols";
 
 export type Watchlist = Record<SymbolGroup, string[]>;
 export const STORAGE_KEY = "awe.watchlist.v1";
@@ -12,7 +13,7 @@ function normalize(value: unknown): Watchlist {
   const record = value as Record<string, unknown>;
   if (!Array.isArray(record.macro) || !Array.isArray(record.stocks)) return DEFAULT_WATCHLIST;
   const valid = (group: SymbolGroup) => [...new Set((record[group] as unknown[]).filter(
-    (id): id is string => typeof id === "string" && findSymbol(id)?.group === group,
+    (id): id is string => typeof id === "string" && (findSymbol(id)?.group === group || (group === "stocks" && isUsStockId(id))),
   ))];
   return { macro: valid("macro"), stocks: valid("stocks") };
 }
@@ -32,8 +33,9 @@ export function saveWatchlist(storage: Pick<Storage, "setItem">, watchlist: Watc
 
 export function addSymbol(watchlist: Watchlist, id: string): Watchlist {
   const symbol = findSymbol(id);
-  if (!symbol || watchlist[symbol.group].includes(symbol.id)) return watchlist;
-  return { ...watchlist, [symbol.group]: [...watchlist[symbol.group], symbol.id] };
+  const group = symbol?.group ?? (isUsStockId(id) ? "stocks" : null);
+  if (!group || watchlist[group].includes(id)) return watchlist;
+  return { ...watchlist, [group]: [...watchlist[group], id] };
 }
 
 export function removeSymbol(watchlist: Watchlist, id: string): Watchlist {
