@@ -1,0 +1,12 @@
+# 版本记录
+
+每个版本在 GitHub 仓库中保留需求、交付内容、后续修复、验证结果和对应 PR。版本内发现的 bug 追加到同一版本记录，并同步更新 PR 描述；不要仅留在聊天里。
+
+| 版本 | 需求与设计 | 交付及修复 | GitHub |
+| --- | --- | --- | --- |
+| V0.1 | [看板设计](superpowers/specs/2026-10-24-v01-dashboard-design.md) | 初始看板与图表里程碑 | [PR #1](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/1) |
+| V0.2 | [实施计划](superpowers/plans/2026-10-24-v02-terminal.md) | [V0.2 记录](v0.2-status.md) | [Issue #2](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/2)、[PR #3](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/3) |
+| V1.3 | [需求设计](superpowers/specs/2026-10-24-v13-terminal.md) | [V1.3 记录](v1.3-status.md) | [PR #4](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/4) |
+| V0.3 | [需求设计](superpowers/specs/2026-10-24-v03-portfolio-matrix.md) | [V0.3 交付与修复](v0.3-status.md) | [PR #5](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/5) |
+
+新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
