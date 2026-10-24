@@ -1,0 +1,51 @@
+import type { SampleCandle } from "./chart-data";
+
+export type LiveQuote = { value: number; changePercent: number; timestamp: string };
+
+const SYMBOLS: Record<string, string> = {
+  SPX: ".SPX.US", NDX: ".NDX.US", DJI: ".DJI.US",
+  AAPL: "AAPL.US", NVDA: "NVDA.US", MSFT: "MSFT.US", TSLA: "TSLA.US",
+  AMZN: "AMZN.US", GOOGL: "GOOGL.US", META: "META.US",
+};
+
+export function toLongbridgeSymbol(id: string): string | null {
+  return SYMBOLS[id] ?? null;
+}
+
+function number(value: unknown): number | null {
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  if (value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+export function parseQuotes(raw: unknown, ids: string[]): Record<string, LiveQuote> {
+  if (!Array.isArray(raw)) return {};
+  const quotes: Record<string, LiveQuote> = {};
+  for (const id of ids) {
+    const symbol = toLongbridgeSymbol(id);
+    const item = raw.map(record).find((entry) => entry?.symbol === symbol);
+    if (!item) continue;
+    const value = number(item.last_done), previous = number(item.prev_close);
+    if (value === null || previous === null || previous <= 0 || typeof item.timestamp !== "string") continue;
+    quotes[id] = { value, changePercent: ((value - previous) / previous) * 100, timestamp: item.timestamp };
+  }
+  return quotes;
+}
+
+export function parseCandles(raw: unknown): SampleCandle[] {
+  if (!Array.isArray(raw)) return [];
+  const output: SampleCandle[] = [];
+  for (const value of raw) {
+    const item = record(value);
+    if (!item || typeof item.timestamp !== "string" || !/^\d{4}-\d\d-\d\dT/.test(item.timestamp)) continue;
+    const open = number(item.open), high = number(item.high), low = number(item.low), close = number(item.close), volume = number(item.volume);
+    if (open === null || high === null || low === null || close === null || volume === null || low > high || open < low || open > high || close < low || close > high) continue;
+    output.push({ time: item.timestamp.slice(0, 10), open, high, low, close, volume });
+  }
+  return output.sort((a, b) => a.time.localeCompare(b.time));
+}

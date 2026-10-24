@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { Dashboard } from "./dashboard";
 import { STORAGE_KEY } from "../lib/watchlist";
 
 beforeEach(() => window.localStorage.clear());
+afterEach(() => vi.unstubAllGlobals());
 
 describe("dashboard", () => {
   it("shows four macro and four stock cards by default", async () => {
@@ -43,5 +44,21 @@ describe("dashboard", () => {
   it("opens the chart workspace from the left navigation", () => {
     render(<Dashboard />);
     expect(screen.getByRole("link", { name: /图表空间/ })).toHaveAttribute("href", "/chart/SPX");
+  });
+
+  it("updates visible quotes only when the user presses refresh", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ connected: true }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { AAPL: { value: 347.725, changePercent: -0.14, timestamp: "2026-10-23T20:00:01Z" } }, unsupported: [], asOf: "2026-10-24T00:00:00Z" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<Dashboard />);
+    const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(refresh);
+    const card = screen.getByText("苹果").closest('[data-testid="asset-card"]') as HTMLElement;
+    await waitFor(() => expect(within(card).getByText("347.73")).toBeInTheDocument());
+    expect(within(card).getByText(/Longbridge/)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
