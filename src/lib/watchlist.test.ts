@@ -6,6 +6,7 @@ import {
   loadWatchlist,
   removeSymbol,
   saveWatchlist,
+  migrateV13Watchlist,
 } from "./watchlist";
 
 describe("watchlist", () => {
@@ -38,5 +39,12 @@ describe("watchlist", () => {
     saveWatchlist({ setItem: (k, v) => { key = k; value = v; } }, { macro: ["SPX"], stocks: [] });
     expect(key).toBe(STORAGE_KEY);
     expect(JSON.parse(value)).toEqual({ macro: ["SPX"], stocks: [] });
+  });
+
+  it("adds six requested global indexes to an existing watchlist once", () => {
+    const saved = { macro: ["SPX", "NDX", "XAUUSD", "US10Y", "DJI", "BTCUSD"], stocks: ["AAPL"] };
+    const next = migrateV13Watchlist(saved);
+    expect(next.macro).toEqual(["SPX", "NDX", "XAUUSD", "US10Y", "DJI", "BTCUSD", "N225", "KOSPI", "SSE", "HSI", "HSTECH", "A500"]);
+    expect(migrateV13Watchlist(next)).toEqual(next);
   });
 });

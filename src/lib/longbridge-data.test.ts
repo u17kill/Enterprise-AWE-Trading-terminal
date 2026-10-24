@@ -7,6 +7,13 @@ describe("Longbridge market data", () => {
     expect(toLongbridgeSymbol("AAPL")).toBe("AAPL.US");
     expect(toLongbridgeSymbol("US10Y")).toBeNull();
     expect(toLongbridgeSymbol("ADBE.US")).toBe("ADBE.US");
+    expect(toLongbridgeSymbol("VIX")).toBe(".VIX.US");
+    expect(toLongbridgeSymbol("HSI")).toBe("HSI.HK");
+    expect(toLongbridgeSymbol("HSTECH")).toBe("HSTECH.HK");
+    expect(toLongbridgeSymbol("SSE")).toBe("000001.SH");
+    expect(toLongbridgeSymbol("A500")).toBe("000510.SH");
+    expect(toLongbridgeSymbol("N225")).toBeNull();
+    expect(toLongbridgeSymbol("KOSPI")).toBeNull();
   });
 
   it("normalizes quote values with source timestamps", () => {

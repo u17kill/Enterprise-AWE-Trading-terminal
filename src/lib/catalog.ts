@@ -11,16 +11,23 @@ export type MarketSymbol = {
   sampleChange: string;
   trend: number[];
   color: "blue" | "gold" | "green" | "violet";
-  source?: "longbridge";
+  source?: "longbridge" | "pending";
 };
 
 export const CATALOG: MarketSymbol[] = [
   { id: "SPX", name: "标普 500 指数", englishName: "S&P 500 Index", category: "美国股指", group: "macro", unit: "点", sampleValue: "6,721.44", sampleChange: "+0.82%", trend: [25, 28, 24, 31, 34, 32, 36, 33, 42, 45, 43, 51], color: "blue" },
   { id: "NDX", name: "纳斯达克 100", englishName: "Nasdaq 100 Index", category: "美国股指", group: "macro", unit: "点", sampleValue: "24,684.12", sampleChange: "+1.14%", trend: [22, 29, 26, 32, 30, 39, 37, 41, 44, 42, 50, 54], color: "violet" },
-  { id: "XAUUSD", name: "黄金 / 美元", englishName: "Gold Spot", category: "贵金属", group: "macro", unit: "美元/盎司", sampleValue: "4,126.80", sampleChange: "+0.36%", trend: [33, 30, 32, 28, 34, 38, 35, 40, 39, 43, 42, 46], color: "gold" },
-  { id: "US10Y", name: "美国 10 年期国债收益率", englishName: "US 10Y Treasury Yield", category: "债券收益率", group: "macro", unit: "%", sampleValue: "4.248", sampleChange: "-0.04%", trend: [49, 47, 50, 46, 44, 45, 40, 42, 38, 37, 35, 34], color: "green" },
+  { id: "XAUUSD", name: "黄金 / 美元", englishName: "Gold Spot", category: "贵金属", group: "macro", unit: "美元/盎司", sampleValue: "4,126.80", sampleChange: "+0.36%", trend: [33, 30, 32, 28, 34, 38, 35, 40, 39, 43, 42, 46], color: "gold", source: "pending" },
+  { id: "US10Y", name: "美国 10 年期国债收益率", englishName: "US 10Y Treasury Yield", category: "债券收益率", group: "macro", unit: "%", sampleValue: "4.248", sampleChange: "-0.04%", trend: [49, 47, 50, 46, 44, 45, 40, 42, 38, 37, 35, 34], color: "green", source: "pending" },
   { id: "DJI", name: "道琼斯工业指数", englishName: "Dow Jones Industrial Average", category: "美国股指", group: "macro", unit: "点", sampleValue: "46,152.32", sampleChange: "+0.51%", trend: [27, 31, 29, 33, 35, 34, 38, 36, 42, 44, 43, 47], color: "blue" },
-  { id: "BTCUSD", name: "比特币 / 美元", englishName: "Bitcoin", category: "数字资产", group: "macro", unit: "美元", sampleValue: "112,430.00", sampleChange: "+1.87%", trend: [19, 27, 22, 34, 30, 39, 35, 47, 43, 50, 46, 55], color: "violet" },
+  { id: "BTCUSD", name: "比特币 / 美元", englishName: "Bitcoin", category: "数字资产", group: "macro", unit: "美元", sampleValue: "112,430.00", sampleChange: "+1.87%", trend: [19, 27, 22, 34, 30, 39, 35, 47, 43, 50, 46, 55], color: "violet", source: "pending" },
+  { id: "N225", name: "日经 225", englishName: "Nikkei 225", category: "日本股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "blue", source: "pending" },
+  { id: "KOSPI", name: "韩国 KOSPI", englishName: "KOSPI", category: "韩国股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "violet", source: "pending" },
+  { id: "SSE", name: "上证指数", englishName: "SSE Composite", category: "中国股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "gold", source: "longbridge" },
+  { id: "HSI", name: "恒生指数", englishName: "Hang Seng Index", category: "香港股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "blue", source: "longbridge" },
+  { id: "HSTECH", name: "恒生科技", englishName: "Hang Seng TECH", category: "香港股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "green", source: "longbridge" },
+  { id: "A500", name: "中证 A500", englishName: "CSI A500", category: "中国股指", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "violet", source: "longbridge" },
+  { id: "VIX", name: "VIX 波动率指数", englishName: "CBOE VIX", category: "波动率", group: "macro", unit: "点", sampleValue: "—", sampleChange: "—", trend: [], color: "violet", source: "longbridge" },
   { id: "AAPL", name: "苹果", englishName: "Apple Inc.", category: "科技", group: "stocks", unit: "美元", sampleValue: "257.18", sampleChange: "+0.94%", trend: [24, 26, 25, 30, 28, 35, 34, 37, 40, 39, 44, 48], color: "blue" },
   { id: "NVDA", name: "英伟达", englishName: "NVIDIA Corp.", category: "半导体", group: "stocks", unit: "美元", sampleValue: "183.64", sampleChange: "+2.31%", trend: [18, 24, 21, 29, 27, 33, 39, 36, 45, 43, 51, 56], color: "green" },
   { id: "MSFT", name: "微软", englishName: "Microsoft Corp.", category: "科技", group: "stocks", unit: "美元", sampleValue: "512.70", sampleChange: "+0.47%", trend: [27, 26, 30, 31, 29, 34, 35, 37, 36, 41, 42, 45], color: "blue" },

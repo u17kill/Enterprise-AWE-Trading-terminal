@@ -3,10 +3,16 @@ import { isUsStockId } from "./custom-symbols";
 
 export type Watchlist = Record<SymbolGroup, string[]>;
 export const STORAGE_KEY = "awe.watchlist.v1";
+export const V13_MIGRATION_KEY = "awe.watchlist.v13-added";
+export const V13_NEW_INDEXES = ["N225", "KOSPI", "SSE", "HSI", "HSTECH", "A500"];
 export const DEFAULT_WATCHLIST: Watchlist = {
-  macro: ["SPX", "NDX", "XAUUSD", "US10Y"],
+  macro: ["SPX", "NDX", "XAUUSD", "US10Y", "DJI", "BTCUSD", ...V13_NEW_INDEXES],
   stocks: ["AAPL", "NVDA", "MSFT", "TSLA"],
 };
+
+export function migrateV13Watchlist(watchlist: Watchlist): Watchlist {
+  return { ...watchlist, macro: [...watchlist.macro, ...V13_NEW_INDEXES.filter((id) => !watchlist.macro.includes(id))] };
+}
 
 function normalize(value: unknown): Watchlist {
   if (!value || typeof value !== "object") return DEFAULT_WATCHLIST;

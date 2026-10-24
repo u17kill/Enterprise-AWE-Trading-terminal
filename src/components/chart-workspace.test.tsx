@@ -76,6 +76,19 @@ describe("chart workspace", () => {
     expect(screen.getByText(/1\s*个/)).toBeInTheDocument();
   });
 
+  it("places, edits and persists a movable text note", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    fireEvent.click(screen.getByRole("button", { name: /文字便签/ }));
+    fireEvent.change(screen.getByLabelText("便签内容"), { target: { value: "等待回调" } });
+    const overlay = screen.getByLabelText("保存的图表绘图");
+    fireEvent.pointerDown(overlay, { clientX: 100, clientY: 100, pointerId: 1 });
+    fireEvent.pointerUp(overlay, { clientX: 100, clientY: 100, pointerId: 1 });
+    expect(screen.getAllByText("等待回调").length).toBeGreaterThan(0);
+    expect(JSON.parse(window.localStorage.getItem("awe-chart-drawings:v1:SPX:1D") || "[]")[0]).toMatchObject({ kind: "note", text: "等待回调" });
+    fireEvent.change(screen.getByLabelText("编辑选中便签"), { target: { value: "已确认突破" } });
+    expect(JSON.parse(window.localStorage.getItem("awe-chart-drawings:v1:SPX:1D") || "[]")[0].text).toBe("已确认突破");
+  });
+
   it("allows MA5 and MA20 to be displayed together and independently hidden", () => {
     render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
     const ma5 = screen.getByRole("checkbox", { name: "MA5" });
@@ -159,6 +172,6 @@ describe("chart workspace", () => {
     await waitFor(() => expect(screen.getByText("7,623.68")).toBeInTheDocument());
     expect(screen.getByText("K 线暂不可用，请稍后重新更新数据。")).toBeInTheDocument();
     expect(screen.queryByText(/报价已更新，但历史 K 线不可用，图表仍为演示/)).not.toBeInTheDocument();
-    expect(setDataMock).toHaveBeenLastCalledWith([]);
+    await waitFor(() => expect(setDataMock).toHaveBeenLastCalledWith([]));
   });
 });

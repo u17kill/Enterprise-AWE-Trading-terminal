@@ -76,7 +76,7 @@ function transport(provider: LongbridgeOAuthProvider) {
 }
 
 export async function beginAuthorization(session: Session): Promise<URL | null> {
-  const client = new Client({ name: "awe-trading-terminal", version: "0.2.0" });
+  const client = new Client({ name: "awe-trading-terminal", version: "1.3.0" });
   try {
     await client.connect(transport(session.provider));
     return null;
@@ -92,7 +92,7 @@ export async function finishAuthorization(session: Session, code: string): Promi
 }
 
 export async function callLongbridgeTool(session: Session, name: string, args: Record<string, unknown>): Promise<unknown> {
-  const client = new Client({ name: "awe-trading-terminal", version: "0.2.0" });
+  const client = new Client({ name: "awe-trading-terminal", version: "1.3.0" });
   try {
     await client.connect(transport(session.provider));
     const response = await client.callTool({ name, arguments: args });

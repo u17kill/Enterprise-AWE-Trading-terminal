@@ -48,3 +48,28 @@ export function rsi(candles: SampleCandle[], period = 14): DatedValue[] {
   }
   return result;
 }
+
+export type BollingerValue = { time: string; middle: number; upper: number; lower: number };
+export function bollinger(candles: SampleCandle[], period = 20, deviation = 2): BollingerValue[] {
+  if (!Number.isInteger(period) || period < 2 || candles.length < period) return [];
+  const result: BollingerValue[] = [];
+  for (let index = period - 1; index < candles.length; index++) {
+    const values = candles.slice(index - period + 1, index + 1).map((item) => item.close);
+    const middle = values.reduce((sum, value) => sum + value, 0) / period;
+    const standard = Math.sqrt(values.reduce((sum, value) => sum + (value - middle) ** 2, 0) / period);
+    result.push({ time: candles[index].time, middle, upper: middle + deviation * standard, lower: middle - deviation * standard });
+  }
+  return result;
+}
+
+export function atr(candles: SampleCandle[], period = 14): DatedValue[] {
+  if (!Number.isInteger(period) || period < 2 || candles.length <= period) return [];
+  const ranges = candles.slice(1).map((item, index) => Math.max(item.high - item.low, Math.abs(item.high - candles[index].close), Math.abs(item.low - candles[index].close)));
+  let current = ranges.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  const result: DatedValue[] = [{ time: candles[period].time, value: current }];
+  for (let index = period; index < ranges.length; index++) {
+    current = (current * (period - 1) + ranges[index]) / period;
+    result.push({ time: candles[index + 1].time, value: current });
+  }
+  return result;
+}
