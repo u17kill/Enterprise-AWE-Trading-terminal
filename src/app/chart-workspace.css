@@ -8,6 +8,7 @@
 .chart-toolbar button:hover,.chart-tools>button:hover:not(:disabled){border-color:#a9c4f4;color:#245fd7}
 .chart-tools>button:disabled{opacity:.45;cursor:default}
 .chart-toolbar-group{display:flex;gap:5px}
+.ma-picker{display:flex;flex-wrap:wrap;gap:9px}
 .chart-toolbar-divider{height:23px;width:1px;background:#e1e8f1;margin:0 3px}
 .chart-toggle,.sma-input-label{display:flex;align-items:center;gap:5px;font-size:11px;color:#637791;font-weight:600}
 .chart-toggle input{accent-color:#2463e8}

@@ -74,4 +74,16 @@ describe("chart workspace", () => {
     fireEvent.pointerUp(overlay, { clientX: 200, clientY: 170, pointerId: 1 });
     expect(screen.getByText(/1\s*个/)).toBeInTheDocument();
   });
+
+  it("allows MA5 and MA20 to be displayed together and independently hidden", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const ma5 = screen.getByRole("checkbox", { name: "MA5" });
+    const ma20 = screen.getByRole("checkbox", { name: "MA20" });
+    fireEvent.click(ma5);
+    expect(ma5).toBeChecked();
+    expect(ma20).toBeChecked();
+    fireEvent.click(ma20);
+    expect(ma5).toBeChecked();
+    expect(ma20).not.toBeChecked();
+  });
 });

@@ -12,6 +12,8 @@ type Drawing = { id: string; kind: "line" | "fib"; color: string; a: Point; b: P
 type Tool = "cursor" | "line" | "fib";
 const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
 const COLORS = ["#2563eb", "#ef6c65", "#16a985", "#ab72ce", "#dc9a27"];
+const MA_PERIODS = [5, 10, 20, 200, 250] as const;
+type MaPeriod = typeof MA_PERIODS[number];
 
 function readDrawings(key: string): Drawing[] {
   try {
@@ -27,9 +29,8 @@ function readDrawings(key: string): Drawing[] {
 
 export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
   const [interval, setInterval] = useState<Interval>("1D");
-  const [showSma, setShowSma] = useState(true);
+  const [selectedMa, setSelectedMa] = useState<MaPeriod[]>([20]);
   const [showVolume, setShowVolume] = useState(true);
-  const [smaPeriod, setSmaPeriod] = useState(20);
   const [tool, setTool] = useState<Tool>("cursor");
   const [color, setColor] = useState(COLORS[0]);
   const [drawings, setDrawings] = useState<Drawing[]>([]);
@@ -87,10 +88,10 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
       volume.priceScale().applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
       volume.setData(candles.map((candle) => ({ time: candle.time, value: candle.volume, color: candle.close >= candle.open ? "#cbece3" : "#f8dce0" })));
     }
-    if (showSma) {
-      const sma = chart.addSeries(LineSeries, { color: "#e6a542", lineWidth: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
-      sma.setData(movingAverage(candles, smaPeriod));
-    }
+    selectedMa.forEach((period) => {
+      const sma = chart.addSeries(LineSeries, { color: COLORS[MA_PERIODS.indexOf(period)], lineWidth: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+      sma.setData(movingAverage(candles, period));
+    });
     chartRef.current = chart;
     seriesRef.current = series;
     if (candles.length > 75) chart.timeScale().setVisibleLogicalRange({ from: candles.length - 75, to: candles.length + 4 });
@@ -111,7 +112,7 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
       chart.remove();
       chartRef.current = null; seriesRef.current = null;
     };
-  }, [candles, showSma, showVolume, smaPeriod, symbol.id]);
+  }, [candles, selectedMa, showVolume, symbol.id]);
 
   const toXY = (point: Point) => {
     const chart = chartRef.current, series = seriesRef.current;
@@ -149,8 +150,7 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
         <div className="chart-toolbar" aria-label="图表控制">
           <div className="chart-toolbar-group" aria-label="时间周期">{(["1D", "1W", "1M"] as Interval[]).map((value) => <button key={value} type="button" className={interval === value ? "active" : ""} aria-pressed={interval === value} onClick={() => setInterval(value)}>{value === "1D" ? "日线" : value === "1W" ? "周线" : "月线"}</button>)}</div>
           <span className="chart-toolbar-divider" />
-          <label className="chart-toggle"><input type="checkbox" checked={showSma} onChange={(event) => setShowSma(event.target.checked)} />均线</label>
-          <label className="sma-input-label">周期 <input aria-label="均线周期" type="number" min="2" max="200" value={smaPeriod} onChange={(event) => setSmaPeriod(Math.max(2, Math.min(200, Number(event.target.value) || 2)))} /></label>
+          <div className="ma-picker" aria-label="均线">{MA_PERIODS.map((period, index) => <label className="chart-toggle" key={period}><input type="checkbox" style={{ accentColor: COLORS[index] }} checked={selectedMa.includes(period)} onChange={(event) => setSelectedMa((current) => event.target.checked ? [...current, period].sort((a, b) => a - b) : current.filter((item) => item !== period))} />MA{period}</label>)}</div>
           <label className="chart-toggle"><input type="checkbox" checked={showVolume} onChange={(event) => setShowVolume(event.target.checked)} />成交量</label>
         </div>
         <div className="chart-tools" aria-label="绘图工具">
