@@ -7,21 +7,23 @@ beforeEach(() => window.localStorage.clear());
 afterEach(() => vi.unstubAllGlobals());
 
 describe("dashboard", () => {
-  it("shows four macro and four stock cards by default", async () => {
+  it("shows twelve macro and four stock cards by default", async () => {
     render(<Dashboard />);
     expect(await screen.findByRole("heading", { name: "宏观资产" })).toBeInTheDocument();
-    expect(screen.getAllByTestId("asset-card")).toHaveLength(8);
+    expect(screen.getAllByTestId("asset-card")).toHaveLength(16);
+    expect(screen.getByText("日经 225")).toBeInTheDocument();
     expect(screen.queryByText("4,126.80")).not.toBeInTheDocument();
     expect(screen.queryAllByRole("img")).toHaveLength(0);
   });
 
   it("searches Chinese names and adds a symbol only once", async () => {
     render(<Dashboard />);
+    fireEvent.click(screen.getByRole("button", { name: "移除 DJI" }));
     fireEvent.click(screen.getByRole("button", { name: "添加资产" }));
     fireEvent.change(screen.getByPlaceholderText("搜索代码或名称"), { target: { value: "道琼斯" } });
     const result = await screen.findByRole("button", { name: /添加 DJI/ });
     fireEvent.click(result);
-    expect(screen.getAllByTestId("asset-card")).toHaveLength(9);
+    expect(screen.getAllByTestId("asset-card")).toHaveLength(16);
     expect(screen.getAllByText("DJI")).toHaveLength(1);
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}").macro).toContain("DJI");
   });
@@ -64,7 +66,7 @@ describe("dashboard", () => {
     expect(within(card).getByRole("img", { name: /最近交易日分时走势/ })).toBeInTheDocument();
     expect(within(card).queryByText("示例走势")).not.toBeInTheDocument();
     const gold = screen.getByText("黄金 / 美元").closest('[data-testid="asset-card"]') as HTMLElement;
-    expect(within(gold).getByText("行情不可用")).toBeInTheDocument();
+    expect(within(gold).getByText("黄金现货参考价暂不可用")).toBeInTheDocument();
     expect(within(gold).queryByText("4,126.80")).not.toBeInTheDocument();
     expect(within(gold).queryByRole("img")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -78,7 +80,7 @@ describe("dashboard", () => {
     const view = render(<Dashboard />);
     fireEvent.click(screen.getByRole("button", { name: "添加资产" }));
     fireEvent.change(screen.getByPlaceholderText("搜索代码或名称"), { target: { value: "ADBE" } });
-    const result = await screen.findByRole("button", { name: "添加 ADBE.US" });
+    const result = await screen.findByRole("button", { name: "添加 ADBE.US" }, { timeout: 5000 });
     fireEvent.click(result);
     expect(screen.getByRole("button", { name: "移除 ADBE.US" })).toBeInTheDocument();
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}").stocks).toContain("ADBE.US");

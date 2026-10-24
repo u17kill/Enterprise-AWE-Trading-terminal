@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import type { SampleCandle } from "./chart-data";
 import type { IntradayPoint, LiveQuote } from "./longbridge-data";
+import type { Fundamentals } from "./fundamentals";
 
 type RefreshResult = {
   quotes: Record<string, LiveQuote>;
   trendsBySymbol?: Record<string, IntradayPoint[]>;
   candlesByInterval?: Partial<Record<"1D" | "1W" | "1M", SampleCandle[]>>;
+  fundamentals?: Fundamentals | null;
+  weekRange?: { high: number; low: number; end: string } | null;
   unsupported: string[];
   asOf: string;
 };

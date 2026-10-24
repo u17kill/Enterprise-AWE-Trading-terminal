@@ -1,12 +1,14 @@
 import type { SampleCandle } from "./chart-data";
 
-export type LiveQuote = { value: number; changePercent: number; timestamp: string };
+export type LiveQuote = { value: number; changePercent: number; timestamp: string; changeBasisPoints?: number; changeAvailable?: boolean; source?: string };
 export type IntradayPoint = { timestamp: string; price: number };
 
 const SYMBOLS: Record<string, string> = {
   SPX: ".SPX.US", NDX: ".NDX.US", DJI: ".DJI.US",
   AAPL: "AAPL.US", NVDA: "NVDA.US", MSFT: "MSFT.US", TSLA: "TSLA.US",
   AMZN: "AMZN.US", GOOGL: "GOOGL.US", META: "META.US",
+  VIX: ".VIX.US", HSI: "HSI.HK", HSTECH: "HSTECH.HK",
+  SSE: "000001.SH", A500: "000510.SH",
 };
 
 export function toLongbridgeSymbol(id: string): string | null {
@@ -64,6 +66,14 @@ export function parseIntraday(raw: unknown): IntradayPoint[] {
     points.set(item.timestamp, { timestamp: item.timestamp, price });
   }
   return [...points.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+export function parseMinuteCandles(raw: unknown): IntradayPoint[] {
+  if (!Array.isArray(raw)) return [];
+  return parseIntraday(raw.map((value) => {
+    const item = record(value);
+    return item ? { timestamp: item.timestamp, price: item.close } : null;
+  }));
 }
 
 function newYorkDate(timestamp: string): string {

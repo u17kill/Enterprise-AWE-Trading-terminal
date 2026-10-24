@@ -15,13 +15,13 @@ import { POST } from "./route";
 beforeEach(() => callLongbridgeTool.mockReset());
 
 describe("manual Longbridge refresh", () => {
-  it("returns matching intraday trends and marks unmapped assets unavailable", async () => {
+  it("returns matching 5-minute trends and marks unmapped assets unavailable", async () => {
     callLongbridgeTool.mockImplementation(async (...args) => {
       const name = args[1];
       if (name === "quote") return [{ symbol: "AAPL.US", last_done: "347.725", prev_close: "348.22", timestamp: "2026-10-23T20:00:01Z" }];
-      if (name === "intraday") return [
-        { timestamp: "2026-10-23T13:30:00Z", price: "350.75" },
-        { timestamp: "2026-10-23T19:59:00Z", price: "347.725" },
+      if (name === "candlesticks") return [
+        { timestamp: "2026-10-23T13:30:00Z", close: "350.75" },
+        { timestamp: "2026-10-23T19:59:00Z", close: "347.725" },
       ];
       if (args.length === 0) return [];
       throw new Error(`unexpected tool ${name}`);
@@ -37,7 +37,7 @@ describe("manual Longbridge refresh", () => {
     expect(body.trendsBySymbol.AAPL).toHaveLength(2);
     expect(body.trendsBySymbol.AAPL.at(-1).price).toBe(body.quotes.AAPL.value);
     expect(body.unsupported).toEqual(["XAUUSD"]);
-    expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "intraday", { symbol: "AAPL.US", trade_sessions: "intraday" });
+    expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "candlesticks", { symbol: "AAPL.US", period: "5m", count: 80, trade_sessions: "intraday" });
   });
 
   it("pages candle data so 300 bars are not truncated", async () => {
@@ -57,5 +57,22 @@ describe("manual Longbridge refresh", () => {
     expect(body.candlesByInterval["1D"].at(-1).close).toBe(body.quotes.SPX.value);
     expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "candlesticks", { symbol: ".SPX.US", period: "day", count: 80, trade_sessions: "intraday" });
     expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "history_candlesticks_by_offset", expect.objectContaining({ symbol: ".SPX.US", period: "day", count: 80 }));
+  });
+
+  it("uses the last regular-session 5-minute candles on a closed-market day", async () => {
+    callLongbridgeTool.mockImplementation(async (_session, name) => {
+      if (name === "quote") return [{ symbol: ".SPX.US", last_done: "7623.68", prev_close: "7663.43", timestamp: "2026-10-23T21:03:30Z" }];
+      if (name === "candlesticks") return [
+        { timestamp: "2026-10-23T19:50:00Z", close: "7623.71" },
+        { timestamp: "2026-10-23T19:55:00Z", close: "7623.68" },
+      ];
+      return [];
+    });
+    const request = new NextRequest("http://127.0.0.1:3100/api/longbridge/refresh", { method: "POST", body: JSON.stringify({ symbols: ["SPX"] }) });
+    const response = await POST(request);
+    const body = await response.json();
+    expect(body.trendsBySymbol.SPX).toHaveLength(2);
+    expect(body.trendsBySymbol.SPX.at(-1).price).toBe(body.quotes.SPX.value);
+    expect(callLongbridgeTool).toHaveBeenCalledWith(expect.anything(), "candlesticks", { symbol: ".SPX.US", period: "5m", count: 80, trade_sessions: "intraday" });
   });
 });

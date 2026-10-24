@@ -47,6 +47,12 @@
 .drawing-overlay.drawing-mode{pointer-events:auto;cursor:crosshair;touch-action:none}
 .drawing-overlay.drawing-mode .drawing-hit,.drawing-overlay.drawing-mode .drawing-handle{pointer-events:none}
 .drawing-hit{pointer-events:stroke;cursor:pointer}
+.chart-note{pointer-events:auto;cursor:grab}
+.chart-note:active{cursor:grabbing}
+.note-entry{display:flex;align-items:center;gap:9px;margin:7px 0 11px;color:#687d98;font-size:11px;font-weight:700}
+.note-entry input,.note-entry textarea{width:min(430px,100%);border:1px solid #d7e2f1;border-radius:7px;padding:8px 10px;color:#334a65;font:inherit}
+.note-entry textarea{min-height:58px;resize:vertical}
+.detail-source{font-size:10px;color:#9ba9bc;line-height:1.45}
 .drawing-handle{pointer-events:auto;cursor:pointer}
 .drawing-handle{cursor:grab}
 .drawing-handle:active{cursor:grabbing}
