@@ -54,4 +54,4 @@
 **Files:** `docs/v0.4-status.md`, `docs/README.md`, `README.md`
 
 - [x] Run full tests, lint, type check and production build.
-- [ ] Record verification and limits in GitHub and open a V0.4 draft PR.
+- [x] Record verification and limits in GitHub and open a V0.4 draft PR.
