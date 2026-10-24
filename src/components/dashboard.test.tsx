@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { Dashboard } from "./dashboard";
 import { STORAGE_KEY } from "../lib/watchlist";
 
-beforeEach(() => window.localStorage.clear());
+beforeEach(() => { window.localStorage.clear(); window.sessionStorage.clear(); });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("dashboard", () => {
@@ -70,6 +70,38 @@ describe("dashboard", () => {
     expect(within(gold).queryByText("4,126.80")).not.toBeInTheDocument();
     expect(within(gold).queryByRole("img")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the last manual market update after returning from a chart", async () => {
+    let refreshCount = 0;
+    const fetchMock = vi.fn(async (url: string) => url === "/api/longbridge/status"
+      ? { ok: true, json: async () => ({ connected: true }) }
+      : { ok: true, json: async () => {
+        refreshCount += 1;
+        const value = refreshCount === 1 ? 347.725 : 350.625;
+        return { quotes: { AAPL: { value, changePercent: -0.14, timestamp: "2026-10-23T20:00:01Z" } }, trendsBySymbol: { AAPL: [{ timestamp: "2026-10-23T13:30:00Z", price: 350.75 }, { timestamp: "2026-10-23T19:59:00Z", price: value }] }, unsupported: [], asOf: "2026-10-24T00:00:00Z" };
+      } });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const firstVisit = render(<Dashboard />);
+    const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    expect(await screen.findByText("347.73")).toBeInTheDocument();
+    firstVisit.unmount();
+
+    render(<Dashboard />);
+    const card = screen.getByText("苹果").closest('[data-testid="asset-card"]') as HTMLElement;
+    await waitFor(() => expect(within(card).getByText("347.73")).toBeInTheDocument());
+    expect(within(card).getByRole("img", { name: /最近交易日分时走势/ })).toBeInTheDocument();
+    expect(screen.getByText("行情已更新")).toBeInTheDocument();
+    expect(refreshCount).toBe(1);
+
+    const secondRefresh = screen.getByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(secondRefresh).toBeEnabled());
+    fireEvent.click(secondRefresh);
+    expect(await screen.findByText("350.63")).toBeInTheDocument();
+    expect(refreshCount).toBe(2);
   });
 
   it("searches Longbridge US securities and keeps a selected stock after remount", async () => {

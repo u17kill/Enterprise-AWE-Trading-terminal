@@ -76,7 +76,7 @@ export function Dashboard() {
   const [remoteMatches, setRemoteMatches] = useState<MarketSymbol[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const market = useLongbridgeMarket();
+  const market = useLongbridgeMarket("awe.dashboard.market.v1");
 
   useEffect(() => {
     if (localStorage.getItem(V13_MIGRATION_KEY)) return;
