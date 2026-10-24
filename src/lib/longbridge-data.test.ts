@@ -6,6 +6,7 @@ describe("Longbridge market data", () => {
     expect(toLongbridgeSymbol("SPX")).toBe(".SPX.US");
     expect(toLongbridgeSymbol("AAPL")).toBe("AAPL.US");
     expect(toLongbridgeSymbol("US10Y")).toBeNull();
+    expect(toLongbridgeSymbol("ADBE.US")).toBe("ADBE.US");
   });
 
   it("normalizes quote values with source timestamps", () => {
@@ -17,6 +18,8 @@ describe("Longbridge market data", () => {
     expect(parseCandles([{ timestamp: "2026-10-23T04:00:00Z", open: "10", high: "12", low: "9", close: "11", volume: "100" }]))
       .toEqual([{ time: "2026-10-23", open: 10, high: 12, low: 9, close: 11, volume: 100 }]);
     expect(parseCandles([{ timestamp: "2026-10-23T04:00:00Z", open: "10", high: "12", low: "9", close: "" }])).toEqual([]);
+    expect(parseCandles([["2026-10-23T04:00:00Z", "10", "12", "9", "11", "100"]]))
+      .toEqual([{ time: "2026-10-23", open: 10, high: 12, low: 9, close: 11, volume: 100 }]);
   });
 
   it("keeps valid intraday prices in timestamp order", () => {

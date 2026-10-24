@@ -69,4 +69,22 @@ describe("dashboard", () => {
     expect(within(gold).queryByRole("img")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("searches Longbridge US securities and keeps a selected stock after remount", async () => {
+    const fetchMock = vi.fn(async (url: string) => url.includes("/search?")
+      ? { ok: true, json: async () => ({ total: 16102, items: [{ id: "ADBE.US", name: "Adobe", englishName: "Adobe Inc.", category: "美股", group: "stocks", unit: "美元", sampleValue: "", sampleChange: "", trend: [], color: "blue", source: "longbridge" }] }) }
+      : { ok: true, json: async () => ({ connected: true }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<Dashboard />);
+    fireEvent.click(screen.getByRole("button", { name: "添加资产" }));
+    fireEvent.change(screen.getByPlaceholderText("搜索代码或名称"), { target: { value: "ADBE" } });
+    const result = await screen.findByRole("button", { name: "添加 ADBE.US" });
+    fireEvent.click(result);
+    expect(screen.getByRole("button", { name: "移除 ADBE.US" })).toBeInTheDocument();
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}").stocks).toContain("ADBE.US");
+    view.unmount();
+    render(<Dashboard />);
+    expect(screen.getByRole("button", { name: "移除 ADBE.US" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看 ADBE.US 图表" })).toHaveAttribute("href", "/chart/ADBE.US?name=Adobe");
+  });
 });

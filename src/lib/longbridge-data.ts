@@ -10,7 +10,7 @@ const SYMBOLS: Record<string, string> = {
 };
 
 export function toLongbridgeSymbol(id: string): string | null {
-  return SYMBOLS[id] ?? null;
+  return SYMBOLS[id] ?? (/^[A-Z0-9][A-Z0-9.\-]{0,14}\.US$/.test(id) ? id : null);
 }
 
 function number(value: unknown): number | null {
@@ -42,7 +42,9 @@ export function parseCandles(raw: unknown): SampleCandle[] {
   if (!Array.isArray(raw)) return [];
   const output: SampleCandle[] = [];
   for (const value of raw) {
-    const item = record(value);
+    const item = Array.isArray(value) && value.length === 6
+      ? { timestamp: value[0], open: value[1], high: value[2], low: value[3], close: value[4], volume: value[5] }
+      : record(value);
     if (!item || typeof item.timestamp !== "string" || !/^\d{4}-\d\d-\d\dT/.test(item.timestamp)) continue;
     const open = number(item.open), high = number(item.high), low = number(item.low), close = number(item.close), volume = number(item.volume);
     if (open === null || high === null || low === null || close === null || volume === null || low > high || open < low || open > high || close < low || close > high) continue;

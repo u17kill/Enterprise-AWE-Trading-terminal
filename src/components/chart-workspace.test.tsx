@@ -88,21 +88,28 @@ describe("chart workspace", () => {
     expect(ma20).not.toBeChecked();
   });
 
+  it("offers MA50 alongside the other moving averages", () => {
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const ma50 = screen.getByRole("checkbox", { name: "MA50" });
+    fireEvent.click(ma50);
+    expect(ma50).toBeChecked();
+  });
+
   it("explains when the selected interval lacks enough bars for a moving average", () => {
     render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "MA250" }));
     expect(screen.getByText(/MA250 需要至少 250 根 K 线/)).toBeInTheDocument();
   });
 
-  it("shows MACD and RSI in independent lower panes and reports unavailable breadth data", () => {
+  it("shows MACD and RSI in independent lower panes and explains breadth availability", () => {
     render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
     expect(screen.queryByRole("region", { name: "MACD 指标" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "MACD" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "RSI" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "标普 500 宽度 MA50" }));
     expect(screen.getByRole("region", { name: "MACD 指标" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "RSI 指标" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "标普 500 宽度 MA50" })).toHaveTextContent("市场宽度数据尚未接入");
+    expect(screen.queryByRole("checkbox", { name: "标普 500 宽度 MA50" })).not.toBeInTheDocument();
+    expect(screen.getByText(/完整的标普 500 成分股/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "MACD" }));
     expect(screen.queryByRole("region", { name: "MACD 指标" })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "RSI 指标" })).toBeInTheDocument();
@@ -138,5 +145,20 @@ describe("chart workspace", () => {
     await waitFor(() => expect(screen.getByText("7,623.68")).toBeInTheDocument());
     expect(screen.getAllByText(/Longbridge K 线/).length).toBeGreaterThan(0);
     expect(setDataMock).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ time: "2026-10-23", close: 7623 })]));
+  });
+
+  it("does not keep the sample K-line after a quote-only refresh", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ connected: true }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ quotes: { SPX: { value: 7623.68, changePercent: -0.52, timestamp: "2026-10-23T21:03:30Z" } }, candlesByInterval: { "1D": [] }, unsupported: [], asOf: "2026-10-24T00:00:00Z" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChartWorkspace symbol={findSymbol("SPX")!} />);
+    const refresh = screen.getByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    await waitFor(() => expect(screen.getByText("7,623.68")).toBeInTheDocument());
+    expect(screen.getByText("K 线暂不可用，请稍后重新更新数据。")).toBeInTheDocument();
+    expect(screen.queryByText(/报价已更新，但历史 K 线不可用，图表仍为演示/)).not.toBeInTheDocument();
+    expect(setDataMock).toHaveBeenLastCalledWith([]);
   });
 });

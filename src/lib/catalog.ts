@@ -11,6 +11,7 @@ export type MarketSymbol = {
   sampleChange: string;
   trend: number[];
   color: "blue" | "gold" | "green" | "violet";
+  source?: "longbridge";
 };
 
 export const CATALOG: MarketSymbol[] = [

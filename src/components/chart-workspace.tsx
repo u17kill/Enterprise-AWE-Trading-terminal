@@ -15,8 +15,8 @@ type Point = { index: number; price: number };
 type Drawing = { id: string; kind: "line" | "fib"; color: string; a: Point; b: Point };
 type Tool = "cursor" | "line" | "fib";
 const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-const COLORS = ["#2563eb", "#ef6c65", "#16a985", "#ab72ce", "#dc9a27"];
-const MA_PERIODS = [5, 10, 20, 200, 250] as const;
+const COLORS = ["#2563eb", "#ef6c65", "#16a985", "#ab72ce", "#dc9a27", "#0f8fab"];
+const MA_PERIODS = [5, 10, 20, 50, 200, 250] as const;
 type MaPeriod = typeof MA_PERIODS[number];
 
 function readDrawings(key: string): Drawing[] {
@@ -38,8 +38,6 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
   const [showVolume, setShowVolume] = useState(true);
   const [showMacd, setShowMacd] = useState(false);
   const [showRsi, setShowRsi] = useState(false);
-  const [showBreadth50, setShowBreadth50] = useState(false);
-  const [showBreadth200, setShowBreadth200] = useState(false);
   const [tool, setTool] = useState<Tool>("cursor");
   const [color, setColor] = useState(COLORS[0]);
   const [drawings, setDrawings] = useState<Drawing[]>([]);
@@ -58,15 +56,16 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
 
   const refreshedCandles = market.result?.candlesByInterval?.[interval];
   const liveCandles = refreshedCandles && refreshedCandles.length >= 2 ? refreshedCandles : null;
-  const candles = useMemo(() => liveCandles ?? aggregateCandles(generateSampleCandles(symbol), interval), [symbol, interval, liveCandles]);
+  const showSample = !market.result && symbol.source !== "longbridge";
+  const candles = useMemo(() => liveCandles ?? (showSample ? aggregateCandles(generateSampleCandles(symbol), interval) : []), [symbol, interval, liveCandles, showSample]);
   const unavailableMa = selectedMa.filter((period) => candles.length < period);
   const macdValues = useMemo(() => macd(candles), [candles]);
   const rsiValues = useMemo(() => rsi(candles), [candles]);
   const timeIndex = useMemo(() => new Map(candles.map((candle, index) => [candle.time, index])), [candles]);
   const storageKey = liveCandles ? `awe-chart-drawings:v2:live:${symbol.id}:${interval}` : `awe-chart-drawings:v1:${symbol.id}:${interval}`;
   const quote = market.result?.quotes[symbol.id];
-  const displayValue = quote ? new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: symbol.id === "US10Y" ? 3 : 2 }).format(quote.value) : symbol.sampleValue;
-  const displayChange = quote ? `${quote.changePercent >= 0 ? "+" : ""}${quote.changePercent.toFixed(2)}%` : symbol.sampleChange;
+  const displayValue = quote ? new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: symbol.id === "US10Y" ? 3 : 2 }).format(quote.value) : showSample ? symbol.sampleValue : "—";
+  const displayChange = quote ? `${quote.changePercent >= 0 ? "+" : ""}${quote.changePercent.toFixed(2)}%` : showSample ? symbol.sampleChange : "—";
   const negative = displayChange.startsWith("-");
 
   useEffect(() => {
@@ -172,18 +171,19 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
   return <div className="workspace-shell">
     <header className="workspace-topbar"><Link className="brand" href="/"><span className="brand-mark">A<span>↗</span></span><span><strong>AWE</strong><small>TRADING TERMINAL</small></span></Link><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath={`/chart/${symbol.id}`} onRefresh={() => market.refresh([symbol.id], symbol.id)} /><Link className="workspace-back" href="/">← 返回总览看板</Link></header>
     <main className="workspace-main chart-workspace-main">
-      <div className="workspace-intro"><div><span className="section-eyebrow">CHART WORKSPACE / {symbol.id}</span><h1>{symbol.name} <span className="asset-symbol">{symbol.id}</span></h1><p>{symbol.englishName} · {symbol.category}</p></div><span className="workspace-demo">ⓘ {liveCandles ? "Longbridge 按需更新" : "演示数据 · 非实时行情"}</span></div>
+      <div className="workspace-intro"><div><span className="section-eyebrow">CHART WORKSPACE / {symbol.id}</span><h1>{symbol.name} <span className="asset-symbol">{symbol.id}</span></h1><p>{symbol.englishName} · {symbol.category}</p></div><span className="workspace-demo">ⓘ {liveCandles ? "Longbridge 按需更新" : showSample ? "演示数据 · 非实时行情" : "等待真实 K 线"}</span></div>
       {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
-      {market.result?.unsupported.includes(symbol.id) && <p className="market-feedback">Longbridge 暂未返回此资产的行情；当前仍显示演示数据。</p>}
+      {market.result?.unsupported.includes(symbol.id) && <p className="market-feedback">Longbridge 暂未返回此资产的行情；请切换到已支持的资产。</p>}
       <div className="workspace-grid"><section className={`chart-panel color-${symbol.color}`} aria-label="K 线图表工作区">
-        <div className="chart-panel-head"><div><h2>价格图表</h2><p>可缩放、拖动的 K 线 · {liveCandles ? "Longbridge K 线" : "本地生成的演示行情"}</p></div><div><strong className="asset-value">{displayValue}</strong><span className={`asset-change ${negative ? "negative" : ""}`}>{displayChange}</span></div></div>
+        <div className="chart-panel-head"><div><h2>价格图表</h2><p>可缩放、拖动的 K 线 · {liveCandles ? "Longbridge K 线" : showSample ? "本地生成的演示行情" : "K 线暂不可用"}</p></div><div><strong className="asset-value">{displayValue}</strong><span className={`asset-change ${negative ? "negative" : ""}`}>{displayChange}</span></div></div>
         <div className="chart-toolbar" aria-label="图表控制">
           <div className="chart-toolbar-group" aria-label="时间周期">{(["1D", "1W", "1M"] as Interval[]).map((value) => <button key={value} type="button" className={interval === value ? "active" : ""} aria-pressed={interval === value} onClick={() => setInterval(value)}>{value === "1D" ? "日线" : value === "1W" ? "周线" : "月线"}</button>)}</div>
           <span className="chart-toolbar-divider" />
           <div className="ma-picker" aria-label="均线">{MA_PERIODS.map((period, index) => <label className="chart-toggle" key={period}><input type="checkbox" style={{ accentColor: COLORS[index] }} checked={selectedMa.includes(period)} onChange={(event) => setSelectedMa((current) => event.target.checked ? [...current, period].sort((a, b) => a - b) : current.filter((item) => item !== period))} />MA{period}</label>)}</div>
           <label className="chart-toggle"><input type="checkbox" checked={showVolume} onChange={(event) => setShowVolume(event.target.checked)} />成交量</label>
         </div>
-        <div className="indicator-toolbar" aria-label="下方指标"><span>下方指标</span><label><input type="checkbox" checked={showMacd} onChange={(event) => setShowMacd(event.target.checked)} />MACD</label><label><input type="checkbox" checked={showRsi} onChange={(event) => setShowRsi(event.target.checked)} />RSI</label><label><input type="checkbox" checked={showBreadth50} onChange={(event) => setShowBreadth50(event.target.checked)} />标普 500 宽度 MA50</label><label><input type="checkbox" checked={showBreadth200} onChange={(event) => setShowBreadth200(event.target.checked)} />标普 500 宽度 MA200</label></div>
+        <div className="indicator-toolbar" aria-label="下方指标"><span>下方指标</span><label><input type="checkbox" checked={showMacd} onChange={(event) => setShowMacd(event.target.checked)} />MACD</label><label><input type="checkbox" checked={showRsi} onChange={(event) => setShowRsi(event.target.checked)} />RSI</label></div>
+        <p className="breadth-note">市场宽度 MA50/MA200 需要完整的标普 500 成分股及历史 K 线才能计算。当前 Longbridge 只返回部分成分股，因此暂不提供未核实的百分比。<a href="https://www.tradingview.com/support/solutions/43000794827-market-breadth-above-moving-averages/" target="_blank" rel="noopener noreferrer">了解指标口径</a></p>
         {unavailableMa.length > 0 && <p className="ma-history-note">{unavailableMa.map((period) => `MA${period} 需要至少 ${period} 根 K 线`).join("；")}；当前周期只有 {candles.length} 根。</p>}
         <div className="chart-tools" aria-label="绘图工具">
           <button type="button" className={tool === "cursor" ? "active" : ""} aria-pressed={tool === "cursor"} onClick={() => changeTool("cursor")}>选择</button>
@@ -195,6 +195,7 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
         </div>
         <p className="chart-hint">{tool === "cursor" ? "滚轮缩放、拖动查看；点击线条选择，拖动端点调整。" : pending ? "拖动或点击第二个位置完成绘图。" : "在图表上按住拖动，或依次点击起点和终点。"}</p>
         <div className="interactive-chart-stage" data-testid="candlestick-chart"><div className="lightweight-chart" ref={containerRef} />
+          {!candles.length && <div className="chart-empty-state">{market.result ? "K 线暂不可用，请稍后重新更新数据。" : "点击顶部更新数据加载 K 线。"}</div>}
           <svg className={`drawing-overlay${tool === "cursor" ? "" : " drawing-mode"}`} width={viewport.width} height={viewport.height} viewBox={`0 0 ${viewport.width} ${viewport.height}`} aria-label="保存的图表绘图" onPointerDown={(event) => {
             if (tool === "cursor") return;
             const point = pointFromPointer(event);
@@ -238,11 +239,9 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
         </div>
         {showMacd && <IndicatorPane title="MACD 指标" width={viewport.width} xForTime={xForTime} lines={[{ label: "DIF", color: "#2563eb", values: macdValues.map((item) => ({ time: item.time, value: item.macd })) }, { label: "DEA", color: "#e6a542", values: macdValues.filter((item) => item.signal !== null).map((item) => ({ time: item.time, value: item.signal! })) }]} bars={macdValues.filter((item) => item.histogram !== null).map((item) => ({ time: item.time, value: item.histogram! }))} />}
         {showRsi && <IndicatorPane title="RSI 指标" width={viewport.width} xForTime={xForTime} range={[0, 100]} lines={[{ label: "RSI 14", color: "#ab72ce", values: rsiValues }]} />}
-        {showBreadth50 && <IndicatorPane title="标普 500 宽度 MA50" width={viewport.width} xForTime={xForTime} range={[0, 100]} lines={[]} emptyMessage="市场宽度数据尚未接入；需要覆盖标普 500 成分股的真实历史行情。" />}
-        {showBreadth200 && <IndicatorPane title="标普 500 宽度 MA200" width={viewport.width} xForTime={xForTime} range={[0, 100]} lines={[]} emptyMessage="市场宽度数据尚未接入；需要覆盖标普 500 成分股的真实历史行情。" />}
-        <div className="chart-disclaimer">{liveCandles ? `K 线来自 Longbridge，最近报价时间：${quote ? new Date(quote.timestamp).toLocaleString("zh-CN") : "未返回报价"}。` : "K 线为本地生成的演示数据。"} {quote && !liveCandles ? "报价已更新，但历史 K 线不可用，图表仍为演示。" : ""}绘图仅保存在此浏览器。{storageError && <strong> 浏览器未能保存绘图，请检查本地存储设置。</strong>}</div>
+        <div className="chart-disclaimer">{liveCandles ? `K 线来自 Longbridge，最近报价时间：${quote ? new Date(quote.timestamp).toLocaleString("zh-CN") : "未返回报价"}。` : showSample ? "K 线为本地生成的演示数据。" : "当前周期未取得真实 K 线。"}绘图仅保存在此浏览器。{storageError && <strong> 浏览器未能保存绘图，请检查本地存储设置。</strong>}</div>
       </section>
-      <aside className="details-panel"><h3>资产信息</h3><div className="detail-row"><span>代码</span><strong>{symbol.id}</strong></div><div className="detail-row"><span>名称</span><strong>{symbol.name}</strong></div><div className="detail-row"><span>类别</span><strong>{symbol.category}</strong></div><div className="detail-row"><span>报价单位</span><strong>{symbol.unit}</strong></div><div className="detail-row"><span>数据状态</span><strong>{liveCandles ? "Longbridge K 线" : quote ? "Longbridge 报价 / 演示 K 线" : "演示数据"}</strong></div><div className="detail-row"><span>已保存绘图</span><strong>{drawings.length} 个</strong></div><div className="upcoming-label">使用提示</div><div className="upcoming-list"><span>切换日线、周线、月线；每个周期分别保存绘图。</span><span>画线或 Fibonacci：选择工具后拖动，或点击两点。</span><span>选择线条后可拖动端点调整，或删除。</span></div><Link href="/" className="workspace-return">← 返回总览看板</Link></aside></div>
+      <aside className="details-panel"><h3>资产信息</h3><div className="detail-row"><span>代码</span><strong>{symbol.id}</strong></div><div className="detail-row"><span>名称</span><strong>{symbol.name}</strong></div><div className="detail-row"><span>类别</span><strong>{symbol.category}</strong></div><div className="detail-row"><span>报价单位</span><strong>{symbol.unit}</strong></div><div className="detail-row"><span>数据状态</span><strong>{liveCandles ? "Longbridge K 线" : quote ? "Longbridge 报价 / K 线不可用" : showSample ? "演示数据" : "等待行情"}</strong></div><div className="detail-row"><span>已保存绘图</span><strong>{drawings.length} 个</strong></div><div className="upcoming-label">使用提示</div><div className="upcoming-list"><span>切换日线、周线、月线；每个周期分别保存绘图。</span><span>画线或 Fibonacci：选择工具后拖动，或点击两点。</span><span>选择线条后可拖动端点调整，或删除。</span></div><Link href="/" className="workspace-return">← 返回总览看板</Link></aside></div>
     </main>
   </div>;
 }
