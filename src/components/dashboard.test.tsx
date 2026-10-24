@@ -39,4 +39,9 @@ describe("dashboard", () => {
     expect(card).not.toBeNull();
     expect(within(card as HTMLElement).getByRole("link", { name: /查看 SPX 图表/ })).toHaveAttribute("href", "/chart/SPX");
   });
+
+  it("opens the chart workspace from the left navigation", () => {
+    render(<Dashboard />);
+    expect(screen.getByRole("link", { name: /图表空间/ })).toHaveAttribute("href", "/chart/SPX");
+  });
 });

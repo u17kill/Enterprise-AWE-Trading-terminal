@@ -69,7 +69,7 @@ export function Dashboard() {
       <aside className="sidebar">
         <Link className="brand" href="/"><span className="brand-mark">A<span>↗</span></span><span><strong>AWE</strong><small>TRADING TERMINAL</small></span></Link>
         <div className="sidebar-label">工作台</div>
-        <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><span className="nav-item muted"><span className="nav-glyph">⌁</span>图表空间</span></nav>
+        <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link></nav>
         <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.1 · 本地自选</div><p>你的自选资产保存在此浏览器中。</p></div>
       </aside>
 
