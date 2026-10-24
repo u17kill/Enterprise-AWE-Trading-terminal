@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./chart-workspace.css";
+import "./financial-calendar.css";
 
 export const metadata: Metadata = {
   title: "AWE Trading Terminal",
