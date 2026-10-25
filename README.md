@@ -1,6 +1,6 @@
-# AWE Trading Terminal
+# Enterprise AWE Trading Terminal
 
-A light-theme market dashboard, chart workspace, editable portfolio map, and financial calendar built with Next.js. V0.4 adds a monthly view of sourced market events and an upcoming earnings overview for major US, Japan, Taiwan, and Hong Kong companies.
+A light-theme market dashboard, chart workspace, editable portfolio map, and financial calendar built with Next.js. V0.5 uses the Enterprise AWE brand across the terminal.
 
 ## Run locally
 

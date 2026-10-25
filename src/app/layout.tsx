@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./chart-workspace.css";
 import "./financial-calendar.css";
+import "./brand.css";
 
 export const metadata: Metadata = {
-  title: "AWE Trading Terminal",
+  title: "Enterprise AWE Trading Terminal",
   description: "A clean market overview and chart workspace for your watchlist.",
 };
 

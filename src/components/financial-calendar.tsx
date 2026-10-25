@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { CURATED_EVENTS, DATE_PENDING, eventsOnDate, mergeCalendarEvents, monthCells, type CalendarCategory, type CalendarEvent } from "../lib/financial-calendar";
+import { Brand } from "./brand";
 
 const LABELS: Record<CalendarCategory, string> = { industry: "产业展会", summit: "国际峰会", company: "科技发布", earnings: "重点财报", "central-bank": "央行会议", macro: "经济指标" };
 const CATEGORIES = Object.keys(LABELS) as CalendarCategory[];
@@ -58,7 +59,7 @@ export function FinancialCalendar() {
 
   return <div className="app-shell calendar-shell">
     <aside className="sidebar">
-      <Link className="brand" href="/"><span className="brand-mark">A<span>↗</span></span><span><strong>AWE</strong><small>TRADING TERMINAL</small></span></Link>
+      <Brand />
       <div className="sidebar-label">工作台</div>
       <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item active" href="/calendar" aria-current="page"><span className="nav-glyph">▤</span>财经日历</Link></nav>
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.4 · 事件观察</div><p>来源明确的日期才进入日历；财报和宏观事件按需更新。</p></div>

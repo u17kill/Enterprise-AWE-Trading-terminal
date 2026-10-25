@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type MatrixColumn, type MatrixGroup, type MatrixItem, type MatrixRegion, type PortfolioMatrix, type TileStatus } from "../lib/portfolio-matrix";
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
+import { Brand } from "./brand";
 
 type Editor =
   | { kind: "item"; value: MatrixItem; fresh: boolean }
@@ -115,7 +116,7 @@ export function PortfolioMapPage() {
   if (!mounted) return <div className="portfolio-shell" aria-label="正在读取本地持仓" />;
   return <div className="portfolio-shell">
     <aside className="sidebar">
-      <Link className="brand" href="/"><span className="brand-mark">A<span>↗</span></span><span><strong>AWE</strong><small>TRADING TERMINAL</small></span></Link>
+      <Brand />
       <div className="sidebar-label">工作台</div>
       <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item active" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link></nav>
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.3 · 持仓矩阵</div><p>地图只保存在这个浏览器中，请定期导出备份。</p></div>

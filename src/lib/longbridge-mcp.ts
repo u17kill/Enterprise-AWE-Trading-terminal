@@ -22,7 +22,7 @@ class LongbridgeOAuthProvider implements OAuthClientProvider {
 
   constructor(origin: string) {
     this.redirectUrl = `${origin}/api/longbridge/callback`;
-    this.clientMetadata = { client_name: "AWE Trading Terminal", redirect_uris: [this.redirectUrl] };
+    this.clientMetadata = { client_name: "Enterprise AWE Trading Terminal", redirect_uris: [this.redirectUrl] };
   }
   state() { this.expectedState = randomUUID(); return this.expectedState; }
   clientInformation() { return this.registration; }

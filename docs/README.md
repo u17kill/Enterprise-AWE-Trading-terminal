@@ -9,5 +9,6 @@
 | V1.3 | [需求设计](superpowers/specs/2026-10-24-v13-terminal.md) | [V1.3 记录](v1.3-status.md) | [PR #4](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/4) |
 | V0.3 | [需求设计](superpowers/specs/2026-10-24-v03-portfolio-matrix.md) | [V0.3 交付与修复](v0.3-status.md) | [PR #5](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/5) |
 | V0.4 | [财经日历设计](superpowers/specs/2026-10-24-v04-financial-calendar.md) | [V0.4 交付与修复](v0.4-status.md) | [PR #6](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/6) |
+| V0.5 | [品牌标识设计](superpowers/specs/2026-10-24-v05-brand.md) | [V0.5 交付与修复](v0.5-status.md) | 待提交 PR |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
