@@ -79,6 +79,8 @@ Scion 的 [2025-09-30 申报](https://www.sec.gov/Archives/edgar/data/1649339/00
 
 用户决定 V0.7 只做 13F，不加入做空研究机构或报告。Jim Chanos 创立的 Kynikos Associates 后以 **Chanos & Co LP** 名称申报（CIK 0001446440），纳入“宏观与多策略”组，作为第 29 家机构。当前核实到的最近一期 [SEC 13F 报告期为 2023-09-30，提交于 2023-11-14](https://www.sec.gov/Archives/edgar/data/1446440/0001172661-23-003940-index.htm)。卡片需显著写“历史申报 · 2023 Q3”，不得写成当前持仓。13F 不披露股票空头；该页面仅显示其可核实的 13F 多头及可报告期权，不推断做空仓位。[SEC 13F FAQ](https://www.sec.gov/rules-regulations/staff-guidance/frequently-asked-questions-about-form-13f)。
 
+该期 [SEC 信息表](https://www.sec.gov/Archives/edgar/data/1446440/000117266123003940/xslForm13F_X02/infotable.xml)共有 7 项未标 PUT/CALL 的证券，申报市值合计 3,865,862 美元。V0.7 页面把这 7 项作为可核实的历史非期权持仓列出，另有期权条目不混入列表或占比；页面中的百分比只以这 7 项的申报市值合计为分母，不代表基金总资产或今天的仓位。
+
 ## 页面与交互
 
 - 侧栏新增“大佬持仓”，沿用现有白底、浅蓝强调色、侧栏与顶部工作台导航。页顶为标题、“公开 13F 快照”说明、最近核对时间和“更新持仓”按钮。数据源未接通时，按钮与状态需明确说明，不显示假数字。

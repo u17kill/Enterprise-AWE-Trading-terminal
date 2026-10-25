@@ -13,9 +13,12 @@ describe("V0.7 holdings directory", () => {
     expect(screen.getByRole("button", { name: /Jim Chanos/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Jim Chanos/ }));
     const panel = screen.getByRole("dialog", { name: /Jim Chanos/ });
-    expect(within(panel).getByText(/历史申报/)).toBeInTheDocument();
+    expect(within(panel).getAllByText(/历史申报/)).toHaveLength(2);
     expect(within(panel).getByText(/2023-09-30/)).toBeInTheDocument();
-    expect(within(panel).getByText(/暂无可展示的持仓明细/)).toBeInTheDocument();
+    expect(within(panel).getByText(/7 项非期权申报/)).toBeInTheDocument();
+    expect(within(panel).getByText("S&P REGL BKG")).toBeInTheDocument();
+    expect(within(panel).getByText(/49,786 股/)).toBeInTheDocument();
+    expect(within(panel).getByRole("link", { name: /SEC 信息表/ })).toHaveAttribute("href", expect.stringContaining("infotable.xml"));
     expect(within(panel).getByRole("link", { name: /SEC 原件/ })).toHaveAttribute("href", expect.stringContaining("sec.gov/Archives/edgar/data/1446440/"));
     fireEvent.click(within(panel).getByRole("button", { name: "关闭详情" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
