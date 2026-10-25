@@ -3,6 +3,7 @@ import "./globals.css";
 import "./chart-workspace.css";
 import "./financial-calendar.css";
 import "./brand.css";
+import "./market-news.css";
 
 export const metadata: Metadata = {
   title: "Enterprise AWE Trading Terminal",
