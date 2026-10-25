@@ -9,7 +9,7 @@
 - 采用模块化持仓卡片，不将原始申报表直接铺在页面上。展示证券名称、代码（能可靠匹配时）、披露市值与其在**该机构 13F 披露持仓总市值中的比例**。
 - 每家机构显示报告季度末日期、实际提交日期与 SEC 原件链接；用户点击“更新持仓”才检查公开申报，不自动轮询。
 - 顶部为跨机构的最新披露变化速览。机构详情有相邻两期自动事实摘要，以及用户可编辑、可删除的评论；两类内容分开，评论保存在当前浏览器。
-- 最早商定价值、宏观、激进科技三组，首批十二家申报主体如下；用户又提出十四家已核实的新机构，建议分为四组，见下节。
+- 最早商定价值、宏观、激进科技三组，首批十二家申报主体如下；用户又提出十六家已核实的新机构，建议分为四组，见下节。
 
 | 风格 | 页面名称 | 13F 申报主体 / CIK |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Scion 的 [2025-09-30 申报](https://www.sec.gov/Archives/edgar/data/1649339/00
 
 ## 扩充名单与分类建议（待用户确认）
 
-建议四组：**价值与质量**、**主动与特殊机会**、**成长与科技**、**宏观与多策略**。分组只是浏览入口，不代表机构只采用一种策略。首批十二家中的伯克希尔、段永平、李录、帕布来、景林归入价值与质量；桥水、索罗斯、Scion、Tudor 归入宏观与多策略；ARK、Situational Awareness、东方港湾归入成长与科技。新增十四家如下，均已核对 SEC 申报主体；表中风格为产品建议，尚待确认：
+建议四组：**价值与质量**、**主动与特殊机会**、**成长与科技**、**宏观与多策略**。分组只是浏览入口，不代表机构只采用一种策略。首批十二家中的伯克希尔、段永平、李录、帕布来、景林归入价值与质量；桥水、索罗斯、Scion、Tudor 归入宏观与多策略；ARK、Situational Awareness、东方港湾归入成长与科技。新增十六家如下，均已核对 SEC 申报主体；表中风格为产品建议，尚待确认：
 
 | 建议分组 | 用户提及 / 核实名称 | 13F 申报主体 / CIK | 核验 |
 | --- | --- | --- | --- |
@@ -48,12 +48,14 @@ Scion 的 [2025-09-30 申报](https://www.sec.gov/Archives/edgar/data/1649339/00
 | 成长与科技 | Chase Coleman · Tiger Global | Tiger Global Management LLC / 0001167483 | [SEC](https://www.sec.gov/Archives/edgar/data/1167483/000091957426005427/0000919574-26-005427-index.html) |
 | 成长与科技 | Coatue Management | Coatue Management LLC / 0001135730 | [SEC](https://www.sec.gov/Archives/edgar/data/1135730/000091957426005478/0000919574-26-005478-index.htm) |
 | 成长与科技 | Brad Gerstner · Altimeter | Altimeter Capital Management LP / 0001541617 | [SEC](https://www.sec.gov/Archives/edgar/data/1541617/000154161726000008/0001541617-26-000008-index.html) |
+| 成长与科技 | 柏基投资 · Baillie Gifford | Baillie Gifford & Co / 0001088875 | [SEC](https://www.sec.gov/Archives/edgar/data/1088875/000108887526000057/0001088875-26-000057-index.htm) |
+| 成长与科技 | Sands Capital | Sands Capital Management LLC / 0001020066 | [SEC](https://www.sec.gov/Archives/edgar/data/1020066/000102006626000018/0001020066-26-000018-index.html) |
 | 宏观与多策略 | David Tepper · Appaloosa | Appaloosa LP / 0001656456 | [SEC](https://www.sec.gov/Archives/edgar/data/1656456/000165645626000003/0001656456-26-000003-index.html) |
 | 宏观与多策略 | Citadel | Citadel Advisors LLC / 0001423053 | [SEC 修正申报](https://www.sec.gov/Archives/edgar/data/1423053/000110465926104387/0001104659-26-104387-index.html) |
 
-两处口述名称暂不强行认定：“**搏击投资**”未能可靠对应到唯一机构；“**Sense Capital Management**”可能指 [Sands Capital Management](https://www.sec.gov/Archives/edgar/data/1020066/000102006626000018/0001020066-26-000018-index.htm)，但仍需用户确认。两者先记入待核对名单，不接入任何误匹配的持仓。
+用户确认“搏击投资”实际为**柏基投资 Baillie Gifford**，“Sense Capital Management”实际为 **Sands Capital**。两者的申报主体已按上表核实；柏基投资按其[官方长期成长投资理念](https://www.bailliegifford.com/en/uk/individual-investors/about-us/philosophy-and-values/?tab=leadership+and+culture)暂归入成长与科技。
 
-潘兴广场在 [2026-06-30 季度提交 13F-NT](https://www.sec.gov/Archives/edgar/data/1336528/000117266126003777/xslForm13F_X02/primary_doc.xml)，通知说明其公开母公司 Pershing Square Inc 代为报告，不能把通知当作空仓；应沿申报中明确列出的其他管理人追踪对应持仓。Oaktree 主要是信贷与特殊机会投资，13F 只呈现其应申报证券的一部分。Citadel 有大量证券与期权，需单列期权并缓存大型申报文件。四组页面也应有搜索、收起和按名称筛选，以容纳二十六家机构。
+潘兴广场在 [2026-06-30 季度提交 13F-NT](https://www.sec.gov/Archives/edgar/data/1336528/000117266126003777/xslForm13F_X02/primary_doc.xml)，通知说明其公开母公司 Pershing Square Inc 代为报告，不能把通知当作空仓；应沿申报中明确列出的其他管理人追踪对应持仓。Oaktree 主要是信贷与特殊机会投资，13F 只呈现其应申报证券的一部分。Citadel 有大量证券与期权，需单列期权并缓存大型申报文件。四组页面也应有搜索、收起和按名称筛选，以容纳二十八家机构。
 
 ## 方案比较
 
@@ -63,7 +65,7 @@ Scion 的 [2025-09-30 申报](https://www.sec.gov/Archives/edgar/data/1649339/00
 
 服务端按固定 CIK 查询 13F-HR、13F-HR/A 和 13F-NT，再取信息表；遇 13F-NT 须沿申报列出的其他管理人寻找持仓，无法安全归属时只显示通知，不推断空仓；比较相邻季度的完整有效申报。修正申报若为重述，以重述表替换被修正的表；若为追加条目，则与该季度有效底表合并。不能可靠判定修正类型或重建完整季度时，标记该季度不可比较，不计算误导性的权重和增减。[SEC 修正申报说明](https://www.sec.gov/rules-regulations/staff-guidance/frequently-asked-questions-about-form-13f)。请求遵守 SEC 的访问规则和速率限制，使用服务端声明的应用联系信息。页面只接收公开申报数据，不含服务端配置。应有合理的服务端缓存，避免每位用户反复下载相同申报；按钮仍会重新核对最新申报索引。
 
-**接入待解决：**2026-10-25 在当前本地服务端对 SEC submissions API 与原始申报档案各做一次只读请求，均返回 Akamai HTTP 403。公开网页能核对文件，但产品服务端尚不能直连。用户要求先核验可追溯 SEC 原件的备用通路：Tracefour 免密钥接口实测覆盖首批十二家中的伯克希尔、ARK、Situational Awareness；XOOMAR 实测覆盖伯克希尔、桥水、索罗斯、ARK、Scion；两者合计已不能覆盖原十二家，更不能覆盖扩充后的二十六家。HoldingsHub 文档称免密钥，但接口实测要求 API key。仍需验证可覆盖全部已核实机构的可靠通路；在此之前不应把“更新持仓”宣称为已可用。
+**接入待解决：**2026-10-25 在当前本地服务端对 SEC submissions API 与原始申报档案各做一次只读请求，均返回 Akamai HTTP 403。公开网页能核对文件，但产品服务端尚不能直连。用户要求先核验可追溯 SEC 原件的备用通路：Tracefour 免密钥接口实测覆盖首批十二家中的伯克希尔、ARK、Situational Awareness；XOOMAR 实测覆盖伯克希尔、桥水、索罗斯、ARK、Scion；两者合计已不能覆盖原十二家，更不能覆盖扩充后的二十八家。HoldingsHub 文档称免密钥，但接口实测要求 API key。仍需验证可覆盖全部已核实机构的可靠通路；在此之前不应把“更新持仓”宣称为已可用。
 
 ## 数据计算与解释
 
@@ -88,6 +90,6 @@ Scion 的 [2025-09-30 申报](https://www.sec.gov/Archives/edgar/data/1649339/00
 
 ## 待确认
 
-- 用户扩充后已核实二十六家申报主体；四组浏览结构和上述十四家新机构纳入 V0.7 仍需确认。两处模糊名称等待用户辨认。
+- 用户扩充后已核实二十八家申报主体；四组浏览结构和上述十六家新机构纳入 V0.7 仍需确认。两处模糊名称现已由用户辨认。
 - 页面中的“最新动作”只做可从相邻两期 13F 核实的事实摘要；个性化观点由用户评论承载。
 - 当前电脑访问 SEC 返回 403；需要确认是否允许使用可追溯到 SEC 原件的第三方传输来源作为本地备用方案，或先完成直连实现并等待可访问 SEC 的运行环境。
