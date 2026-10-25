@@ -131,7 +131,7 @@ export function Dashboard() {
       <aside className="sidebar">
         <Brand />
         <div className="sidebar-label">工作台</div>
-        <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link></nav>
+        <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">▤</span>大佬持仓</Link></nav>
         <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.3 · 按需更新</div><p>自选资产和五灯判断保存在此浏览器中。</p></div>
       </aside>
 

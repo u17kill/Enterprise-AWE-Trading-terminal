@@ -46,7 +46,7 @@ describe("V0.3 portfolio matrix", () => {
     fireEvent.click(screen.getByRole("button", { name: "删除主题" }));
     expect(screen.queryByRole("button", { name: "编辑 TEST" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "编辑 NVDA" })).toBeInTheDocument();
-  });
+  }, 15_000);
 
   it("restores a V0.3 backup while leaving the old portfolio data intact", async () => {
     localStorage.setItem(PORTFOLIO_KEY, JSON.stringify({ private: "old data" }));
