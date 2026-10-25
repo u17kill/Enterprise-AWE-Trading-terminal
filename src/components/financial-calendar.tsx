@@ -61,7 +61,7 @@ export function FinancialCalendar() {
     <aside className="sidebar">
       <Brand />
       <div className="sidebar-label">工作台</div>
-      <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item active" href="/calendar" aria-current="page"><span className="nav-glyph">▤</span>财经日历</Link></nav>
+      <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item active" href="/calendar" aria-current="page"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link></nav>
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.4 · 事件观察</div><p>来源明确的日期才进入日历；财报和宏观事件按需更新。</p></div>
     </aside>
     <main className="main-content">
