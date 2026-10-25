@@ -48,6 +48,7 @@ describe("dashboard", () => {
   it("opens the chart workspace from the left navigation", () => {
     render(<Dashboard />);
     expect(screen.getByRole("link", { name: /图表空间/ })).toHaveAttribute("href", "/chart/SPX");
+    expect(screen.getByRole("link", { name: /期权计算/ })).toHaveAttribute("href", "/options");
   });
 
   it("updates visible quotes only when the user presses refresh", async () => {

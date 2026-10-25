@@ -12,6 +12,6 @@
 | V0.5 | [品牌标识设计](superpowers/specs/2026-10-24-v05-brand.md) | [V0.5 交付与修复](v0.5-status.md) | [PR #7](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/7) |
 | V0.6（已验收） | [市场动态设计](superpowers/specs/2026-10-25-v06-market-news-design.md) | [V0.6 交付与限制](v0.6-status.md) | [Issue #8](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/8)、[PR #9](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/9) |
 | V0.7（29 家已公开 13F 快照与手动更新；季度对比待续） | [大佬持仓设计](superpowers/specs/2026-10-25-v07-leader-holdings-design.md) | [V0.7 交付、数据限制与缺数据修复](v0.7-status.md) | [PR #10](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/10) |
-| V0.8（十二种期权策略，设计待确认） | [期权计算设计草案](superpowers/specs/2026-10-25-v08-options-calculator-design.md) | [V0.8 需求与进度](v0.8-status.md) | [草稿 PR #11](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/11) |
+| V0.8（十二种策略的到期盈亏计算，待验收） | [期权计算设计](superpowers/specs/2026-10-25-v08-options-calculator-design.md) | [V0.8 交付、验证与数据边界](v0.8-status.md) | [草稿 PR #11](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/11) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。

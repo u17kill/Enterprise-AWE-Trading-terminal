@@ -46,17 +46,17 @@
 
 **Interfaces:** `/options` renders twelve strategy cards. Selected strategy shows per-leg inputs, stock cost where needed, dynamic payoff SVG, break-even points, best/worst outcomes and warnings. Card mini SVG uses fixed preset through the same analyzer.
 
-- [ ] Write failing UI tests for twelve cards, navigation entry, strategy switching, live recalculation, invalid input state and editable collar/iron-condor cases.
-- [ ] Run targeted tests; verify expected failure.
-- [ ] Implement responsive light UI, original SVG chart, strategy source links and navigation.
-- [ ] Run targeted tests until green, then full suite with bounded workers.
-- [ ] Commit page, styling, navigation and tests.
+- [x] Write failing UI tests for twelve cards, navigation entry, strategy switching, live recalculation, invalid input state and editable collar/iron-condor cases.
+- [x] Run targeted tests; verify expected failure.
+- [x] Implement responsive light UI, original SVG chart, strategy source links and navigation.
+- [x] Run targeted tests until green, then full suite with bounded workers.
+- [x] Commit page, styling, navigation and tests.
 
 ### Task 3: 浏览器验收与版本归档
 
 **Files:** Update `docs/v0.8-status.md`, `docs/README.md`, design if implementation decisions change, and PR #11 body/title.
 
 - [ ] In the local browser test twelve cards, collar stock-cost changes, asymmetric iron condor, invalid input and small viewport; inspect screenshot and console.
-- [ ] Run fresh full tests, ESLint and production build sequentially; confirm exact outputs.
+- [x] Run fresh full tests, ESLint and production build sequentially; confirm exact outputs.
 - [ ] Record delivery, limits and verification in version docs; commit, push and sync draft PR #11.
-- [ ] Perform whole-branch review and fix important findings before final delivery.
+- [x] Perform whole-branch review and fix important findings before final delivery.
