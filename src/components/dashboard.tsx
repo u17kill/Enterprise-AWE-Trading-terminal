@@ -11,6 +11,7 @@ import type { IntradayPoint, LiveQuote } from "../lib/longbridge-data";
 import { CUSTOM_SYMBOLS_KEY, loadCustomSymbols, saveCustomSymbol } from "../lib/custom-symbols";
 import { toLongbridgeSymbol } from "../lib/longbridge-data";
 import { FiveLightsPanel } from "./five-lights-panel";
+import { Brand } from "./brand";
 
 const SOURCE_NOTES: Record<string, string> = {
   XAUUSD: "黄金现货参考价暂不可用", US10Y: "美国财政部日度收益率暂不可用",
@@ -128,7 +129,7 @@ export function Dashboard() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/"><span className="brand-mark">A<span>↗</span></span><span><strong>AWE</strong><small>TRADING TERMINAL</small></span></Link>
+        <Brand />
         <div className="sidebar-label">工作台</div>
         <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link></nav>
         <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.3 · 按需更新</div><p>自选资产和五灯判断保存在此浏览器中。</p></div>
@@ -150,7 +151,7 @@ export function Dashboard() {
 
           <AssetSection title="宏观资产" eyebrow="01 / MACRO MARKETS" description="跟踪影响市场方向的关键资产" ids={watchlist.macro} group="macro" customSymbols={customSymbols} onRemove={(id) => updateWatchlist(removeSymbol(watchlist, id))} onAdd={openSearch} quotes={market.result?.quotes ?? {}} trends={market.result?.trendsBySymbol ?? {}} refreshed={Boolean(market.result)} />
           <AssetSection title="个股观察" eyebrow="02 / EQUITIES" description="将值得持续研究的公司放在眼前" ids={watchlist.stocks} group="stocks" customSymbols={customSymbols} onRemove={(id) => updateWatchlist(removeSymbol(watchlist, id))} onAdd={openSearch} quotes={market.result?.quotes ?? {}} trends={market.result?.trendsBySymbol ?? {}} refreshed={Boolean(market.result)} />
-          <footer className="page-footer">AWE Trading Terminal <span>·</span> V1.3 Preview</footer>
+          <footer className="page-footer">Enterprise AWE Trading Terminal <span>·</span> V1.3 Preview</footer>
         </div>
       </main>
 

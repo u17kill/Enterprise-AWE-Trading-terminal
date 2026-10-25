@@ -1,0 +1,8 @@
+.brand{gap:9px;padding-left:2px;padding-right:2px;min-width:0}
+.brand-emblem{position:relative;display:block;flex:0 0 75px;width:75px;height:45px;overflow:hidden;border:1px solid #dce8fb;border-radius:8px;background:linear-gradient(135deg,#f9fbff,#edf4ff);box-shadow:0 4px 12px #3267ae12}
+.brand-emblem img{position:absolute;display:block;width:88px;height:auto;max-width:none;left:-7px;top:-7px}
+.brand-wordmark{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.brand-wordmark strong{color:#233d67;font-size:12px;font-weight:800;letter-spacing:.7px;line-height:1.2;text-transform:uppercase;white-space:nowrap}
+.brand-wordmark small{color:#6889b8;font-size:8px;font-weight:700;letter-spacing:1.15px;line-height:1.25;margin-top:5px;text-transform:uppercase;white-space:nowrap}
+@media(min-width:721px) and (max-width:1200px){.sidebar .brand{gap:7px}.sidebar .brand-emblem{flex-basis:58px;width:58px;height:36px}.sidebar .brand-emblem img{width:70px;left:-6px;top:-6px}.sidebar .brand-wordmark strong{font-size:10px;letter-spacing:.35px}.sidebar .brand-wordmark small{font-size:7px;letter-spacing:.65px}}
+@media(max-width:600px){.workspace-topbar .brand-wordmark{display:none}.workspace-topbar .brand-emblem{flex-basis:67px;width:67px;height:40px}.workspace-topbar .brand-emblem img{width:79px;left:-7px;top:-7px}}
