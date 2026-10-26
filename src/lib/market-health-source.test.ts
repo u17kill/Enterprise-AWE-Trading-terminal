@@ -1,9 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./longbridge-mcp", () => ({ callLongbridgeTool: vi.fn() }));
 import { callLongbridgeTool, type getSession } from "./longbridge-mcp";
-import { collectMarketHealth, parseFredCsv, parseCnnFearGreed, parseSpyOptionStats, normalizePair, optionHealthReadings } from "./market-health-source";
+import { collectMarketHealth, parseFredCsv, parseCnnFearGreed, parseSpyOptionStats, normalizePair, optionHealthReadings, parseBreadth } from "./market-health-source";
 
 describe("market health source parsing", () => {
+  it("uses published S&P 500 MA50 and MA200 breadth with its sample and date", () => {
+    const result = parseBreadth({ metadata: { generated_at: "2026-10-26T20:00:00Z", universe: "S&P 500", total_stocks_analyzed: 503 }, data: { date: "2026-10-26", moving_averages: { above_50_day_ma: { count: 301, percentage: 59.84 }, above_200_day_ma: { count: 287, percentage: 57.06 } } } }, new Date("2026-10-26T21:00:00Z"));
+    expect(result).toMatchObject({ value: 59.84, state: "amber", asOf: "2026-10-26T00:00:00Z" });
+    expect(result?.detail).toContain("MA200 57.06%");
+    expect(result?.detail).toContain("503");
+  });
+
+  it("rejects stale or incomplete breadth instead of displaying a misleading percentage", () => {
+    const data = { metadata: { generated_at: "2026-10-20T20:00:00Z", universe: "S&P 500", total_stocks_analyzed: 503 }, data: { date: "2026-10-20", moving_averages: { above_50_day_ma: { count: 301, percentage: 59.84 }, above_200_day_ma: { count: 287, percentage: 57.06 } } } };
+    expect(parseBreadth(data, new Date("2026-10-26T21:00:00Z"))).toBeNull();
+    expect(parseBreadth({ ...data, metadata: { ...data.metadata, generated_at: "2026-10-26T20:00:00Z" }, data: { ...data.data, date: "2026-10-26", moving_averages: { ...data.data.moving_averages, above_50_day_ma: { count: 20, percentage: 59.84 } } } }, new Date("2026-10-26T21:00:00Z"))).toBeNull();
+  });
   it("rejects missing FRED rows and keeps observed dates", () => {
     expect(parseFredCsv("DATE,BAMLH0A0HYM2\n2026-10-20,3.82\n2026-10-21,.\n2026-10-22,4.05", "BAMLH0A0HYM2")).toEqual([
       { date: "2026-10-20", value: 3.82 }, { date: "2026-10-22", value: 4.05 },

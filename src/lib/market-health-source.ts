@@ -8,6 +8,7 @@ type OptionStat = { asOf: string; ratio: number; calls: number; puts: number };
 const FRED = "https://fred.stlouisfed.org/series/";
 const CNN = "https://www.cnn.com/markets/fear-and-greed";
 const LB = "https://longbridge.com";
+const BREADTH_URL = "https://raw.githubusercontent.com/DeanFinancials/deanfi-data/main/advance-decline/daily_breadth.json";
 
 function numeric(raw: unknown): number | null {
   if ((typeof raw !== "string" && typeof raw !== "number") || raw === "") return null;
@@ -48,6 +49,35 @@ export function parseSpyOptionStats(raw: unknown): OptionStat[] {
     if (calls === null || puts === null || calls <= 0 || puts < 0 || typeof asOf !== "string" || !Number.isFinite(Date.parse(asOf))) return [];
     return [{ asOf, ratio: puts / calls, calls, puts }];
   }).sort((a, b) => a.asOf.localeCompare(b.asOf));
+}
+
+export function parseBreadth(raw: unknown, now = new Date()): HealthReading | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const root = raw as Record<string, unknown>;
+  const metadata = root.metadata as Record<string, unknown> | undefined;
+  const data = root.data as Record<string, unknown> | undefined;
+  const moving = data?.moving_averages as Record<string, unknown> | undefined;
+  const ma50 = moving?.above_50_day_ma as Record<string, unknown> | undefined;
+  const ma200 = moving?.above_200_day_ma as Record<string, unknown> | undefined;
+  const sample = numeric(metadata?.total_stocks_analyzed);
+  const date = data?.date;
+  const generated = metadata?.generated_at;
+  const count50 = numeric(ma50?.count), count200 = numeric(ma200?.count);
+  const pct50 = numeric(ma50?.percentage), pct200 = numeric(ma200?.percentage);
+  if (metadata?.universe !== "S&P 500" || sample === null || sample < 450 || sample > 550 ||
+      typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      typeof generated !== "string" || !Number.isFinite(Date.parse(generated)) ||
+      count50 === null || count200 === null || pct50 === null || pct200 === null ||
+      [count50, count200].some((n) => !Number.isInteger(n) || n < 0 || n > sample) ||
+      [pct50, pct200].some((n) => n < 0 || n > 100) ||
+      Math.abs(count50 / sample * 100 - pct50) > 0.2 || Math.abs(count200 / sample * 100 - pct200) > 0.2) return null;
+  const asOf = Date.parse(`${date}T00:00:00Z`), publishedAt = Date.parse(generated), current = now.getTime();
+  if (!Number.isFinite(asOf) || asOf > current || publishedAt > current + 60_000 || publishedAt < asOf || current - publishedAt > 5 * 86_400_000) return null;
+  const weakest = Math.min(pct50, pct200);
+  const state: HealthState = weakest > 60 ? "green" : weakest >= 40 ? "amber" : "red";
+  return reading(pct50, "%", `${date}T00:00:00Z`, "DeanFi · S&P 500 宽度", BREADTH_URL, state,
+    `MA50 ${pct50.toFixed(2)}% · MA200 ${pct200.toFixed(2)}%`,
+    { detail: `MA50 ${count50}/${sample}；MA200 ${pct200.toFixed(2)}%（${count200}/${sample}）。按两项中较弱值判断灯色；第三方 Yahoo Finance 数据。` });
 }
 
 export function normalizePair(first: { time: string; close: number }[], second: { time: string; close: number }[]): { first: number[]; second: number[]; asOf: string } | null {
@@ -123,7 +153,13 @@ export async function collectMarketHealth(session: Session | null): Promise<Heal
   } else {
     for (const id of ["volatility", "crowding", "putCall", "equalWeight"] as const) errors[id] = "需连接 Longbridge 获取行情";
   }
-  errors.breadth = "尚无完整标普 500 成分股 MA50/MA200 数据，不能计算市场宽度";
+  tasks.push(run(["breadth"], async () => {
+    const response = await fetch(BREADTH_URL, { cache: "no-store", signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`市场宽度数据源 HTTP ${response.status}`);
+    const breadth = parseBreadth(await response.json());
+    if (!breadth) throw new Error("市场宽度数据不完整或已过期，暂不显示新值");
+    return { breadth };
+  }));
   tasks.push(run(["liquidity"], async () => {
     const data = await fetchFred("BAMLH0A0HYM2"), latest = data.at(-1)!;
     const target = Date.parse(latest.date) - 28 * 86_400_000;
