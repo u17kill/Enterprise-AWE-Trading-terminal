@@ -13,6 +13,8 @@ pnpm exec next dev --hostname 127.0.0.1 --port 3100
 
 Open `http://127.0.0.1:3100`. Click **连接 Longbridge** and approve access in Longbridge. Then click **更新数据** on the dashboard or chart page. The app requests market data only on that click; it does not poll or stream. The Longbridge OAuth token stays in the Next.js server process, keyed by an opaque HttpOnly browser cookie. Do not paste a token into the browser or commit it. The Codex/ChatGPT Longbridge connection is separate from this app's authorization.
 
+On the current Windows workstation, Task Scheduler runs `scripts/start-local-preview.ps1` when the user signs in. The script rebuilds the app and serves it at `http://127.0.0.1:3100` using `next start`; logs stay in the ignored `.local/preview-startup.log`. It binds only to the local computer. Windows must be running and the user must sign in; this is not an internet-hosted site. If Node.js or project dependencies move, update the launcher or reinstall dependencies.
+
 The local preview keeps OAuth sessions in server memory. Restarting the server requires reconnecting. A public or multi-instance deployment needs a durable, encrypted, per-user session store and a configured `AWE_BASE_URL` before enabling this integration. The app never submits trades. It requests Longbridge quote, search, candle, valuation-index, and financial-report data from the server. Gold API, Coinbase Exchange, and the US Treasury are also fetched server-side when their cards are refreshed.
 
 ## Data and chart behavior
