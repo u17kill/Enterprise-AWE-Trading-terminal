@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | V0.1 | [看板设计](superpowers/specs/2026-10-24-v01-dashboard-design.md) | 初始看板与图表里程碑 | [PR #1](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/1) |
 | V0.2 | [实施计划](superpowers/plans/2026-10-24-v02-terminal.md) | [V0.2 记录](v0.2-status.md) | [Issue #2](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/2)、[PR #3](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/3) |
-| V1.3 | [需求设计](superpowers/specs/2026-10-24-v13-terminal.md) | [V1.3 交付与日经、KOSPI 空白修复](v1.3-status.md) | [PR #4](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/4)、[后续修复 PR #13](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/13) |
+| V1.3 | [需求设计](superpowers/specs/2026-10-24-v13-terminal.md) | [V1.3 交付与黄金、日经、KOSPI 报价和走势图修复](v1.3-status.md) | [PR #4](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/4)、[后续修复 PR #13](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/13) |
 | V0.3 | [需求设计](superpowers/specs/2026-10-24-v03-portfolio-matrix.md) | [V0.3 交付与修复](v0.3-status.md) | [PR #5](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/5) |
 | V0.4 | [财经日历设计](superpowers/specs/2026-10-24-v04-financial-calendar.md) | [V0.4 交付与修复](v0.4-status.md) | [PR #6](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/6) |
 | V0.5 | [品牌标识设计](superpowers/specs/2026-10-24-v05-brand.md) | [V0.5 交付与修复](v0.5-status.md) | [PR #7](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/7) |

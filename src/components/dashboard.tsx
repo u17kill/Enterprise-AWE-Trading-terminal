@@ -32,6 +32,7 @@ function AssetCard({ symbol, onRemove, quote, trend, refreshed }: { symbol: Mark
   const value = quote ? new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(quote.value) : "—";
   const hasTrend = Boolean(trend && trend.length >= 2);
   const trendDate = hasTrend ? new Intl.DateTimeFormat("zh-CN", { timeZone: "America/New_York", month: "2-digit", day: "2-digit" }).format(new Date(trend![0].timestamp)) : "";
+  const trendDescription = ["N225", "KOSPI"].includes(symbol.id) ? "近30交易日指数走势" : symbol.id === "XAUUSD" ? "近24小时现货走势" : "最近交易日分时走势";
   const zone = ["HSI", "HSTECH"].includes(symbol.id) ? "Asia/Hong_Kong" : ["SSE", "A500"].includes(symbol.id) ? "Asia/Shanghai" : "America/New_York";
   const quoteTime = quote?.marketDate ? quote.marketDate.replaceAll("-", "/") : quote ? new Intl.DateTimeFormat("zh-CN", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit", ...(symbol.id === "US10Y" ? {} : { hour: "2-digit", minute: "2-digit" }) }).format(new Date(quote.timestamp)) : "";
   return (
@@ -44,8 +45,8 @@ function AssetCard({ symbol, onRemove, quote, trend, refreshed }: { symbol: Mark
       <p className="asset-category">{symbol.category} · {symbol.englishName}</p>
       <div className="asset-value-row"><span className="asset-value">{value}</span><span className={`asset-change ${negative ? "negative" : ""}`}>{change}</span></div>
       <p className="asset-unit">{quote ? `${quote.source ?? "Longbridge"} · ${quoteTime} ${quote.marketDate ? "交易日" : symbol.id === "US10Y" ? "发布日期" : zone === "America/New_York" ? "美东" : zone === "Asia/Hong_Kong" ? "香港" : "北京时间"}` : SOURCE_NOTES[symbol.id] ?? (refreshed ? "行情不可用" : "点击更新获取行情")}{quote ? ` · ${symbol.unit}` : ""}</p>
-      {hasTrend ? <TrendChart symbolId={symbol.id} points={trend!} negative={negative} /> : <div className="trend-unavailable">{refreshed ? "分时走势不可用" : "等待行情更新"}</div>}
-      <div className="card-footer"><span>{hasTrend ? symbol.id === "US10Y" ? "近 30 个发布日走势" : symbol.id === "BTCUSD" ? "近 24 小时走势" : `${trendDate} 最近交易日分时` : "暂无真实走势"}</span><Link href={symbol.source === "longbridge" ? `/chart/${symbol.id}?name=${encodeURIComponent(symbol.name)}` : `/chart/${symbol.id}`} aria-label={`查看 ${symbol.id} 图表`}>查看图表 <ArrowIcon /></Link></div>
+      {hasTrend ? <TrendChart symbolId={symbol.id} points={trend!} negative={negative} description={trendDescription} /> : <div className="trend-unavailable">{refreshed ? "走势数据不可用" : "等待行情更新"}</div>}
+      <div className="card-footer"><span>{hasTrend ? ["N225", "KOSPI", "XAUUSD"].includes(symbol.id) ? trendDescription : symbol.id === "US10Y" ? "近 30 个发布日走势" : symbol.id === "BTCUSD" ? "近 24 小时走势" : `${trendDate} 最近交易日分时` : "暂无真实走势"}</span><Link href={symbol.source === "longbridge" ? `/chart/${symbol.id}?name=${encodeURIComponent(symbol.name)}` : `/chart/${symbol.id}`} aria-label={`查看 ${symbol.id} 图表`}>查看图表 <ArrowIcon /></Link></div>
     </article>
   );
 }
@@ -140,7 +141,7 @@ export function Dashboard() {
         <div className="dashboard-content">
           <div className="page-hero"><div><div className="hero-kicker"><span className="kicker-line" /> AWE MARKET OVERVIEW</div><h1>你的市场，<em>一目了然。</em></h1><p>集中查看关注的宏观资产和个股，点开任意卡片进入专属图表空间。</p></div><button className="primary-button" aria-label="添加资产" onClick={openSearch}><span>＋</span> 添加资产</button></div>
 
-          <div className="info-banner"><span className="info-icon">ⓘ</span><p><strong>按需更新</strong> — {market.result ? "数据分别来自 Longbridge、DeanFi、美国财政部、Gold API 和 Coinbase；各卡片标明来源与时间。未返回行情的资产显示不可用。" : "连接 Longbridge 后点击顶部按钮获取行情；日经、KOSPI、黄金、比特币与美债收益率采用卡片注明的其他来源。未获取前不显示演示行情。"}</p></div>
+          <div className="info-banner"><span className="info-icon">ⓘ</span><p><strong>按需更新</strong> — {market.result ? "数据分别来自 Longbridge、DeanFi、美国财政部、Standard Bullion（黄金现货）和 Coinbase；各卡片标明来源与时间。未返回行情的资产显示不可用。" : "连接 Longbridge 后点击顶部按钮获取行情；日经、KOSPI、黄金、比特币与美债收益率采用卡片注明的其他来源。未获取前不显示演示行情。"}</p></div>
           {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
 
           <FiveLightsPanel />

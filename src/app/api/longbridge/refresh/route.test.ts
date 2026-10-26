@@ -17,7 +17,12 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("manual Longbridge refresh", () => {
   it("fills Nikkei, KOSPI and gold cards from their named public sources", async () => {
-    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: async () => url.includes("international_major_indices")
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: async () => url.includes("international_major_indices_historical")
+      ? { metadata: { generated_at: new Date().toISOString() }, indices: {
+        "^N225": { symbol: "^N225", data: [{ date: "2026-10-22", close: 62900 }, { date: "2026-10-23", close: 62693.16 }] },
+        "^KS11": { symbol: "^KS11", data: [{ date: "2026-10-22", close: 5600 }, { date: "2026-10-23", close: 5550 }] },
+      } }
+      : url.includes("international_major_indices")
       ? { metadata: { market_date: "2026-10-26", generated_at: new Date().toISOString() }, indices: {
         "^N225": { symbol: "^N225", country: "Japan", currency: "JPY", current_price: 62189.65, daily_change_percent: -0.8 },
         "^KS11": { symbol: "^KS11", country: "South Korea", currency: "KRW", current_price: 5469.47, daily_change_percent: -1.46 },
@@ -29,7 +34,20 @@ describe("manual Longbridge refresh", () => {
     expect(body.quotes.N225.value).toBe(62189.65);
     expect(body.quotes.KOSPI.value).toBe(5469.47);
     expect(body.quotes.XAUUSD.value).toBe(4018.8);
+    expect(body.trendsBySymbol.N225.at(-1).price).toBe(body.quotes.N225.value);
+    expect(body.trendsBySymbol.KOSPI.at(-1).price).toBe(body.quotes.KOSPI.value);
     expect(body.unsupported).toEqual([]);
+  });
+
+  it("draws gold from the same provider as its quote", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: async () => url.includes("history")
+      ? { source: "Standard Bullion", metal: "XAU", unit: "USD per troy ounce", points: [{ t: "2026-10-26T14:45:00Z", price: 4018 }, { t: "2026-10-26T15:45:00Z", price: 4020.44 }] }
+      : { updated: "2026-10-26T15:55:45Z", metals: [{ symbol: "XAU", ask: 4020.13, bid: 4013.7, open: 3997.68 }] } })));
+    const request = new NextRequest("http://127.0.0.1:3101/api/longbridge/refresh", { method: "POST", body: JSON.stringify({ symbols: ["XAUUSD"] }) });
+    const response = await POST(request), body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.quotes.XAUUSD.source).toContain("Standard Bullion");
+    expect(body.trendsBySymbol.XAUUSD.at(-1).price).toBe(body.quotes.XAUUSD.value);
   });
   it("returns matching 5-minute trends and marks unmapped assets unavailable", async () => {
     callLongbridgeTool.mockImplementation(async (...args) => {
