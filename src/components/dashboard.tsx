@@ -132,7 +132,7 @@ export function Dashboard() {
         <Brand />
         <div className="sidebar-label">工作台</div>
         <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">▤</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link></nav>
-        <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.3 · 按需更新</div><p>自选资产和五灯判断保存在此浏览器中。</p></div>
+        <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.9 · 市场健康预览</div><p>自选资产和市场健康快照保存在此浏览器中。</p></div>
       </aside>
 
       <main className="main-content">
@@ -143,7 +143,7 @@ export function Dashboard() {
           <div className="info-banner"><span className="info-icon">ⓘ</span><p><strong>按需更新</strong> — {market.result ? "数据分别来自 Longbridge、美国财政部、Gold API 和 Coinbase；各卡片标明来源与时间。未返回行情的资产显示不可用。" : "连接 Longbridge 后点击顶部按钮获取行情；黄金、比特币与美债收益率采用卡片注明的其他来源。未获取前不显示演示行情。"}</p></div>
           {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
 
-          <FiveLightsPanel vix={market.result?.quotes.VIX} />
+          <FiveLightsPanel />
 
           <div className="overview-row"><div className="overview-item"><span>自选总数</span><strong>{tracked.toString().padStart(2, "0")}</strong><small>已添加资产</small></div><div className="overview-item"><span>宏观资产</span><strong>{watchlist.macro.length.toString().padStart(2, "0")}</strong><small>指数 · 贵金属 · 债券</small></div><div className="overview-item"><span>个股观察</span><strong>{watchlist.stocks.length.toString().padStart(2, "0")}</strong><small>你的股票清单</small></div><div className="overview-cta"><span>你的工作区</span><strong>从市场全景<br />走向深度分析</strong><p>选择一张卡片，打开图表空间 <ArrowIcon /></p></div></div>
 
@@ -151,7 +151,7 @@ export function Dashboard() {
 
           <AssetSection title="宏观资产" eyebrow="01 / MACRO MARKETS" description="跟踪影响市场方向的关键资产" ids={watchlist.macro} group="macro" customSymbols={customSymbols} onRemove={(id) => updateWatchlist(removeSymbol(watchlist, id))} onAdd={openSearch} quotes={market.result?.quotes ?? {}} trends={market.result?.trendsBySymbol ?? {}} refreshed={Boolean(market.result)} />
           <AssetSection title="个股观察" eyebrow="02 / EQUITIES" description="将值得持续研究的公司放在眼前" ids={watchlist.stocks} group="stocks" customSymbols={customSymbols} onRemove={(id) => updateWatchlist(removeSymbol(watchlist, id))} onAdd={openSearch} quotes={market.result?.quotes ?? {}} trends={market.result?.trendsBySymbol ?? {}} refreshed={Boolean(market.result)} />
-          <footer className="page-footer">Enterprise AWE Trading Terminal <span>·</span> V1.3 Preview</footer>
+          <footer className="page-footer">Enterprise AWE Trading Terminal <span>·</span> V0.9 Preview</footer>
         </div>
       </main>
 

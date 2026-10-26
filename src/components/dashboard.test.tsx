@@ -13,7 +13,7 @@ describe("dashboard", () => {
     expect(screen.getAllByTestId("asset-card")).toHaveLength(16);
     expect(screen.getByText("日经 225")).toBeInTheDocument();
     expect(screen.queryByText("4,126.80")).not.toBeInTheDocument();
-    expect(screen.queryAllByRole("img")).toHaveLength(0);
+    for (const card of screen.getAllByTestId("asset-card")) expect(within(card).queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("searches Chinese names and adds a symbol only once", async () => {
