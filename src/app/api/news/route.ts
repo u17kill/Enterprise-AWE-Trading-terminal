@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPublicNews } from "../../../lib/market-news-feeds";
 import { selectMarketNews, type NewsCandidate, type NewsCategory, type NewsSnapshot } from "../../../lib/market-news";
-import { callLongbridgeTool, COOKIE_NAME, getSession, hasLongbridgeToken } from "../../../lib/longbridge-mcp";
+import { callLongbridgeTool, getSession, hasLongbridgeToken } from "../../../lib/longbridge-mcp";
+import { longbridgeCookieName } from "../../../lib/longbridge-cookie";
 
 export const runtime = "nodejs";
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
   const days = Number(request.nextUrl.searchParams.get("days") ?? 3);
   if (days !== 3 && days !== 5 && days !== 7) return NextResponse.json({ error: "只支持过去 3、5 或 7 天。" }, { status: 400 });
   const publicResult = await fetchPublicNews(days);
-  const session = getSession(request.cookies.get(COOKIE_NAME)?.value);
+  const session = getSession(request.cookies.get(longbridgeCookieName(request))?.value);
   const longbridgeResults = session && hasLongbridgeToken(session) ? await Promise.allSettled(SEARCHES.map(async ({ keyword, category }) => parseLongbridgeNews(await withDeadline(callLongbridgeTool(session, "news_search", { keyword, limit: 25 }), 8_000), category))) : [];
   const missing = [...publicResult.missing, ...SEARCHES.filter((_, index) => longbridgeResults[index]?.status === "rejected").map(({ keyword }) => `Longbridge ${keyword}`)];
   const candidates = [...publicResult.candidates, ...longbridgeResults.flatMap((result) => result.status === "fulfilled" ? result.value : [])];

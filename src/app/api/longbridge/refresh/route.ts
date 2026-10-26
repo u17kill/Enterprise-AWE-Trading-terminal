@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findSymbol } from "../../../../lib/catalog";
 import { matchTrendToQuote, parseCandles, parseMinuteCandles, parseQuotes, toLongbridgeSymbol, type IntradayPoint } from "../../../../lib/longbridge-data";
-import { callLongbridgeTool, COOKIE_NAME, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { callLongbridgeTool, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { longbridgeCookieName } from "../../../../lib/longbridge-cookie";
 import { parseFundamentals, yearRange } from "../../../../lib/fundamentals";
 import { fetchTreasury10Y } from "../../../../lib/treasury";
 import { aggregateCandles } from "../../../../lib/chart-data";
@@ -29,7 +30,7 @@ async function getChartCandles(session: NonNullable<ReturnType<typeof getSession
 }
 
 export async function POST(request: NextRequest) {
-  const session = getSession(request.cookies.get(COOKIE_NAME)?.value);
+  const session = getSession(request.cookies.get(longbridgeCookieName(request))?.value);
   if (!session || !hasLongbridgeToken(session)) return NextResponse.json({ error: "请先连接 Longbridge。" }, { status: 401 });
   let body: { symbols?: unknown; chartSymbol?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "请求格式无效。" }, { status: 400 }); }
