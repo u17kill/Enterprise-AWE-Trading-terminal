@@ -13,7 +13,7 @@ describe("dashboard", () => {
     expect(screen.getAllByTestId("asset-card")).toHaveLength(16);
     expect(screen.getByText("日经 225")).toBeInTheDocument();
     expect(screen.queryByText("4,126.80")).not.toBeInTheDocument();
-    expect(screen.queryAllByRole("img")).toHaveLength(0);
+    for (const card of screen.getAllByTestId("asset-card")) expect(within(card).queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("searches Chinese names and adds a symbol only once", async () => {
@@ -71,6 +71,42 @@ describe("dashboard", () => {
     expect(within(gold).queryByText("4,126.80")).not.toBeInTheDocument();
     expect(within(gold).queryByRole("img")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows the Asian index trading date rather than the later snapshot download time", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url === "/api/longbridge/status"
+      ? { ok: true, json: async () => ({ connected: true }) }
+      : { ok: true, json: async () => ({ quotes: { N225: { value: 62189.65, changePercent: -0.8, timestamp: "2026-10-26T15:37:39Z", marketDate: "2026-10-26", source: "DeanFi · Nikkei 225" } }, trendsBySymbol: {}, unsupported: [], asOf: "2026-10-26T15:37:39Z" }) }));
+    render(<Dashboard />);
+    const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    const card = screen.getByText("日经 225").closest('[data-testid="asset-card"]') as HTMLElement;
+    await waitFor(() => expect(within(card).getByText("62,189.65")).toBeInTheDocument());
+    expect(within(card).getByText(/2026\/10\/26 交易日/)).toBeInTheDocument();
+  });
+
+  it("labels each real chart with its own period and provider", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url === "/api/longbridge/status"
+      ? { ok: true, json: async () => ({ connected: true }) }
+      : { ok: true, json: async () => ({ quotes: {
+        N225: { value: 62189.65, changePercent: -0.8, timestamp: "2026-10-26T15:37:39Z", marketDate: "2026-10-26", source: "DeanFi · Nikkei 225" },
+        XAUUSD: { value: 4020.13, changePercent: 0.56, timestamp: "2026-10-26T15:55:45Z", source: "Data by Standard Bullion · XAU 卖出价" },
+      }, trendsBySymbol: {
+        N225: [{ timestamp: "2026-10-23T12:00:00Z", price: 62693.16 }, { timestamp: "2026-10-26T12:00:00Z", price: 62189.65 }],
+        XAUUSD: [{ timestamp: "2026-10-26T14:45:00Z", price: 4018 }, { timestamp: "2026-10-26T15:55:45Z", price: 4020.13 }],
+      }, unsupported: [], asOf: "2026-10-26T15:55:45Z" }) }));
+    render(<Dashboard />);
+    const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    const nikkei = screen.getByText("日经 225").closest('[data-testid="asset-card"]') as HTMLElement;
+    const gold = screen.getByText("黄金 / 美元").closest('[data-testid="asset-card"]') as HTMLElement;
+    expect(await within(nikkei).findByRole("img", { name: "N225 近30交易日指数走势" })).toBeInTheDocument();
+    expect(within(nikkei).getByText("近30交易日指数走势")).toBeInTheDocument();
+    expect(within(gold).getByRole("img", { name: "XAUUSD 近24小时现货走势" })).toBeInTheDocument();
+    expect(within(gold).getByText("近24小时现货走势")).toBeInTheDocument();
+    expect(within(gold).getByText(/Data by Standard Bullion/)).toBeInTheDocument();
   });
 
   it("keeps the last manual market update after returning from a chart", async () => {

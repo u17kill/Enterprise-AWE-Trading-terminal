@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findSymbol } from "../../../../lib/catalog";
 import { matchTrendToQuote, parseCandles, parseMinuteCandles, parseQuotes, toLongbridgeSymbol, type IntradayPoint } from "../../../../lib/longbridge-data";
-import { callLongbridgeTool, COOKIE_NAME, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { callLongbridgeTool, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { longbridgeCookieName } from "../../../../lib/longbridge-cookie";
 import { parseFundamentals, yearRange } from "../../../../lib/fundamentals";
 import { fetchTreasury10Y } from "../../../../lib/treasury";
 import { aggregateCandles } from "../../../../lib/chart-data";
-import { fetchBitcoin, fetchGoldSpot } from "../../../../lib/external-market";
+import { fetchBitcoin, fetchBullionGold, fetchGoldSpot, fetchInternationalHistory, fetchInternationalQuotes } from "../../../../lib/external-market";
 
 export const runtime = "nodejs";
 
@@ -29,7 +30,7 @@ async function getChartCandles(session: NonNullable<ReturnType<typeof getSession
 }
 
 export async function POST(request: NextRequest) {
-  const session = getSession(request.cookies.get(COOKIE_NAME)?.value);
+  const session = getSession(request.cookies.get(longbridgeCookieName(request))?.value);
   if (!session || !hasLongbridgeToken(session)) return NextResponse.json({ error: "请先连接 Longbridge。" }, { status: 401 });
   let body: { symbols?: unknown; chartSymbol?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "请求格式无效。" }, { status: 400 }); }
@@ -41,14 +42,25 @@ export async function POST(request: NextRequest) {
     const rawQuotes = supported.length ? await callLongbridgeTool(session, "quote", { symbols: supported.map((id) => toLongbridgeSymbol(id)) }) : [];
     const quotes = parseQuotes(rawQuotes, supported);
     const trendsBySymbol: Record<string, IntradayPoint[]> = {};
-    const [treasury, gold, bitcoin] = await Promise.all([
+    const [treasury, gold, bitcoin, international] = await Promise.all([
       ids.includes("US10Y") || chartSymbol === "US10Y" ? fetchTreasury10Y().catch(() => null) : Promise.resolve(null),
-      ids.includes("XAUUSD") || chartSymbol === "XAUUSD" ? fetchGoldSpot().catch(() => null) : Promise.resolve(null),
+      ids.includes("XAUUSD") || chartSymbol === "XAUUSD" ? fetchBullionGold().catch(async () => {
+        const quote = await fetchGoldSpot().catch(() => null);
+        return quote ? { quote, trend: [] } : null;
+      }) : Promise.resolve(null),
       ids.includes("BTCUSD") || chartSymbol === "BTCUSD" ? fetchBitcoin(chartSymbol === "BTCUSD").catch(() => null) : Promise.resolve(null),
+      ids.includes("N225") || ids.includes("KOSPI") ? fetchInternationalQuotes().catch(() => ({})) : Promise.resolve({}),
     ]);
     if (treasury) { quotes.US10Y = treasury.quote; trendsBySymbol.US10Y = treasury.trend; }
-    if (gold) quotes.XAUUSD = gold;
+    if (gold) { quotes.XAUUSD = gold.quote; trendsBySymbol.XAUUSD = gold.trend; }
     if (bitcoin) { quotes.BTCUSD = bitcoin.quote; trendsBySymbol.BTCUSD = bitcoin.trend; }
+    if ("N225" in international && international.N225) quotes.N225 = international.N225;
+    if ("KOSPI" in international && international.KOSPI) quotes.KOSPI = international.KOSPI;
+    if (!chartSymbol && (quotes.N225 || quotes.KOSPI)) {
+      const history: Partial<Record<"N225" | "KOSPI", IntradayPoint[]>> = await fetchInternationalHistory({ N225: quotes.N225, KOSPI: quotes.KOSPI }).catch(() => ({}));
+      if (history.N225) trendsBySymbol.N225 = history.N225;
+      if (history.KOSPI) trendsBySymbol.KOSPI = history.KOSPI;
+    }
     if (!chartSymbol) {
       const quotedIds = supported.filter((id) => quotes[id]);
       for (let start = 0; start < quotedIds.length; start += 4) {

@@ -16,10 +16,10 @@ New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 Set-Location -LiteralPath $project
 $env:PATH = (Split-Path -Parent $node) + [IO.Path]::PathSeparator + $env:PATH
 
-if (Get-NetTCPConnection -LocalPort 3100 -State Listen -ErrorAction SilentlyContinue) { exit 0 }
+if (Get-NetTCPConnection -LocalPort 3101 -State Listen -ErrorAction SilentlyContinue) { exit 0 }
 
 & $node $next build *>> (Join-Path $logDirectory 'preview-startup.log')
 if ($LASTEXITCODE -ne 0) { throw "Next.js build failed with exit code $LASTEXITCODE." }
 
-& $node $next start --hostname 127.0.0.1 --port 3100 *>> (Join-Path $logDirectory 'preview-startup.log')
+& $node $next start --hostname 127.0.0.1 --port 3101 *>> (Join-Path $logDirectory 'preview-startup.log')
 if ($LASTEXITCODE -ne 0) { throw "Next.js server exited with code $LASTEXITCODE." }

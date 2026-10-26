@@ -5,9 +5,10 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { OAuthClientProvider, type OAuthDiscoveryState, UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { OAuthClientInformationMixed, OAuthClientMetadata, OAuthTokens } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { LONG_BRIDGE_COOKIE } from "./longbridge-cookie";
 
 const MCP_URL = new URL("https://mcp.longbridge.com");
-const COOKIE_NAME = "awe-longbridge-session";
+const COOKIE_NAME = LONG_BRIDGE_COOKIE;
 const MAX_AGE_SECONDS = 60 * 60 * 24;
 
 class LongbridgeOAuthProvider implements OAuthClientProvider {

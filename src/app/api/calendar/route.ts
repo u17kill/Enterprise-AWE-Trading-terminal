@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callLongbridgeTool, COOKIE_NAME, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../lib/longbridge-mcp";
+import { callLongbridgeTool, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../lib/longbridge-mcp";
+import { longbridgeCookieName } from "../../../lib/longbridge-cookie";
 import { parseLongbridgeCalendar } from "../../../lib/financial-calendar";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const current = now.getUTCFullYear() * 12 + now.getUTCMonth() + 1;
   if (target < current - 1 || target > current + 18) return NextResponse.json({ error: "只能更新最近至未来 18 个月的日历。" }, { status: 400 });
-  const session = getSession(request.cookies.get(COOKIE_NAME)?.value);
+  const session = getSession(request.cookies.get(longbridgeCookieName(request))?.value);
   if (!session || !hasLongbridgeToken(session)) return NextResponse.json({ error: "请先连接 Longbridge，才能更新财报和宏观事件。" }, { status: 401 });
   const boundaryDate = (date: Date) => date.toISOString().slice(0, 10);
   const start = boundaryDate(new Date(Date.UTC(year, monthNumber - 1, 0)));

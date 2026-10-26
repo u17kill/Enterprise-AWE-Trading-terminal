@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fromLongbridgeSecurity, isUsStockId } from "../../../../lib/custom-symbols";
-import { callLongbridgeTool, COOKIE_NAME, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { callLongbridgeTool, getSession, hasLongbridgeToken, UnauthorizedError } from "../../../../lib/longbridge-mcp";
+import { longbridgeCookieName } from "../../../../lib/longbridge-cookie";
 
 export const runtime = "nodejs";
 
@@ -43,7 +44,7 @@ async function loadDirectory(session: NonNullable<ReturnType<typeof getSession>>
 }
 
 export async function GET(request: NextRequest) {
-  const session = getSession(request.cookies.get(COOKIE_NAME)?.value);
+  const session = getSession(request.cookies.get(longbridgeCookieName(request))?.value);
   if (!session || !hasLongbridgeToken(session)) return NextResponse.json({ error: "请先连接 Longbridge。" }, { status: 401 });
   const query = (request.nextUrl.searchParams.get("q") ?? "").trim().toLowerCase();
   if (query.length < 2 || query.length > 40) return NextResponse.json({ total: 0, items: [] });
