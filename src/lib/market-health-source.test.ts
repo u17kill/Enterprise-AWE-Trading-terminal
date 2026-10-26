@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./longbridge-mcp", () => ({ callLongbridgeTool: vi.fn() }));
-import { parseFredCsv, parseCnnFearGreed, parseSpyOptionStats, normalizePair, optionHealthReadings } from "./market-health-source";
+import { callLongbridgeTool, type getSession } from "./longbridge-mcp";
+import { collectMarketHealth, parseFredCsv, parseCnnFearGreed, parseSpyOptionStats, normalizePair, optionHealthReadings } from "./market-health-source";
 
 describe("market health source parsing", () => {
   it("rejects missing FRED rows and keeps observed dates", () => {
@@ -23,5 +24,27 @@ describe("market health source parsing", () => {
     const values = [{ asOf: "2026-10-23T04:00:00Z", ratio: 1.2, calls: 100, puts: 120 }];
     expect(optionHealthReadings(values).crowding).toBeUndefined();
     expect(optionHealthReadings(values).putCall?.value).toBe(1.2);
+  });
+
+  it("requests only needed SPY fields so a full-year option response is not truncated", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("other sources unavailable")));
+    vi.mocked(callLongbridgeTool).mockImplementation(async (_session, name, args) => {
+      if (name !== "option_volume_daily") throw new Error("other Longbridge source unavailable");
+      if (!args._jq) throw new SyntaxError("Unexpected token 'T', '[TRUNCATED ...' is not valid JSON");
+      return { stats: Array.from({ length: 60 }, (_, index) => ({
+        timestamp: new Date(Date.UTC(2026, 6, 1 + index)).toISOString(),
+        total_call_volume: "100",
+        total_put_volume: String(index === 59 ? 130 : 80 + index),
+      })) };
+    });
+    try {
+      const result = await collectMarketHealth({} as NonNullable<ReturnType<typeof getSession>>);
+      expect(result.readings.putCall?.value).toBe(1.3);
+      expect(result.readings.crowding?.value).toBeGreaterThan(0);
+      expect(result.errors.putCall).toBeUndefined();
+    } finally {
+      vi.unstubAllGlobals();
+      vi.mocked(callLongbridgeTool).mockReset();
+    }
   });
 });

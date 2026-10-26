@@ -103,7 +103,11 @@ export async function collectMarketHealth(session: Session | null): Promise<Heal
       return { volatility: reading(quote.value, "点", quote.timestamp, "Longbridge · Cboe VIX", "https://www.cboe.com/tradable_products/vix/", classifyVix(quote.value), quote.value < 20 ? "波动温和；仍需结合其他维度" : quote.value <= 30 ? "波动升高，留意期限结构" : "波动显著升高") };
     }));
     tasks.push(run(["crowding", "putCall"], async () => {
-      const stats = parseSpyOptionStats(await callLongbridgeTool(session, "option_volume_daily", { symbol: "SPY.US", count: 260 }));
+      const stats = parseSpyOptionStats(await callLongbridgeTool(session, "option_volume_daily", {
+        symbol: "SPY.US",
+        count: 260,
+        _jq: "{stats: (.stats | map({timestamp, total_call_volume, total_put_volume}))}",
+      }));
       if (!stats.length) throw new Error("Longbridge 未返回 SPY 期权量");
       const values = optionHealthReadings(stats);
       if (!values.crowding) errors.crowding = "SPY 期权历史样本不足，暂不计算拥挤分位";
