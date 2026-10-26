@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { LIGHTS_KEY, loadLights, parseLights, type LightId, type Lights, type LightState } from "../lib/five-lights";
-import { HEALTH_STORAGE_KEY, mergeHealthSnapshot, parseHealthSnapshot, type HealthId, type HealthReading, type HealthSnapshot, type HealthState } from "../lib/market-health";
+import { HEALTH_IDS, HEALTH_STORAGE_KEY, mergeHealthSnapshot, parseHealthSnapshot, type HealthId, type HealthReading, type HealthSnapshot, type HealthState } from "../lib/market-health";
 import "../app/market-health.css";
 
 const lights: { id: LightId; title: string; hint: string }[] = [
@@ -22,6 +22,7 @@ const stateText: Record<HealthState, string> = { green: "绿灯 · 平稳", ambe
 const manualText: Record<LightState, string> = { green: "绿灯", amber: "黄灯", red: "红灯", unknown: "未判断" };
 
 function dateLabel(value?: string) { return value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", timeZone: "UTC" }).format(new Date(value)) : "未更新"; }
+function safeRead(key: string) { try { return window.localStorage.getItem(key) ?? ""; } catch { return ""; } }
 function valueLabel(id: HealthId, value?: number) {
   if (value === undefined) return "—";
   if (id === "fearGreed" || id === "crowding") return value.toFixed(0);
@@ -42,17 +43,26 @@ function Gauge({ score }: { score?: number }) {
 }
 
 export function FiveLightsPanel() {
-  const savedSnapshot = useSyncExternalStore((callback) => { window.addEventListener("storage", callback); window.addEventListener("awe-health-change", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("awe-health-change", callback); }; }, () => window.localStorage.getItem(HEALTH_STORAGE_KEY) ?? "", () => "");
-  const savedManual = useSyncExternalStore((callback) => { window.addEventListener("storage", callback); window.addEventListener("awe-lights-change", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("awe-lights-change", callback); }; }, () => window.localStorage.getItem(LIGHTS_KEY) ?? "", () => "");
-  const snapshot = useMemo(() => { try { return parseHealthSnapshot(JSON.parse(savedSnapshot)); } catch { return null; } }, [savedSnapshot]);
-  const manual = useMemo<Lights>(() => savedManual ? loadLights({ getItem: () => savedManual }) : parseLights(null), [savedManual]);
+  const savedSnapshot = useSyncExternalStore((callback) => { window.addEventListener("storage", callback); window.addEventListener("awe-health-change", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("awe-health-change", callback); }; }, () => safeRead(HEALTH_STORAGE_KEY), () => "");
+  const savedManual = useSyncExternalStore((callback) => { window.addEventListener("storage", callback); window.addEventListener("awe-lights-change", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("awe-lights-change", callback); }; }, () => safeRead(LIGHTS_KEY), () => "");
+  const [volatileSnapshot, setVolatileSnapshot] = useState<HealthSnapshot | null>(null);
+  const [volatileManual, setVolatileManual] = useState<Lights | null>(null);
+  const storedSnapshot = useMemo(() => { try { return parseHealthSnapshot(JSON.parse(savedSnapshot)); } catch { return null; } }, [savedSnapshot]);
+  const snapshot = volatileSnapshot ?? storedSnapshot;
+  const manual = volatileManual ?? (savedManual ? loadLights({ getItem: () => savedManual }) : parseLights(null));
   const [editing, setEditing] = useState<LightId | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [feedback, setFeedback] = useState("");
   const updateManual = (id: LightId, state: LightState, note: string) => {
     const next = { ...manual, [id]: { state, note, updatedAt: new Date().toISOString().slice(0, 10) } };
+    setVolatileManual(next);
     try { localStorage.setItem(LIGHTS_KEY, JSON.stringify(next)); } catch { /* Browser storage may be disabled. */ }
     window.dispatchEvent(new Event("awe-lights-change"));
+  };
+  const saveSnapshot = (next: HealthSnapshot) => {
+    setVolatileSnapshot(next);
+    try { localStorage.setItem(HEALTH_STORAGE_KEY, JSON.stringify(next)); } catch { /* New data remains visible in memory. */ }
+    window.dispatchEvent(new Event("awe-health-change"));
   };
   const refresh = async () => {
     setRefreshing(true); setFeedback("");
@@ -61,10 +71,12 @@ export function FiveLightsPanel() {
       if (!response.ok) throw new Error("市场健康数据暂不可更新");
       const incoming = await response.json() as HealthSnapshot;
       if (!incoming || typeof incoming.refreshedAt !== "string" || !incoming.readings || !incoming.errors) throw new Error("返回的数据格式无效");
-      const next = mergeHealthSnapshot(snapshot, incoming);
-      try { localStorage.setItem(HEALTH_STORAGE_KEY, JSON.stringify(next)); } catch { /* Browser storage may be disabled. */ }
-      window.dispatchEvent(new Event("awe-health-change"));
-    } catch (error) { setFeedback(error instanceof Error ? error.message : "更新失败"); }
+      saveSnapshot(mergeHealthSnapshot(snapshot, incoming));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "更新失败";
+      setFeedback(message);
+      saveSnapshot(mergeHealthSnapshot(snapshot, { refreshedAt: new Date().toISOString(), readings: {}, errors: Object.fromEntries(HEALTH_IDS.map((id) => [id, message])) }));
+    }
     finally { setRefreshing(false); }
   };
   return <section className="market-health" aria-label="市场健康仪表盘">
@@ -77,7 +89,7 @@ export function FiveLightsPanel() {
       })}
       {metrics.map(({ id, title, icon }) => {
         const item = snapshot?.readings[id], error = snapshot?.errors[id];
-        return <article className="mh-card mh-secondary" data-testid="health-slot" key={id}><div className="mh-secondary-top"><h3>{title}</h3><span>{icon}</span></div><div className="mh-value">{valueLabel(id, item?.value)}<small>{item?.unit ?? ""}</small></div><p className="mh-measure">{item?.summary ?? (error || "点击重新计算获取数据")}{item?.stale && <b className="mh-stale">旧数据</b>}</p>{id === "yieldCurve" && <MiniLine points={item?.points} />}{id === "equalWeight" && <><MiniLine points={item?.points} secondary={item?.secondaryPoints} /><div className="mh-legend"><span>● RSP 等权 ETF</span><span>● SPY 市值加权 ETF</span></div></>}{id === "putCall" && <div className="mh-bars"><div><span>Call</span><i style={{ width: "100%" }} /><small>100</small></div><div><span>Put</span><i style={{ width: `${item ? Math.min(100, item.value * 100) : 0}%` }} /><small>{item ? (item.value * 100).toFixed(0) : "—"}</small></div></div>}{id === "fearGreed" && <Gauge score={item?.value} />}{item?.detail && <p className="mh-secondary-detail">{item.detail}</p>}{error && item && <p className="mh-error">{error}</p>}<Source reading={item} /></article>;
+        return <article className="mh-card mh-secondary" data-testid="health-slot" key={id}><div className="mh-secondary-top"><h3>{title}</h3><span>{icon}</span></div><div className="mh-value">{valueLabel(id, item?.value)}<small>{item?.unit ?? ""}</small></div><p className="mh-measure">{item?.summary ?? (error || "点击重新计算获取数据")}{item?.stale && <b className="mh-stale">旧数据</b>}</p>{id === "yieldCurve" && <MiniLine points={item?.points} />}{id === "equalWeight" && <><MiniLine points={item?.points} secondary={item?.secondaryPoints} /><div className="mh-legend"><span>● RSP 等权 ETF</span><span>● SPY 市值加权 ETF</span></div></>}{id === "putCall" && <div className="mh-bars"><div><span>Call</span><i style={{ width: `${item ? Math.min(100, 100 / Math.max(1, item.value)).toFixed(4) : 0}%` }} /><small>100</small></div><div><span>Put</span><i style={{ width: `${item ? Math.min(100, item.value / Math.max(1, item.value) * 100).toFixed(4) : 0}%` }} /><small>{item ? (item.value * 100).toFixed(0) : "—"}</small></div></div>}{id === "fearGreed" && <Gauge score={item?.value} />}{item?.detail && <p className="mh-secondary-detail">{item.detail}</p>}{error && item && <p className="mh-error">{error}</p>}<Source reading={item} /></article>;
       })}
       <article className="mh-card mh-placeholder" data-testid="health-slot"><div className="mh-placeholder-plus">＋</div><strong>预留指标</strong><p>保持十格布局<br />以后可添加新的市场信号</p></article>
     </div></div><p className="mh-footnote">来源和日期见各卡。五灯不等权；单一红灯不构成交易建议。市场宽度待完整成分股均线数据。</p>

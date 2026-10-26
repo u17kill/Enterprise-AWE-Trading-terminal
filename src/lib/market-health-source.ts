@@ -78,6 +78,17 @@ function reading(value: number, unit: string, date: string, source: string, sour
   return { value, unit, asOf: date, source, sourceUrl, state, summary, ...rest };
 }
 
+export function optionHealthReadings(stats: OptionStat[]): Partial<Record<"crowding" | "putCall", HealthReading>> {
+  const latest = stats.at(-1);
+  if (!latest) return {};
+  const putCall = reading(latest.ratio, "倍", latest.asOf, "Longbridge · SPY 期权量", LB, "unknown", "SPY 期权成交量之比", { secondaryValue: latest.calls, detail: `Call ${latest.calls.toLocaleString()} · Put ${latest.puts.toLocaleString()}` });
+  if (stats.length < 40) return { putCall };
+  const percentile = percentileRank(latest.ratio, stats.map((item) => item.ratio));
+  if (percentile === null) return { putCall };
+  const crowding = reading(percentile, "% 分位", latest.asOf, "Longbridge · SPY 期权量", LB, classifyPercentile(percentile), percentile < 20 ? "Call 相对活跃，留意单边乐观" : percentile >= 80 ? "Put 相对活跃，留意防守拥挤" : "期权量比处于常态区间", { detail: `SPY Put/Call ${latest.ratio.toFixed(2)}；近 ${stats.length} 个交易日分位。仅为代理指标。` });
+  return { crowding, putCall };
+}
+
 export async function collectMarketHealth(session: Session | null): Promise<HealthSnapshot> {
   const readings: HealthSnapshot["readings"] = {}, errors: HealthSnapshot["errors"] = {};
   const run = async (ids: HealthId[], action: () => Promise<Partial<Record<HealthId, HealthReading>>>) => {
@@ -94,13 +105,9 @@ export async function collectMarketHealth(session: Session | null): Promise<Heal
     tasks.push(run(["crowding", "putCall"], async () => {
       const stats = parseSpyOptionStats(await callLongbridgeTool(session, "option_volume_daily", { symbol: "SPY.US", count: 260 }));
       if (!stats.length) throw new Error("Longbridge 未返回 SPY 期权量");
-      const latest = stats.at(-1)!;
-      const percentile = stats.length >= 40 ? percentileRank(latest.ratio, stats.map((item) => item.ratio)) : null;
-      const crowdingState = classifyPercentile(percentile);
-      return {
-        crowding: reading(percentile ?? 0, percentile === null ? "" : "% 分位", latest.asOf, "Longbridge · SPY 期权量", LB, crowdingState, percentile === null ? "样本不足，暂不判断拥挤度" : percentile < 20 ? "Call 相对活跃，留意单边乐观" : percentile >= 80 ? "Put 相对活跃，留意防守拥挤" : "期权量比处于常态区间", { detail: `SPY Put/Call ${latest.ratio.toFixed(2)}；近 ${stats.length} 个交易日分位。仅为代理指标。` }),
-        putCall: reading(latest.ratio, "倍", latest.asOf, "Longbridge · SPY 期权量", LB, "unknown", "SPY 期权成交量之比", { secondaryValue: latest.calls, detail: `Call ${latest.calls.toLocaleString()} · Put ${latest.puts.toLocaleString()}` }),
-      };
+      const values = optionHealthReadings(stats);
+      if (!values.crowding) errors.crowding = "SPY 期权历史样本不足，暂不计算拥挤分位";
+      return values;
     }));
     tasks.push(run(["equalWeight"], async () => {
       const [rspRaw, spyRaw] = await Promise.all([callLongbridgeTool(session, "candlesticks", { symbol: "RSP.US", period: "day", count: 60 }), callLongbridgeTool(session, "candlesticks", { symbol: "SPY.US", period: "day", count: 60 })]);
