@@ -1,6 +1,6 @@
 import type { SampleCandle } from "./chart-data";
 
-export type LiveQuote = { value: number; changePercent: number; timestamp: string; changeBasisPoints?: number; changeAvailable?: boolean; source?: string };
+export type LiveQuote = { value: number; changePercent: number; timestamp: string; marketDate?: string; changeBasisPoints?: number; changeAvailable?: boolean; source?: string };
 export type IntradayPoint = { timestamp: string; price: number };
 
 const SYMBOLS: Record<string, string> = {

@@ -15,7 +15,7 @@ import { Brand } from "./brand";
 
 const SOURCE_NOTES: Record<string, string> = {
   XAUUSD: "黄金现货参考价暂不可用", US10Y: "美国财政部日度收益率暂不可用",
-  BTCUSD: "Coinbase BTC/USD 行情暂不可用", N225: "日经 225 数据源待接入", KOSPI: "KOSPI 数据源待接入",
+  BTCUSD: "Coinbase BTC/USD 行情暂不可用", N225: "日经 225 第三方指数数据暂不可用", KOSPI: "KOSPI 第三方指数数据暂不可用",
 };
 
 function SearchIcon({ size = 18 }: { size?: number }) {
@@ -33,7 +33,7 @@ function AssetCard({ symbol, onRemove, quote, trend, refreshed }: { symbol: Mark
   const hasTrend = Boolean(trend && trend.length >= 2);
   const trendDate = hasTrend ? new Intl.DateTimeFormat("zh-CN", { timeZone: "America/New_York", month: "2-digit", day: "2-digit" }).format(new Date(trend![0].timestamp)) : "";
   const zone = ["HSI", "HSTECH"].includes(symbol.id) ? "Asia/Hong_Kong" : ["SSE", "A500"].includes(symbol.id) ? "Asia/Shanghai" : "America/New_York";
-  const quoteTime = quote ? new Intl.DateTimeFormat("zh-CN", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit", ...(symbol.id === "US10Y" ? {} : { hour: "2-digit", minute: "2-digit" }) }).format(new Date(quote.timestamp)) : "";
+  const quoteTime = quote?.marketDate ? quote.marketDate.replaceAll("-", "/") : quote ? new Intl.DateTimeFormat("zh-CN", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit", ...(symbol.id === "US10Y" ? {} : { hour: "2-digit", minute: "2-digit" }) }).format(new Date(quote.timestamp)) : "";
   return (
     <article className={`asset-card color-${symbol.color}`} data-testid="asset-card">
       <div className="asset-card-top">
@@ -43,7 +43,7 @@ function AssetCard({ symbol, onRemove, quote, trend, refreshed }: { symbol: Mark
       <div className="asset-title-row"><h3>{symbol.name}</h3><span className="asset-symbol">{symbol.id}</span></div>
       <p className="asset-category">{symbol.category} · {symbol.englishName}</p>
       <div className="asset-value-row"><span className="asset-value">{value}</span><span className={`asset-change ${negative ? "negative" : ""}`}>{change}</span></div>
-      <p className="asset-unit">{quote ? `${quote.source ?? "Longbridge"} · ${quoteTime} ${symbol.id === "US10Y" ? "发布日期" : zone === "America/New_York" ? "美东" : zone === "Asia/Hong_Kong" ? "香港" : "北京时间"}` : SOURCE_NOTES[symbol.id] ?? (refreshed ? "行情不可用" : "点击更新获取行情")}{quote ? ` · ${symbol.unit}` : ""}</p>
+      <p className="asset-unit">{quote ? `${quote.source ?? "Longbridge"} · ${quoteTime} ${quote.marketDate ? "交易日" : symbol.id === "US10Y" ? "发布日期" : zone === "America/New_York" ? "美东" : zone === "Asia/Hong_Kong" ? "香港" : "北京时间"}` : SOURCE_NOTES[symbol.id] ?? (refreshed ? "行情不可用" : "点击更新获取行情")}{quote ? ` · ${symbol.unit}` : ""}</p>
       {hasTrend ? <TrendChart symbolId={symbol.id} points={trend!} negative={negative} /> : <div className="trend-unavailable">{refreshed ? "分时走势不可用" : "等待行情更新"}</div>}
       <div className="card-footer"><span>{hasTrend ? symbol.id === "US10Y" ? "近 30 个发布日走势" : symbol.id === "BTCUSD" ? "近 24 小时走势" : `${trendDate} 最近交易日分时` : "暂无真实走势"}</span><Link href={symbol.source === "longbridge" ? `/chart/${symbol.id}?name=${encodeURIComponent(symbol.name)}` : `/chart/${symbol.id}`} aria-label={`查看 ${symbol.id} 图表`}>查看图表 <ArrowIcon /></Link></div>
     </article>
@@ -140,7 +140,7 @@ export function Dashboard() {
         <div className="dashboard-content">
           <div className="page-hero"><div><div className="hero-kicker"><span className="kicker-line" /> AWE MARKET OVERVIEW</div><h1>你的市场，<em>一目了然。</em></h1><p>集中查看关注的宏观资产和个股，点开任意卡片进入专属图表空间。</p></div><button className="primary-button" aria-label="添加资产" onClick={openSearch}><span>＋</span> 添加资产</button></div>
 
-          <div className="info-banner"><span className="info-icon">ⓘ</span><p><strong>按需更新</strong> — {market.result ? "数据分别来自 Longbridge、美国财政部、Gold API 和 Coinbase；各卡片标明来源与时间。未返回行情的资产显示不可用。" : "连接 Longbridge 后点击顶部按钮获取行情；黄金、比特币与美债收益率采用卡片注明的其他来源。未获取前不显示演示行情。"}</p></div>
+          <div className="info-banner"><span className="info-icon">ⓘ</span><p><strong>按需更新</strong> — {market.result ? "数据分别来自 Longbridge、DeanFi、美国财政部、Gold API 和 Coinbase；各卡片标明来源与时间。未返回行情的资产显示不可用。" : "连接 Longbridge 后点击顶部按钮获取行情；日经、KOSPI、黄金、比特币与美债收益率采用卡片注明的其他来源。未获取前不显示演示行情。"}</p></div>
           {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
 
           <FiveLightsPanel />

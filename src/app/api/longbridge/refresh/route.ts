@@ -6,7 +6,7 @@ import { longbridgeCookieName } from "../../../../lib/longbridge-cookie";
 import { parseFundamentals, yearRange } from "../../../../lib/fundamentals";
 import { fetchTreasury10Y } from "../../../../lib/treasury";
 import { aggregateCandles } from "../../../../lib/chart-data";
-import { fetchBitcoin, fetchGoldSpot } from "../../../../lib/external-market";
+import { fetchBitcoin, fetchGoldSpot, fetchInternationalQuotes } from "../../../../lib/external-market";
 
 export const runtime = "nodejs";
 
@@ -42,14 +42,17 @@ export async function POST(request: NextRequest) {
     const rawQuotes = supported.length ? await callLongbridgeTool(session, "quote", { symbols: supported.map((id) => toLongbridgeSymbol(id)) }) : [];
     const quotes = parseQuotes(rawQuotes, supported);
     const trendsBySymbol: Record<string, IntradayPoint[]> = {};
-    const [treasury, gold, bitcoin] = await Promise.all([
+    const [treasury, gold, bitcoin, international] = await Promise.all([
       ids.includes("US10Y") || chartSymbol === "US10Y" ? fetchTreasury10Y().catch(() => null) : Promise.resolve(null),
       ids.includes("XAUUSD") || chartSymbol === "XAUUSD" ? fetchGoldSpot().catch(() => null) : Promise.resolve(null),
       ids.includes("BTCUSD") || chartSymbol === "BTCUSD" ? fetchBitcoin(chartSymbol === "BTCUSD").catch(() => null) : Promise.resolve(null),
+      ids.includes("N225") || ids.includes("KOSPI") ? fetchInternationalQuotes().catch(() => ({})) : Promise.resolve({}),
     ]);
     if (treasury) { quotes.US10Y = treasury.quote; trendsBySymbol.US10Y = treasury.trend; }
     if (gold) quotes.XAUUSD = gold;
     if (bitcoin) { quotes.BTCUSD = bitcoin.quote; trendsBySymbol.BTCUSD = bitcoin.trend; }
+    if ("N225" in international && international.N225) quotes.N225 = international.N225;
+    if ("KOSPI" in international && international.KOSPI) quotes.KOSPI = international.KOSPI;
     if (!chartSymbol) {
       const quotedIds = supported.filter((id) => quotes[id]);
       for (let start = 0; start < quotedIds.length; start += 4) {

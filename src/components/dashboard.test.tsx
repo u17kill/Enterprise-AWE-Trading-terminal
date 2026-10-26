@@ -73,6 +73,19 @@ describe("dashboard", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("shows the Asian index trading date rather than the later snapshot download time", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url === "/api/longbridge/status"
+      ? { ok: true, json: async () => ({ connected: true }) }
+      : { ok: true, json: async () => ({ quotes: { N225: { value: 62189.65, changePercent: -0.8, timestamp: "2026-10-26T15:37:39Z", marketDate: "2026-10-26", source: "DeanFi · Nikkei 225" } }, trendsBySymbol: {}, unsupported: [], asOf: "2026-10-26T15:37:39Z" }) }));
+    render(<Dashboard />);
+    const refresh = await screen.findByRole("button", { name: "更新当前页面数据" });
+    await waitFor(() => expect(refresh).toBeEnabled());
+    fireEvent.click(refresh);
+    const card = screen.getByText("日经 225").closest('[data-testid="asset-card"]') as HTMLElement;
+    await waitFor(() => expect(within(card).getByText("62,189.65")).toBeInTheDocument());
+    expect(within(card).getByText(/2026\/10\/26 交易日/)).toBeInTheDocument();
+  });
+
   it("keeps the last manual market update after returning from a chart", async () => {
     let refreshCount = 0;
     const fetchMock = vi.fn(async (url: string) => url === "/api/longbridge/status"

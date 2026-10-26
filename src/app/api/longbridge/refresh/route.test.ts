@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const callLongbridgeTool = vi.hoisted(() => vi.fn());
@@ -13,8 +13,24 @@ vi.mock("../../../../lib/longbridge-mcp", () => ({
 import { POST } from "./route";
 
 beforeEach(() => callLongbridgeTool.mockReset());
+afterEach(() => vi.unstubAllGlobals());
 
 describe("manual Longbridge refresh", () => {
+  it("fills Nikkei, KOSPI and gold cards from their named public sources", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: async () => url.includes("international_major_indices")
+      ? { metadata: { market_date: "2026-10-26", generated_at: new Date().toISOString() }, indices: {
+        "^N225": { symbol: "^N225", country: "Japan", currency: "JPY", current_price: 62189.65, daily_change_percent: -0.8 },
+        "^KS11": { symbol: "^KS11", country: "South Korea", currency: "KRW", current_price: 5469.47, daily_change_percent: -1.46 },
+      } }
+      : { symbol: "XAU", currency: "USD", price: 4018.8, updatedAt: "2026-10-26T15:43:44Z" } })));
+    const request = new NextRequest("http://127.0.0.1:3101/api/longbridge/refresh", { method: "POST", body: JSON.stringify({ symbols: ["N225", "KOSPI", "XAUUSD"] }) });
+    const response = await POST(request), body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.quotes.N225.value).toBe(62189.65);
+    expect(body.quotes.KOSPI.value).toBe(5469.47);
+    expect(body.quotes.XAUUSD.value).toBe(4018.8);
+    expect(body.unsupported).toEqual([]);
+  });
   it("returns matching 5-minute trends and marks unmapped assets unavailable", async () => {
     callLongbridgeTool.mockImplementation(async (...args) => {
       const name = args[1];

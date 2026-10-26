@@ -14,6 +14,33 @@ export function parseGoldQuote(raw: unknown): LiveQuote | null {
   return { value, changePercent: 0, changeAvailable: false, timestamp: item.updatedAt, source: "Gold API · 现货参考价" };
 }
 
+const INTERNATIONAL_INDEX_URL = "https://raw.githubusercontent.com/DeanFinancials/deanfi-data/main/major-indexes/international_major_indices.json";
+
+export function parseInternationalQuotes(raw: unknown, now = new Date()): Partial<Record<"N225" | "KOSPI", LiveQuote>> {
+  const root = record(raw), metadata = record(root.metadata), indices = record(root.indices);
+  const generated = metadata.generated_at, marketDate = metadata.market_date;
+  if (typeof generated !== "string" || !Number.isFinite(Date.parse(generated)) ||
+      typeof marketDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(marketDate)) return {};
+  const age = now.getTime() - Date.parse(generated), marketTime = Date.parse(`${marketDate}T00:00:00Z`);
+  if (age < -60_000 || age > 5 * 86_400_000 || !Number.isFinite(marketTime) || marketTime > now.getTime() || now.getTime() - marketTime > 6 * 86_400_000) return {};
+  const result: Partial<Record<"N225" | "KOSPI", LiveQuote>> = {};
+  for (const [id, canonical, country, currency, name] of [
+    ["N225", "^N225", "Japan", "JPY", "Nikkei 225"],
+    ["KOSPI", "^KS11", "South Korea", "KRW", "KOSPI"],
+  ] as const) {
+    const item = record(indices[canonical]);
+    const value = positive(item.current_price);
+    const change = typeof item.daily_change_percent === "number" ? item.daily_change_percent : Number(item.daily_change_percent);
+    if (item.symbol !== canonical || item.country !== country || item.currency !== currency || value === null || !Number.isFinite(change)) continue;
+    result[id] = { value, changePercent: change, timestamp: generated, marketDate, source: `DeanFi · ${name}` };
+  }
+  return result;
+}
+
+export async function fetchInternationalQuotes(): Promise<Partial<Record<"N225" | "KOSPI", LiveQuote>>> {
+  return parseInternationalQuotes(await json(INTERNATIONAL_INDEX_URL));
+}
+
 export function parseCoinbaseQuote(ticker: unknown, stats: unknown): LiveQuote | null {
   const item = record(ticker), detail = record(stats);
   const value = positive(item.price), open = positive(detail.open);
