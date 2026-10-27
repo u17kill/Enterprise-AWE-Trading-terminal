@@ -15,7 +15,7 @@
 - Use the user's AWE PPT slides 21–23 as the quote and portrait source; keep all 12 people and three original groups in order.
 - Preserve the excerpt wording except whitespace/punctuation cleanup. Describe it as a personal excerpt collection, with original publication attribution not independently verified.
 - No market fetch, OAuth dependency, editing, or 13F linkage.
-- Update `docs/v0.10-status.md`, `docs/README.md`, and the version PR before completion.
+- Update `docs/v1.0-status.md`, `docs/README.md`, and the version PR before completion.
 
 ## Review Focus
 
@@ -65,11 +65,11 @@
 ### Task 3: Version record and final checks
 
 **Files:**
-- Create: `docs/v0.10-status.md`
+- Create: `docs/v1.0-status.md`
 - Modify: `docs/README.md`
 - Modify: version PR body on GitHub.
 
 - [ ] **Step 1: Record** requirements, delivered page, portrait/quote provenance, limitations and verification in the version status document and README index.
 - [ ] **Step 2: Run** full `pnpm exec vitest run --maxWorkers=2`, `pnpm lint`, `pnpm build`, `git diff --check`; resolve concrete failures.
 - [ ] **Step 3: Verify** `/philosophy` in the local 3101 browser, including navigation and visible profiles.
-- [ ] **Step 4: Commit and push** branch `codex/v0.10-master-philosophy`; create or update PR with matching scope, limits and test results.
+- [ ] **Step 4: Commit and push** branch `codex/v1.0-master-philosophy`; create or update PR with matching scope, limits and test results.
