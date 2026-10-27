@@ -29,12 +29,20 @@ function Trend({ reading, label }: { reading?: CanaryReading; label: string }) {
 function IndicatorCard({ item, reading, error }: { item: CanaryIndicator; reading?: CanaryReading; error?: string }) {
   const old = expired(reading);
   const state = reading && !old ? reading.state : "unknown";
-  const status = !reading ? "待接入" : old ? "旧数据" : state === "red" ? "警戒" : state === "amber" ? "关注" : state === "green" ? "平稳" : "已取数";
+  const pendingReasons: Record<string, { status: string; message: string }> = {
+    fedWatch: { status: "需授权", message: "CME 官方概率 API 需要订阅及展示授权" },
+    bojProb: { status: "口径待核", message: "暂无已核验的日本央行加息概率模型" },
+    ndxPe: { status: "口径待核", message: "纳指 100 滚动 PE 的公开来源口径不一致" },
+    ndxForward: { status: "需授权", message: "纳指 100 前瞻 PE 尚无获准的自动数据源" },
+    allApe: { status: "口径待核", message: "中证全指官方资料未公布可用滚动 PE" },
+  };
+  const pending = pendingReasons[item.id];
+  const status = !reading ? pending?.status ?? "暂不可用" : old ? "旧数据" : state === "red" ? "警戒" : state === "amber" ? "关注" : state === "green" ? "平稳" : "已取数";
   return <details className={`canary-card canary-card-${state}`} data-testid={`canary-${item.id}`}>
     <summary><div className="canary-card-head"><span className="canary-card-region">{item.region} · {item.horizon === "short" ? "中短期" : "中长期"}</span><span className={`canary-card-status canary-status-${state}`}>● {status}</span></div>
       <h3>{item.title}</h3>
       <div className="canary-card-reading">{reading ? <><strong>{formatValue(reading)}</strong><span>{reading.unit}</span></> : <strong className="canary-card-unavailable">—</strong>}</div>
-      <p>{reading?.summary ?? (error || "来源或统一口径尚待接入")}</p><Trend reading={reading} label={item.title} />
+      <p>{reading?.summary ?? (error || pending?.message || "本次没有取得可核验的数值")}</p><Trend reading={reading} label={item.title} />
       <div className="canary-card-foot"><span>{reading ? `${displayDate(reading.asOf)} · ${reading.source}` : "数值尚未通过接入核验"}</span><span>查看解读 ↗</span></div>
     </summary>
     <div className="canary-card-detail">

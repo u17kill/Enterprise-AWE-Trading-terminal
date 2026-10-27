@@ -15,7 +15,8 @@ describe("V1.1 canary dashboard", () => {
     expect(screen.getByRole("heading", { name: "美股风险" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "A 股资金与情绪" })).toBeInTheDocument();
     const card = screen.getByTestId("canary-fedWatch");
-    expect(card.querySelector(".canary-card-status")).toHaveTextContent("待接入");
+    expect(card.querySelector(".canary-card-status")).toHaveTextContent("需授权");
+    expect(within(card).getByText(/CME 官方概率 API 需要订阅/)).toBeInTheDocument();
     fireEvent.click(within(card).getByText(/未来三次 FOMC 概率/));
     expect(within(card).getByText(/官方 API 需订阅/)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();

@@ -1,4 +1,5 @@
 import type { HealthReading, HealthState } from "./market-health";
+import { XMLParser } from "fast-xml-parser";
 
 export type CanaryBand = "macro" | "us" | "china";
 export type CanaryHorizon = "short" | "long";
@@ -26,15 +27,15 @@ export const CANARY_INDICATORS: CanaryIndicator[] = [
   indicator("us30_2", "美债 30Y−2Y 利差", "macro", "美国", "long", "同一观测日 DGS30 与 DGS2 之差。", "查看曲线陡峭化或倒挂的持续时间和速度。", "由正转负或快速变化时亮关注灯，需结合信用利差。", "FRED H.15 两端同日自算；不是衰退概率。", "FRED / H.15 · 同日计算", fred("DGS30")),
   indicator("us10_3m", "美债 10Y−3M 利差", "macro", "美国", "long", "同一观测日 DGS10 与 DGS3MO 之差。", "持续倒挂可以提示宏观压力。", "负值标为关注，持续倒挂需结合其他领先数据。", "FRED H.15 两端同日自算；不等同于纽约联储模型概率。", "FRED / H.15 · 同日计算", fred("DGS10")),
   indicator("hyOas", "美国高收益债 OAS", "macro", "美国", "long", "高收益公司债相对国债的期权调整后利差。", "持续扩大常表示信用风险补偿上升。", "按既有五灯规则：高于 5% 或四周扩大逾 1 个百分点为警戒。", "ICE 数据经 FRED 展示，使用及再分发条件需持续复核。", "FRED / ICE BofA", fred("BAMLH0A0HYM2")),
-  indicator("igOas", "投资级债券 OAS", "macro", "美国", "long", "投资级公司债相对国债的期权调整后利差。", "与高收益债 OAS 对照，可判断信用压力是否扩散。", "需要历史基准，不凭单个绝对读数定警报。", "ICE 数据近三年可见范围及许可需核验。", "FRED / ICE BofA", fred("BAMLC0A0CM")),
+  indicator("igOas", "投资级债券 OAS", "macro", "美国", "long", "投资级公司债相对国债的期权调整后利差。", "与高收益债 OAS 对照，可判断信用压力是否扩散。", "需要历史基准，不凭单个绝对读数定警报。", "ICE 数据经 FRED 发布；按观测日阅读，不能视为盘中报价。", "FRED / ICE BofA", fred("BAMLC0A0CM")),
   indicator("dollar", "广义美元指数", "macro", "美国", "long", "美联储贸易加权广义美元指数。", "美元走强可影响全球金融条件。", "持续快速上升时需结合新兴市场汇率和信用压力。", "这是贸易加权美元指数，不是 ICE DXY。", "FRED / 美联储", fred("DTWEXBGS")),
   indicator("fedWatch", "未来三次 FOMC 概率", "macro", "美国", "short", "CME FedWatch 根据期货价格推算的会议后利率概率。", "分别看未来三次会议的概率分布和变化。", "市场押注变化属于预期变化，不代表美联储承诺。", "官方 API 需订阅；未获展示授权时不复制概率或绘制柱图。", "CME FedWatch", "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"),
   indicator("jp10", "日本国债 10 年期", "macro", "日本", "long", "日本财务省公布的 10 年期国债收益率。", "观察持续升息及日元汇率共同变化。", "单日数值不亮灯；需结合历史变化和日本央行政策。", "财务省发布的日度值，不是盘中报价。", "日本财务省", "https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/index.htm"),
   indicator("usdjpy", "美元 / 日元", "macro", "日本", "short", "每 1 美元折合多少日元，按 ECB 同日欧元参考价交叉计算。", "数值上升表示日元相对美元走弱。", "短期急变需结合美日利差和政策讯息。", "ECB 日度参考价推算，并非实时现汇。", "欧洲央行", ecb),
   indicator("bojProb", "日本央行加息概率", "macro", "日本", "short", "基于利率期货或 OIS 推导的下次会议加息概率。", "模型与合约映射不同会得出不同概率。", "显著变化时核对期货和央行公告。", "尚无获准且核验通过的统一概率源，不能标为官方概率。", "日本交易所 TONA 期货", "https://www.jpx.co.jp/english/markets/derivatives/settlement-price/index.html"),
-  indicator("shibor", "隔夜 Shibor", "macro", "中国", "short", "银行间隔夜拆借利率报价。", "观察境内短期资金松紧与持续变化。", "持续上升需结合央行公开市场操作。", "中国货币网可读，应用转载条件仍需确认。", "中国货币网", chinaMoney),
-  indicator("cn10", "中国国债 10 年期", "macro", "中国", "long", "财政部中国国债收益率曲线中的 10 年期限。", "观察国内长期利率方向。", "与 2 年和 30 年利率对照观察曲线变化。", "公开查询可读，产品化展示条件仍需核对。", "财政部 / 中债曲线", chineseBond),
-  indicator("cn30_2", "中国国债 30Y−2Y 利差", "macro", "中国", "long", "同日国债 30 年与 2 年收益率之差。", "观察长短端利率形态与变化。", "急速收窄需要结合增长和资金面。", "需两端同日值；转载条件仍待确认。", "财政部 / 中债曲线", chineseBond),
+  indicator("shibor", "隔夜 Shibor", "macro", "中国", "short", "银行间隔夜拆借利率报价。", "观察境内短期资金松紧与持续变化。", "持续上升需结合央行公开市场操作。", "中国货币网日度公布值，不是实时成交利率。", "中国货币网", chinaMoney),
+  indicator("cn10", "中国国债 10 年期", "macro", "中国", "long", "财政部中国国债收益率曲线中的 10 年期限。", "观察国内长期利率方向。", "与 2 年和 30 年利率对照观察曲线变化。", "财政部日度曲线估值，不是单只国债的交易报价。", "财政部 / 中债曲线", chineseBond),
+  indicator("cn30_2", "中国国债 30Y−2Y 利差", "macro", "中国", "long", "同日国债 30 年与 2 年收益率之差。", "观察长短端利率形态与变化。", "急速收窄需要结合增长和资金面。", "从财政部同一观测日曲线相减，不是衰退概率。", "财政部 / 中债曲线", chineseBond),
   indicator("usdcny", "美元 / 人民币", "macro", "中国", "short", "每 1 美元折合多少在岸人民币，按 ECB 同日欧元参考价交叉计算。", "数值上升表示人民币相对美元走弱。", "短期急变需结合中间价和市场利率。", "ECB 日度参考价推算，不是官方人民币中间价或离岸 CNH。", "欧洲央行", ecb),
   indicator("vix", "VIX 波动率", "us", "美股", "short", "Cboe 标普 500 期权隐含波动率指数。", "上升通常表明市场为未来波动支付更高价格。", "沿用五灯规则：20–30 关注，高于 30 警戒。", "不预测涨跌方向；需要 Longbridge 会话。", "Longbridge / Cboe", "https://www.cboe.com/tradable_products/vix/"),
   indicator("crowding", "期权拥挤度", "us", "美股", "short", "SPY Put/Call 成交量比的近 260 日分位代理。", "低分位提示 Call 活跃，高分位提示 Put 防守拥挤。", "两端极值亮关注或警戒灯。", "不是全市场交易拥挤度；需要 Longbridge 会话。", "Longbridge", "https://longbridge.com"),
@@ -42,17 +43,17 @@ export const CANARY_INDICATORS: CanaryIndicator[] = [
   indicator("leverage", "美国杠杆条件", "us", "美股", "long", "芝加哥联储 NFCI 杠杆子指数。", "观察相对自身近一年分位与周度变化。", "高分位亮关注，极端高位警戒。", "周度代理，不是 FINRA 账户杠杆余额。", "FRED / 芝加哥联储", fred("NFCILEVERAGE")),
   indicator("fearGreed", "恐慌与贪婪", "us", "美股", "short", "CNN 汇总多维美股情绪指标，范围 0–100。", "低值为恐惧，高值为贪婪；极端读数也可能提供反向线索。", "与 VIX、宽度相互印证，不单独发交易信号。", "CNN 自有综合模型，构成和更新频率由其决定。", "CNN Business", "https://www.cnn.com/markets/fear-and-greed"),
   indicator("putCall", "SPY Put / Call", "us", "美股", "short", "SPY 看跌期权成交量除以看涨期权成交量。", "比率升高代表 Put 相对活跃。", "结合自身分位和市场宽度，而非固定数值。", "仅 SPY；不是 Cboe 全市场 Put/Call。", "Longbridge", "https://longbridge.com"),
-  indicator("spPe", "标普 500 滚动 PE", "us", "美股", "long", "指数价格对过去 12 个月盈利的倍数。", "与自身历史分位及盈利周期对照。", "历史高位可能压缩长期回报空间，但不是短线转折。", "可见网页多为月频与估算口径；自动展示授权未取得。", "Multpl", "https://www.multpl.com/s-p-500-pe-ratio/table/by-month"),
+  indicator("spPe", "标普 500 滚动 PE", "us", "美股", "long", "Shiller 月均标普价格除以其滚动 12 个月每股盈利。", "与自身历史分位及盈利周期对照。", "历史高位可能压缩长期回报空间，但不是短线转折。", "Shiller 月频、最近 EPS 可能滞后数月；卡片标观测日，不推算成今日 PE。", "Shiller 数据镜像", "https://shillerdata.com/"),
   indicator("ndxPe", "纳指 100 滚动 PE", "us", "美股", "long", "纳指 100 指数对过去盈利的估值倍数。", "与自身历史及成分权重变化一起看。", "历史分位需同一提供方完整序列。", "免费估算网站口径不一，未验证可用自动源。", "WorldPEratio", "https://worldperatio.com/index/nasdaq-100/"),
-  indicator("spForward", "标普未来一年 PE", "us", "美股", "long", "价格与未来一年一致预期盈利的比值。", "预期盈利上修和价格变化都会改变倍数。", "需与同口径历史分位比较。", "YCharts 网页限制自动复制；无授权前不展示其读数。", "YCharts", "https://ycharts.com/indicators/sp_500_pe_ratio_forward_estimate"),
+  indicator("spForward", "标普未来一年 PE", "us", "美股", "long", "FactSet 发布的标普 500 未来 12 个月一致预期市盈率。", "预期盈利上修和价格变化都会改变倍数。", "需与同口径历史分位比较。", "FactSet 周报口径，通常每周更新；不是实时指数估值。", "FactSet Earnings Insight", "https://insight.factset.com/All"),
   indicator("ndxForward", "纳指未来一年 PE", "us", "美股", "long", "价格与预期未来一年盈利之比。", "观察估值变化及预期盈利修订。", "需同一来源的完整历史才计算分位。", "MacroMicro 网页限制复制，未获应用展示授权。", "MacroMicro", "https://en.macromicro.me/series/23955/nasdaq-100-pe"),
-  indicator("cape", "席勒市盈率", "us", "美股", "long", "以通胀调整后的十年平均盈利计算的周期调整 PE。", "适合多年估值观察，不适合短线择时。", "与自身长历史比较，单月变化不触发日度警报。", "Shiller 原始月度文件尚待稳定解析与使用条件核验。", "Robert Shiller", "https://shillerdata.com/"),
-  indicator("buffett", "巴菲特指标", "us", "美股", "long", "美国股票总市值相对于 GDP 的比率。", "需先明确市值范围和季度 GDP 的更新节奏。", "历史分位需严格同口径。", "多个分子定义并存；未定口径不显示计算值。", "FRED / 美联储", fred("BOGZ1LM893064105Q")),
+  indicator("cape", "席勒市盈率", "us", "美股", "long", "以通胀调整后的十年平均盈利计算的周期调整 PE。", "适合多年估值观察，不适合短线择时。", "与自身长历史比较，单月变化不触发日度警报。", "由更新 Shiller 文件的独立镜像转为 JSON；月频、非官方实时行情。", "Shiller 数据镜像", "https://shillerdata.com/"),
+  indicator("buffett", "巴菲特指标", "us", "美股", "long", "美联储 Z.1 非金融企业股权市值除以同季美国名义 GDP。", "观察股市相对于经济体量的长期估值；须与同口径历史相比。", "高位提示长期估值敏感，单季读数不触发短线交易信号。", "季频、约滞后一个季度；此代理口径不等于全部上市股票实时总市值。", "FRED / 美联储", fred("NCBEILQ027S")),
   indicator("margin", "沪深两融余额", "china", "A 股", "long", "上交所与深交所同一交易日两融余额之和。", "观察持续增减而非单日波动。", "持续大幅上升可能提示杠杆累积。", "交易所汇总含 ETF 等证券，并非仅 A 股股票；两所日期必须一致。", "上交所 / 深交所", sse),
-  indicator("turnover", "沪深 A 股成交额", "china", "A 股", "short", "沪深两市 A 股交易金额之和，不含 B 股和基金。", "看过去数周持续放量或缩量，不能将成交额误称净流入。", "放量伴随价格与涨跌家数变化才有解释力。", "两所板块分项不得与市场总计重复相加；接口仍在接入中。", "上交所 / 深交所", "https://www.sse.com.cn/market/stockdata/overview/day/"),
+  indicator("turnover", "沪深 A 股成交额", "china", "A 股", "short", "沪深两市 A 股交易金额之和，不含 B 股和基金。", "看过去数周持续放量或缩量，不能将成交额误称净流入。", "放量伴随价格与涨跌家数变化才有解释力。", "两所同日板块分项相加，不重复加市场总计。", "上交所 / 深交所", "https://www.sse.com.cn/market/stockdata/overview/day/"),
   indicator("allApe", "中证全指滚动 PE", "china", "A 股", "long", "中证全指口径的滚动市盈率。", "与自身历史分位比较；不混用万得全 A 或个股 PE 中位数。", "高分位需结合盈利周期与利率。", "网页读取及再展示权限未核验，无法自动刷新。", "ETF Monitor", "https://www.etfmonitor.cn/graham-index"),
-  indicator("etfRatio", "四大 300 ETF / 成分总市值", "china", "A 股", "long", "四只指定沪深 300 ETF 合计基金规模除以沪深 300 成分股总市值。", "关注比例与 ETF 份额变化，不能推断特定买方。", "需要同日分子与分母历史，不能混用基金份额或指数市值。", "当前缺同日完整规模和分母历史，不显示伪精确比值。", "中证指数 / 交易所", "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/000300factsheet.pdf"),
-  indicator("limits", "A 股涨跌停家数", "china", "A 股", "short", "指定交易范围内涨停与跌停股票数量。", "结合上涨家数和成交额观察短期情绪。", "需统一 ST、科创板、北交所和盘中封板定义。", "现成网站样本范围不全、历史 0 可能是缺失，暂不亮灯。", "东方财富股池", "https://quote.eastmoney.com/ztb/detail"),
+  indicator("etfRatio", "四大 300 ETF / 成分总市值", "china", "A 股", "long", "四只指定沪深 300 ETF 的交易市值合计除以沪深 300 指数成分总市值。", "关注比例与 ETF 份额变化，不能推断特定买方。", "比例持续变化需结合 ETF 申赎和指数成分调整。", "分子是 ETF 份额×价格的交易市值，不是基金净资产；东财五项同日快照，非国家队持仓。", "东方财富", "https://quote.eastmoney.com/center/gridlist.html#fund_etf"),
+  indicator("limits", "A 股涨跌停家数", "china", "A 股", "short", "东方财富收盘涨停和跌停股池统计；大数字为涨停家数，卡片说明中列跌停家数。", "结合上涨家数和成交额观察短期情绪。", "需观察多个交易日，不凭单日家数直接亮风险灯。", "采用东方财富股池口径；与交易所全市场定义可能不同，缺任何一侧时不显示。", "东方财富股池", "https://quote.eastmoney.com/ztb/detail"),
 ];
 
 export const CANARY_IDS = new Set(CANARY_INDICATORS.map((item) => item.id));
@@ -108,6 +109,121 @@ export function parseMofJgb(csv: string): { date: string; value: number } | null
     return /^\d{4}-\d{2}-\d{2}$/.test(rawDate ?? "") && Number.isFinite(value) && value > -5 && value < 30 ? [{ date: rawDate!, value }] : [];
   }).sort((a, b) => a.date.localeCompare(b.date));
   return values.at(-1) ?? null;
+}
+
+export function parseShiborHistory(raw: unknown): { date: string; value: number; points: number[] } | null {
+  const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+  const rows = Array.isArray(root.records) ? root.records : [];
+  const valid = rows.flatMap((row) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return [];
+    const item = row as Record<string, unknown>;
+    const date = item.showDateCN, value = Number(item.ON);
+    return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      item.ON !== "" && item.ON !== null && Number.isFinite(value) && value >= 0 && value < 30 ? [{ date, value }] : [];
+  }).sort((a, b) => a.date.localeCompare(b.date));
+  return valid.length ? { ...valid.at(-1)!, points: valid.map((item) => item.value) } : null;
+}
+
+export function parseChinaTreasuryHistory(raw: unknown): { date: string; tenYear: number; thirtyMinusTwo: number; tenPoints: number[]; spreadPoints: number[] } | null {
+  const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+  if (root.flag !== "0" || !Array.isArray(root.heList)) return null;
+  const valid = root.heList.flatMap((row: unknown) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return [];
+    const item = row as Record<string, unknown>;
+    const date = item.workTime, two = Number(item.twoYear), ten = Number(item.tenYear), thirty = Number(item.thirtyYear);
+    return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      [item.twoYear, item.tenYear, item.thirtyYear].every((x) => x !== "" && x !== null && x !== undefined) &&
+      [two, ten, thirty].every((x) => Number.isFinite(x) && x > -5 && x < 30) ? [{ date, tenYear: ten, thirtyMinusTwo: Number((thirty - two).toFixed(4)) }] : [];
+  }).sort((a: { date: string }, b: { date: string }) => a.date.localeCompare(b.date));
+  return valid.length ? { ...valid.at(-1)!, tenPoints: valid.map((item: { tenYear: number }) => item.tenYear), spreadPoints: valid.map((item: { thirtyMinusTwo: number }) => item.thirtyMinusTwo) } : null;
+}
+
+export function parseLimitPools(upRaw: unknown, downRaw: unknown, date: string): { date: string; up: number; down: number } | null {
+  const count = (raw: unknown) => {
+    const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+    const data = root.data && typeof root.data === "object" && !Array.isArray(root.data) ? root.data as Record<string, unknown> : {};
+    return root.rc === 0 && Number.isInteger(data.tc) && Number(data.tc) >= 0 ? Number(data.tc) : null;
+  };
+  const up = count(upRaw), down = count(downRaw);
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && up !== null && up > 0 && down !== null ? { date, up, down } : null;
+}
+
+export function alignQuarterlyRatio(equity: { date: string; value: number }[], gdp: { date: string; value: number }[]): { date: string; value: number; points: number[] } | null {
+  const byDate = new Map(gdp.filter((item) => Number.isFinite(item.value) && item.value > 0).map((item) => [item.date, item.value]));
+  const aligned = equity.flatMap((item) => {
+    const denominator = byDate.get(item.date);
+    return denominator && Number.isFinite(item.value) && item.value > 0 ? [{ date: item.date, value: item.value / (denominator * 1000) * 100 }] : [];
+  }).sort((a, b) => a.date.localeCompare(b.date));
+  return aligned.length ? { ...aligned.at(-1)!, points: aligned.map((item) => item.value) } : null;
+}
+
+export function findFactsetReport(rss: string): { date: string; sourceUrl: string } | null {
+  const feed = new XMLParser().parse(rss) as { rss?: { channel?: { item?: unknown } } };
+  const items = Array.isArray(feed.rss?.channel?.item) ? feed.rss.channel.item : [feed.rss?.channel?.item];
+  const reports = items.flatMap((raw) => {
+    if (!raw || typeof raw !== "object") return [];
+    const item = raw as Record<string, unknown>;
+    const title = item.title, link = item.link, published = item.pubDate;
+    if (typeof title !== "string" || !/^S&P 500 Earnings Season Update:/i.test(title) || typeof link !== "string" || typeof published !== "string" || !Number.isFinite(Date.parse(published))) return [];
+    try { if (new URL(link).origin !== "https://insight.factset.com") return []; } catch { return []; }
+    return [{ date: new Date(published).toISOString().slice(0, 10), sourceUrl: link }];
+  }).sort((a, b) => b.date.localeCompare(a.date));
+  return reports[0] ?? null;
+}
+
+export function parseFactsetForwardReport(rss: string, article: string): { date: string; value: number; sourceUrl: string } | null {
+  const latest = findFactsetReport(rss);
+  const plain = article.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+  const match = plain.match(/forward 12-month P\/E ratio is\s+([0-9]+(?:\.[0-9]+)?)/i);
+  const value = match ? Number(match[1]) : NaN;
+  return latest && Number.isFinite(value) && value > 0 && value < 200 ? { ...latest, value } : null;
+}
+
+export function parseShillerMonthly(raw: unknown): { cape: { date: string; value: number; points: number[] } | null; trailingPe: { date: string; value: number; points: number[] } | null } {
+  const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+  const rows = Array.isArray(root.data) ? root.data : [];
+  const cape: { date: string; value: number }[] = [], trailing: { date: string; value: number }[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) continue;
+    const item = row as Record<string, unknown>;
+    const date = item.date_string;
+    if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    const capeValue = Number(item.cape);
+    if (item.cape !== null && item.cape !== undefined && Number.isFinite(capeValue) && capeValue > 0 && capeValue < 200) cape.push({ date, value: capeValue });
+    const price = Number(item.sp500), earnings = Number(item.earnings);
+    if (item.sp500 !== null && item.earnings !== null && item.earnings !== undefined && Number.isFinite(price) && Number.isFinite(earnings) && price > 0 && earnings > 0) trailing.push({ date, value: price / earnings });
+  }
+  cape.sort((a, b) => a.date.localeCompare(b.date));
+  trailing.sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    cape: cape.length ? { ...cape.at(-1)!, points: cape.map((item) => item.value) } : null,
+    trailingPe: trailing.length ? { ...trailing.at(-1)!, points: trailing.map((item) => item.value) } : null,
+  };
+}
+
+export function parseEtfMarketCapRatio(rawRows: unknown[], rawQuotes: unknown): { date: string; value: number } | null {
+  const codes = ["510300", "510330", "159919", "510310", "000300"];
+  const caps = new Map<string, number>();
+  for (const raw of rawRows) {
+    const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+    const data = root.data && typeof root.data === "object" && !Array.isArray(root.data) ? root.data as Record<string, unknown> : {};
+    const cap = Number(data.f116);
+    if (typeof data.f57 === "string" && codes.includes(data.f57) && Number.isFinite(cap) && cap > 0) caps.set(data.f57, cap);
+  }
+  const quoteRoot = rawQuotes && typeof rawQuotes === "object" && !Array.isArray(rawQuotes) ? rawQuotes as Record<string, unknown> : {};
+  const quoteData = quoteRoot.data && typeof quoteRoot.data === "object" && !Array.isArray(quoteRoot.data) ? quoteRoot.data as Record<string, unknown> : {};
+  const quoteRows = Array.isArray(quoteData.diff) ? quoteData.diff : [];
+  const dates = new Map<string, string>();
+  for (const raw of quoteRows) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+    const item = raw as Record<string, unknown>, stamp = Number(item.f124);
+    if (typeof item.f12 === "string" && codes.includes(item.f12) && Number.isFinite(stamp) && stamp > 0) dates.set(item.f12, new Date(stamp * 1000 + 8 * 3_600_000).toISOString().slice(0, 10));
+  }
+  const observed = codes.map((code) => dates.get(code));
+  const denominator = caps.get("000300");
+  if (!denominator || codes.some((code) => !caps.has(code)) || observed.some((date) => !date || date !== observed[0])) return null;
+  const total = codes.slice(0, 4).reduce((sum, code) => sum + caps.get(code)!, 0);
+  return { date: observed[0]!, value: total / denominator * 100 };
 }
 
 export function parseMarginPair(shanghai: unknown, shenzhen: unknown): { date: string; value: number } | null {

@@ -1,6 +1,6 @@
 import { collectMarketHealth, parseFredCsv } from "./market-health-source";
 import { getSession } from "./longbridge-mcp";
-import { CANARY_INDICATORS, parseEcbDaily, parseMarginPair, parseMofJgb, parseTurnoverPair, type CanaryReading, type CanarySnapshot } from "./canary";
+import { CANARY_INDICATORS, alignQuarterlyRatio, findFactsetReport, parseChinaTreasuryHistory, parseEcbDaily, parseEtfMarketCapRatio, parseFactsetForwardReport, parseLimitPools, parseMarginPair, parseMofJgb, parseShiborHistory, parseShillerMonthly, parseTurnoverPair, type CanaryReading, type CanarySnapshot } from "./canary";
 import type { HealthId, HealthReading, HealthState } from "./market-health";
 
 type Session = NonNullable<ReturnType<typeof getSession>>;
@@ -11,6 +11,11 @@ const JGB_CURRENT = "https://www.mof.go.jp/english/policy/jgbs/reference/interes
 const SSE_MARGIN = "https://query.sse.com.cn/marketdata/tradedata/queryMargin.do";
 const SZSE_MARGIN = "https://www.szse.cn/api/report/ShowReport/data";
 const SSE_TURNOVER = "https://query.sse.com.cn/commonQuery.do";
+const SHIBOR_HISTORY = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-shibor/ShiborHis";
+const CHINA_TREASURY_HISTORY = "https://yield.chinabond.com.cn/cbweb-czb-web/czb/historyQuery";
+const LIMIT_POOL = "https://push2ex.eastmoney.com/getTopic";
+const SHILLER_JSON = "https://adambnash-afk.github.io/shiller-data/data/stock_market_data.json";
+const EASTMONEY_QUOTE = "https://push2.eastmoney.com/api/qt";
 
 async function getText(url: string): Promise<string> {
   const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(12_000), headers: { Accept: "text/plain, text/csv, text/xml, application/xml, */*" } });
@@ -21,6 +26,13 @@ async function getText(url: string): Promise<string> {
 async function getJson(url: string, referer: string): Promise<unknown> {
   const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(12_000), headers: { Accept: "application/json, text/plain, */*", Referer: referer, "User-Agent": "Mozilla/5.0" } });
   if (!response.ok) throw new Error(`交易所数据源 HTTP ${response.status}`);
+  return response.json();
+}
+
+async function getChinaTreasury(startDate: string, endDate: string): Promise<unknown> {
+  const params = new URLSearchParams({ startDate, endDate, gjqx: "0", locale: "cn_ZH", qxmc: "1" });
+  const response = await fetch(`${CHINA_TREASURY_HISTORY}?${params}`, { method: "POST", cache: "no-store", signal: AbortSignal.timeout(12_000), headers: { Accept: "application/json", Referer: "https://yield.chinabond.com.cn/cbweb-czb-web/czb/showHistory?locale=cn_ZH&nameType=1" } });
+  if (!response.ok) throw new Error(`财政部国债曲线 HTTP ${response.status}`);
   return response.json();
 }
 
@@ -96,6 +108,76 @@ export async function collectCanary(session: Session | null): Promise<CanarySnap
     run(["dollar"], async () => {
       const history = await fredSeries("DTWEXBGS"), latest = history.at(-1)!;
       return { dollar: reading("dollar", latest.value, "指数", latest.date, "美联储贸易加权广义美元指数，非 ICE DXY", "unknown", history.slice(-40).map((item) => item.value)) };
+    }),
+    run(["igOas"], async () => {
+      const history = await fredSeries("BAMLC0A0CM"), latest = history.at(-1)!;
+      return { igOas: reading("igOas", latest.value, "%", latest.date, "投资级信用利差；与高收益债利差对照", "unknown", history.slice(-40).map((item) => item.value)) };
+    }),
+    run(["shibor"], async () => {
+      const end = new Date(Date.now() + 8 * 3_600_000).toISOString().slice(0, 10);
+      const start = new Date(Date.now() - 20 * 86_400_000).toISOString().slice(0, 10);
+      const params = new URLSearchParams({ lang: "CN", startDate: start, endDate: end });
+      const result = parseShiborHistory(await getJson(`${SHIBOR_HISTORY}?${params}`, "https://www.chinamoney.com.cn/chinese/bkshibor/"));
+      if (!result) throw new Error("中国货币网未返回有效隔夜 Shibor");
+      return { shibor: reading("shibor", result.value, "%", result.date, "中国货币网隔夜 Shibor 日度报价", "unknown", result.points) };
+    }),
+    run(["cn10", "cn30_2"], async () => {
+      const end = new Date(Date.now() + 8 * 3_600_000).toISOString().slice(0, 10);
+      const start = new Date(Date.now() - 20 * 86_400_000).toISOString().slice(0, 10);
+      const result = parseChinaTreasuryHistory(await getChinaTreasury(start, end));
+      if (!result) throw new Error("财政部曲线缺少同日 2、10、30 年数据");
+      return {
+        cn10: reading("cn10", result.tenYear, "%", result.date, "财政部中国国债收益率曲线 10 年期", "unknown", result.tenPoints),
+        cn30_2: reading("cn30_2", result.thirtyMinusTwo, "百分点", result.date, "财政部同日 30 年减 2 年收益率", result.thirtyMinusTwo < 0 ? "amber" : "unknown", result.spreadPoints),
+      };
+    }),
+    run(["buffett"], async () => {
+      const [equity, gdp] = await Promise.all([fredSeries("NCBEILQ027S"), fredSeries("GDP")]);
+      const result = alignQuarterlyRatio(equity, gdp);
+      if (!result) throw new Error("美股市值与 GDP 缺少同一季度数据");
+      return { buffett: reading("buffett", result.value, "%", result.date, "美联储 Z.1 非金融企业股权市值 / BEA 名义 GDP；季频", "unknown", result.points.slice(-40)) };
+    }),
+    run(["spForward"], async () => {
+      const rss = await getText("https://insight.factset.com/rss.xml");
+      const report = findFactsetReport(rss);
+      if (!report) throw new Error("FactSet RSS 未发布近期标普盈利周报");
+      const value = parseFactsetForwardReport(rss, await getText(report.sourceUrl));
+      if (!value) throw new Error("FactSet 最新周报未提供可核验的前瞻 PE");
+      return { spForward: { ...reading("spForward", value.value, "倍", value.date, "FactSet 标普 500 未来 12 个月一致预期 PE"), sourceUrl: value.sourceUrl } };
+    }),
+    run(["cape", "spPe"], async () => {
+      const result = parseShillerMonthly(await getJson(SHILLER_JSON, "https://shillerdata.com/"));
+      if (!result.cape) throw new Error("Shiller 数据镜像缺少有效 CAPE");
+      const values: Record<string, CanaryReading> = {
+        cape: { ...reading("cape", result.cape.value, "倍", result.cape.date, "Shiller 周期调整市盈率；月频", "unknown", result.cape.points.slice(-40)), sourceUrl: SHILLER_JSON },
+      };
+      if (result.trailingPe) values.spPe = { ...reading("spPe", result.trailingPe.value, "倍", result.trailingPe.date, "Shiller 月均价 / 最近可用滚动盈利；请留意观测日", "unknown", result.trailingPe.points.slice(-40)), sourceUrl: SHILLER_JSON };
+      else errors.spPe = "Shiller 镜像没有可计算滚动 PE 的盈利数据";
+      return values;
+    }),
+    run(["etfRatio"], async () => {
+      const secids = ["1.510300", "1.510330", "0.159919", "1.510310", "1.000300"];
+      const referer = "https://quote.eastmoney.com/";
+      const [rows, quotes] = await Promise.all([
+        Promise.all(secids.map((secid) => getJson(`${EASTMONEY_QUOTE}/stock/get?${new URLSearchParams({ secid, fields: "f57,f116" })}`, referer))),
+        getJson(`${EASTMONEY_QUOTE}/ulist.np/get?${new URLSearchParams({ fltt: "2", fields: "f12,f124", secids: secids.join(",") })}`, referer),
+      ]);
+      const result = parseEtfMarketCapRatio(rows, quotes);
+      if (!result) throw new Error("四只 ETF 与沪深 300 缺少同日完整市值");
+      return { etfRatio: reading("etfRatio", result.value, "%", result.date, "四只 ETF 交易市值 / 沪深 300 成分总市值；非基金净资产") };
+    }),
+    run(["limits"], async () => {
+      const dates = Array.from({ length: 7 }, (_, index) => new Date(Date.now() + 8 * 3_600_000 - index * 86_400_000).toISOString().slice(0, 10));
+      for (const date of dates) {
+        const params = new URLSearchParams({ ut: "7eea3edcaed734bea9cbfc24409ed989", dpt: "wz.ztzt", Pageindex: "0", pagesize: "200", sort: "fbt:asc", date: date.replaceAll("-", "") });
+        const [up, down] = await Promise.allSettled([
+          getJson(`${LIMIT_POOL}ZTPool?${params}`, "https://quote.eastmoney.com/ztb/detail"),
+          getJson(`${LIMIT_POOL}DTPool?${params}`, "https://quote.eastmoney.com/ztb/detail"),
+        ]);
+        const result = up.status === "fulfilled" && down.status === "fulfilled" ? parseLimitPools(up.value, down.value, date) : null;
+        if (result) return { limits: reading("limits", result.up, "涨停家", result.date, `跌停 ${result.down} 家；东方财富收盘股池口径`, "unknown") };
+      }
+      throw new Error("近七天未获得同日完整的涨跌停股池");
     }),
     run(["margin"], async () => {
       const end = new Date().toISOString().slice(0, 10).replaceAll("-", "");
