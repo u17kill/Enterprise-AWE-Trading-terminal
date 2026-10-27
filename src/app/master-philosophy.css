@@ -1,0 +1,26 @@
+.philosophy-content{max-width:1370px;margin:0 auto;padding:42px 44px 80px}
+.philosophy-hero{position:relative;overflow:hidden;border:1px solid #dce6f6;border-radius:18px;background:linear-gradient(118deg,#fff 8%,#eff5ff 68%,#e7f0ff);padding:35px 40px 31px}
+.philosophy-hero:after{content:"✦";position:absolute;right:37px;top:-85px;font-size:260px;line-height:1;color:#cbdcfb66;pointer-events:none}
+.philosophy-hero>*{position:relative;z-index:1}
+.philosophy-hero h1{font-size:36px;letter-spacing:-1.2px;margin:10px 0 10px}
+.philosophy-hero p{color:#7084a1;font-size:13px;line-height:1.7;margin:0}
+.philosophy-totals{display:flex;gap:38px;margin-top:31px;padding-top:20px;border-top:1px solid #dce7f7;color:#6b819d;font-size:11px;font-weight:600}
+.philosophy-totals span{display:flex;align-items:baseline;gap:7px}.philosophy-totals strong{font-size:23px;line-height:1;color:#2463e8;letter-spacing:-.5px}
+.philosophy-source-note{border:1px solid #e5ebf4;border-radius:10px;background:#fff;color:#536984;font-size:11px;line-height:1.7;padding:12px 16px;margin:18px 0 0}
+.philosophy-group{margin-top:48px;--philosophy-accent:#2463e8;--philosophy-soft:#ecf3ff}
+.philosophy-group-allocation{--philosophy-accent:#199477;--philosophy-soft:#ebf8f3}.philosophy-group-trading{--philosophy-accent:#b07b37;--philosophy-soft:#fff6e9}
+.philosophy-group-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px;padding-left:14px;border-left:3px solid var(--philosophy-accent)}
+.philosophy-group-head .section-eyebrow{color:var(--philosophy-accent)}.philosophy-group-head h2{font-size:24px;letter-spacing:-.6px;margin:4px 0 0}.philosophy-group-count{font-size:11px;color:#5a6f89;white-space:nowrap;padding-bottom:4px}
+.philosophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.philosophy-card{min-width:0;background:#fff;border:1px solid #e3eaf4;border-radius:15px;padding:23px 24px 17px;box-shadow:0 4px 20px #19355309}
+.philosophy-person-head{display:flex;align-items:center;gap:15px}.philosophy-portrait-wrap{width:84px;height:84px;flex:0 0 84px;position:relative;display:block;overflow:hidden;border-radius:15px;background:var(--philosophy-soft)}
+.philosophy-portrait-fallback{position:absolute;inset:0;display:grid;place-items:center;color:var(--philosophy-accent);font-size:34px;font-weight:700}
+.philosophy-portrait{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 24%;background:var(--philosophy-soft)}
+.philosophy-person-identity{min-width:0}.philosophy-person-number{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--philosophy-accent)}.philosophy-person-identity h3{font-size:20px;margin:5px 0 2px;letter-spacing:-.4px}.philosophy-person-identity>span:last-child{color:#566b84;font-size:11px}
+.philosophy-bio{color:#536782;font-size:12px;line-height:1.75;min-height:57px;margin:17px 0 17px}.philosophy-bio a{color:#285aab;font-weight:700;white-space:nowrap}.philosophy-bio a:hover{text-decoration:underline}
+.philosophy-quote-head{border-top:1px solid #edf1f6;padding-top:14px;display:flex;align-items:center;justify-content:space-between;color:#8fa0b4;font-size:10px;font-weight:800;letter-spacing:1px}.philosophy-quote-mark{font-family:Georgia,serif;font-size:29px;line-height:14px;color:var(--philosophy-accent);opacity:.5}
+.philosophy-quote-list{list-style:none;counter-reset:quote;margin:10px 0 0;padding:0;display:grid;gap:8px}.philosophy-quote-list[start="3"]{counter-reset:quote 2}.philosophy-quote-list li{counter-increment:quote;position:relative;background:#f8fafd;border-left:2px solid #dce7f6;border-radius:0 7px 7px 0;padding:9px 12px 9px 33px;color:#38506c;font-size:12px;line-height:1.65;overflow-wrap:anywhere}.philosophy-quote-list li:before{content:counter(quote,decimal-leading-zero);position:absolute;left:10px;top:10px;color:#9eb1c9;font-size:9px;font-weight:700}
+.philosophy-more{margin-top:12px}.philosophy-more summary{color:var(--philosophy-accent);font-size:11px;font-weight:700;padding:5px 0;cursor:pointer;list-style:none}.philosophy-more summary::-webkit-details-marker{display:none}.philosophy-more summary:after{content:"⌄";font-size:16px;margin-left:7px;vertical-align:-1px}.philosophy-more[open] summary:after{content:"⌃"}.philosophy-more summary:hover{text-decoration:underline}
+@media(max-width:1100px){.philosophy-content{padding:32px 28px 60px}.philosophy-grid{grid-template-columns:1fr}.philosophy-bio{min-height:0}}
+@media(max-width:720px){.philosophy-content{padding:24px 18px 55px}.philosophy-hero{padding:27px 23px}.philosophy-hero h1{font-size:29px}.philosophy-hero:after{right:-20px;top:-35px;font-size:175px}.philosophy-totals{gap:17px;flex-wrap:wrap}.philosophy-totals strong{font-size:20px}.philosophy-group{margin-top:37px}.philosophy-card{padding:19px 18px 15px}.philosophy-group-head h2{font-size:21px}}
+@media(max-width:420px){.philosophy-group-head{align-items:start;flex-direction:column;gap:5px}.philosophy-group-count{padding-bottom:0}.philosophy-portrait-wrap{width:72px;height:72px;flex-basis:72px}.philosophy-person-identity h3{font-size:17px}}
