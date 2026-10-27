@@ -38,10 +38,10 @@
 **Interfaces:**
 - Produces: `type Master = { id: string; name: string; englishName: string; portrait: string; bio: string; bioSource: string; quotes: readonly string[] }` and `MASTER_GROUPS: readonly { id: string; name: string; masters: readonly Master[] }[]`.
 
-- [ ] **Step 1: Write failing data test** asserting group order, 4 people per group, nonempty bio/source/portrait, unique IDs, and exact first/last quote per person from the three source slides.
-- [ ] **Step 2: Run** `pnpm exec vitest run src/lib/master-philosophy.test.ts`; expect failure before data exists.
-- [ ] **Step 3: Extract images and implement anthology** with all PPT quotations; cross-check names and image relationship mapping against slides 21–23. Keep biographies brief, stable and sourced.
-- [ ] **Step 4: Re-run the test** and verify all assertions pass.
+- [x] **Step 1: Write failing data test** asserting group order, 4 people per group, nonempty bio/source/portrait, unique IDs, and exact first/last quote per person from the three source slides.
+- [x] **Step 2: Run** `pnpm exec vitest run src/lib/master-philosophy.test.ts`; expect failure before data exists.
+- [x] **Step 3: Extract images and implement anthology** with all PPT quotations; cross-check names and image relationship mapping against slides 21–23. Keep biographies brief, stable and sourced.
+- [x] **Step 4: Re-run the test** and verify all assertions pass.
 
 ### Task 2: Page, navigation, responsive layout
 
@@ -57,10 +57,10 @@
 - Consumes: `MASTER_GROUPS` from Task 1; route `/philosophy`.
 - Produces: a one-page three-section view, accessible portrait and expandable quote lists, and navigation links from existing screens.
 
-- [ ] **Step 1: Write failing component/navigation tests** for page title, 12 names, all three groups, quote expansion, portrait alt text, source note, and link/active state.
-- [ ] **Step 2: Run** `pnpm exec vitest run src/components/master-philosophy.test.tsx src/components/dashboard.test.tsx`; expect failure on absent route/nav.
-- [ ] **Step 3: Implement route, component, CSS and navigation** using the existing shell styles and native `<details>` for long quote lists.
-- [ ] **Step 4: Re-run focused tests** until green; check desktop and narrow viewport in the browser.
+- [x] **Step 1: Write failing component/navigation tests** for page title, 12 names, all three groups, quote expansion, portrait alt text, source note, and link/active state.
+- [x] **Step 2: Run** `pnpm exec vitest run src/components/master-philosophy.test.tsx src/components/dashboard.test.tsx`; expect failure on absent route/nav.
+- [x] **Step 3: Implement route, component, CSS and navigation** using the existing shell styles and native `<details>` for long quote lists.
+- [x] **Step 4: Re-run focused tests** until green; check desktop and narrow viewport in the browser.
 
 ### Task 3: Version record and final checks
 
@@ -69,7 +69,7 @@
 - Modify: `docs/README.md`
 - Modify: version PR body on GitHub.
 
-- [ ] **Step 1: Record** requirements, delivered page, portrait/quote provenance, limitations and verification in the version status document and README index.
-- [ ] **Step 2: Run** full `pnpm exec vitest run --maxWorkers=2`, `pnpm lint`, `pnpm build`, `git diff --check`; resolve concrete failures.
-- [ ] **Step 3: Verify** `/philosophy` in the local 3101 browser, including navigation and visible profiles.
-- [ ] **Step 4: Commit and push** branch `codex/v1.0-master-philosophy`; create or update PR with matching scope, limits and test results.
+- [x] **Step 1: Record** requirements, delivered page, portrait/quote provenance, limitations and verification in the version status document and README index.
+- [x] **Step 2: Run** full `pnpm exec vitest run --maxWorkers=2`, `pnpm lint`, `pnpm build`, `git diff --check`; resolve concrete failures.
+- [x] **Step 3: Verify** `/philosophy` in the local 3101 browser, including navigation and visible profiles.
+- [x] **Step 4: Commit and push** branch `codex/v1.0-master-philosophy`; create or update PR with matching scope, limits and test results.
