@@ -49,6 +49,7 @@ describe("dashboard", () => {
     render(<Dashboard />);
     expect(screen.getByRole("link", { name: /图表空间/ })).toHaveAttribute("href", "/chart/SPX");
     expect(screen.getByRole("link", { name: /期权计算/ })).toHaveAttribute("href", "/options");
+    expect(screen.getByRole("link", { name: /大师哲学/ })).toHaveAttribute("href", "/philosophy");
   });
 
   it("updates visible quotes only when the user presses refresh", async () => {
