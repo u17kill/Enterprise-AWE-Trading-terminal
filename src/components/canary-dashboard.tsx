@@ -13,7 +13,12 @@ const sections = [
 
 function displayDate(value?: string) { return value && Number.isFinite(Date.parse(value)) ? value.slice(0, 10) : "尚无观测日"; }
 function storedValue() { try { return localStorage.getItem(CANARY_STORAGE_KEY) ?? ""; } catch { return ""; } }
-function expired(reading?: CanaryReading) { return Boolean(reading && (reading.stale || Date.now() - Date.parse(reading.asOf) > 45 * 86_400_000)); }
+function expired(reading?: CanaryReading, id?: string) {
+  if (!reading) return false;
+  const meeting = id === "fedWatch" ? reading.summary.match(/下次会议 (\d{4}-\d{2}-\d{2})/)?.[1] : null;
+  return Boolean(reading.stale || Date.now() - Date.parse(reading.asOf) > (id === "fedWatch" ? 3 : 45) * 86_400_000 ||
+    (meeting && Date.now() >= Date.parse(meeting) + 86_400_000));
+}
 function formatValue(reading: CanaryReading) {
   const decimals = Math.abs(reading.value) >= 1000 ? 0 : Math.abs(reading.value) >= 100 ? 2 : Math.abs(reading.value) >= 10 ? 2 : 3;
   return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: decimals, minimumFractionDigits: Math.min(2, decimals) }).format(reading.value);
@@ -27,10 +32,10 @@ function Trend({ reading, label }: { reading?: CanaryReading; label: string }) {
 }
 
 function IndicatorCard({ item, reading, error }: { item: CanaryIndicator; reading?: CanaryReading; error?: string }) {
-  const old = expired(reading);
+  const old = expired(reading, item.id);
   const state = reading && !old ? reading.state : "unknown";
   const pendingReasons: Record<string, { status: string; message: string }> = {
-    fedWatch: { status: "需授权", message: "CME 官方概率 API 需要订阅及展示授权" },
+    fedWatch: { status: "待刷新", message: "点击更新读取芝商所下一次会议的 +25 基点概率" },
     bojProb: { status: "口径待核", message: "暂无已核验的日本央行加息概率模型" },
     ndxPe: { status: "口径待核", message: "纳指 100 滚动 PE 的公开来源口径不一致" },
     ndxForward: { status: "需授权", message: "纳指 100 前瞻 PE 尚无获准的自动数据源" },

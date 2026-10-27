@@ -1,5 +1,6 @@
 import { collectMarketHealth, parseFredCsv } from "./market-health-source";
 import { getSession } from "./longbridge-mcp";
+import { fetchNextFedHike25 } from "./fedwatch";
 import { CANARY_INDICATORS, alignQuarterlyRatio, findFactsetReport, parseChinaTreasuryHistory, parseEcbDaily, parseEtfMarketCapRatio, parseFactsetForwardReport, parseLimitPools, parseMarginPair, parseMofJgb, parseShiborHistory, parseShillerMonthly, parseTurnoverPair, type CanaryReading, type CanarySnapshot } from "./canary";
 import type { HealthId, HealthReading, HealthState } from "./market-health";
 
@@ -104,6 +105,11 @@ export async function collectCanary(session: Session | null): Promise<CanarySnap
         usdjpy: reading("usdjpy", result.usdjpy, "JPY / USD", result.date, "ECB 欧元参考价交叉计算；非实时现汇"),
         usdcny: reading("usdcny", result.usdcny, "CNY / USD", result.date, "ECB 欧元参考价交叉计算；非人民币中间价"),
       };
+    }),
+    run(["fedWatch"], async () => {
+      const result = await fetchNextFedHike25();
+      return { fedWatch: reading("fedWatch", result.value, "%", result.asOf,
+        `下次会议 ${result.meetingDate}；当前 ${result.currentRange}bp，+25bp 对应 ${result.targetRange}bp。CME 页面读数，非实时推送。`) };
     }),
     run(["dollar"], async () => {
       const history = await fredSeries("DTWEXBGS"), latest = history.at(-1)!;
