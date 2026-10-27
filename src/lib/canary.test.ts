@@ -37,6 +37,8 @@ describe("official source parsers", () => {
     const up = { rc: 0, data: { tc: 41, qdate: 20261027, pool: [{ c: "600000" }] } };
     const down = { rc: 0, data: { tc: 22, qdate: 20261027, pool: [] } };
     expect(parseLimitPools(up, down, "2026-10-27")).toEqual({ date: "2026-10-27", up: 41, down: 22 });
+    expect(parseLimitPools(up, down, "2026-10-28")).toBeNull();
+    expect(parseLimitPools(up, { rc: 0, data: { tc: 22, qdate: 20261026, pool: [] } }, "2026-10-27")).toBeNull();
     expect(parseLimitPools(up, { rc: 0, data: { pool: [] } }, "2026-10-27")).toBeNull();
   });
 

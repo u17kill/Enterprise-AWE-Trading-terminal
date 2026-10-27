@@ -142,7 +142,8 @@ export function parseLimitPools(upRaw: unknown, downRaw: unknown, date: string):
   const count = (raw: unknown) => {
     const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
     const data = root.data && typeof root.data === "object" && !Array.isArray(root.data) ? root.data as Record<string, unknown> : {};
-    return root.rc === 0 && Number.isInteger(data.tc) && Number(data.tc) >= 0 ? Number(data.tc) : null;
+    return root.rc === 0 && Number.isInteger(data.tc) && Number(data.tc) >= 0 &&
+      String(data.qdate) === date.replaceAll("-", "") ? Number(data.tc) : null;
   };
   const up = count(upRaw), down = count(downRaw);
   return /^\d{4}-\d{2}-\d{2}$/.test(date) && up !== null && up > 0 && down !== null ? { date, up, down } : null;
