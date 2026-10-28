@@ -102,7 +102,7 @@ export function CanaryDashboard() {
     <Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link>
     <Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link>
     <Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link>
-    <Link className="nav-item" href="/holdings"><span className="nav-glyph">▤</span>大佬持仓</Link>
+    <Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link>
     <Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link>
     <Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link>
     <Link className="nav-item active" href="/canary" aria-current="page"><span className="nav-glyph">◈</span>金丝雀指标</Link>

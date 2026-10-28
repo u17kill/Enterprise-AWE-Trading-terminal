@@ -15,6 +15,6 @@
 | V0.8（十二种策略的到期盈亏计算，待验收） | [期权计算设计](superpowers/specs/2026-10-25-v08-options-calculator-design.md) | [V0.8 交付、验证、本地开机启动与数据边界](v0.8-status.md) | [草稿 PR #11](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/11) |
 | V0.9（市场健康仪表盘，用户已验收） | [五灯与指标设计](superpowers/specs/2026-10-26-v09-market-health.md) | [V0.9 交付、3101 单入口、授权修复与市场宽度数据源](v0.9-status.md) | [Issue #12](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/12)、[PR #13](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/13) |
 | V1.0（大师哲学，用户已验收） | [页面设计](superpowers/specs/2026-10-27-master-philosophy-design.md) | [V1.0 交付与限制](v1.0-status.md) | [PR #14](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/14) |
-| V1.1（金丝雀指标，开发版待验收） | [设计与数据边界](superpowers/specs/2026-10-27-v11-canary-design.md) | [V1.1 交付、空卡片逐项补数、等高修正、下次 FOMC +25bp 概率与数据限制](v1.1-status.md) | [需求与来源核验 Issue #15](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/15) · [草稿 PR #16](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/16) |
+| V1.1（金丝雀指标，用户已验收） | [设计与数据边界](superpowers/specs/2026-10-27-v11-canary-design.md) | [V1.1 交付、修复、导航图标微调与剩余数据限制](v1.1-status.md) | [需求与来源核验 Issue #15](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/15) · [PR #16](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/16) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
