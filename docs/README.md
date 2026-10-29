@@ -16,5 +16,6 @@
 | V0.9（市场健康仪表盘，用户已验收） | [五灯与指标设计](superpowers/specs/2026-10-26-v09-market-health.md) | [V0.9 交付、3101 单入口、授权修复与市场宽度数据源](v0.9-status.md) | [Issue #12](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/12)、[PR #13](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/13) |
 | V1.0（大师哲学，用户已验收） | [页面设计](superpowers/specs/2026-10-27-master-philosophy-design.md) | [V1.0 交付与限制](v1.0-status.md) | [PR #14](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/14) |
 | V1.1（金丝雀指标，用户已验收） | [设计与数据边界](superpowers/specs/2026-10-27-v11-canary-design.md) | [V1.1 交付、修复、导航图标微调与剩余数据限制](v1.1-status.md) | [需求与来源核验 Issue #15](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/15) · [PR #16](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/16) |
+| V1.2（投资框架原图展示，待验收） | [展示范围](superpowers/specs/2026-10-29-v12-investment-framework-image.md) | [V1.2 交付与限制](v1.2-status.md) | [草稿 PR #17](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/17) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。

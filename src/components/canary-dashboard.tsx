@@ -105,7 +105,7 @@ export function CanaryDashboard() {
     <Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link>
     <Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link>
     <Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link>
-    <Link className="nav-item active" href="/canary" aria-current="page"><span className="nav-glyph">◈</span>金丝雀指标</Link>
+    <Link className="nav-item active" href="/canary" aria-current="page"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link>
   </nav><div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.1 · 市场先行信号</div><p>按观测日期阅读指标，避免把旧值当成实时行情。</p></div></aside>
   <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>金丝雀指标</strong></div><span className="sample-pill">手动刷新 · 本地保存</span></header>
     <div className="canary-content"><div className="canary-hero"><div><span className="section-eyebrow">AWE / MARKET INTELLIGENCE</span><h1>金丝雀指标</h1><p>宏观先行，再看美股风险与 A 股资金。让风险变化有出处、有日期，也有解释。</p></div><div className="canary-hero-actions"><button type="button" onClick={refresh} disabled={busy}>{busy ? "正在核对数据…" : "↻ 更新指标"}</button><span>{snapshot ? `上次更新 ${displayDate(snapshot.refreshedAt)} · 已有 ${updated} 项读数` : "点击更新获取已接入指标"}</span><a href="/api/longbridge/connect?return=%2Fcanary">连接 Longbridge · 读取 VIX 与期权指标</a></div></div>
