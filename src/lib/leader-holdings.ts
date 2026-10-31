@@ -44,6 +44,7 @@ const rows: ManagerRow[] = [
   ["Chase Coleman · Tiger Global", "Tiger Global Management LLC", "0001167483", "growth"],
   ["Coatue Management", "Coatue Management LLC", "0001135730", "growth"],
   ["Brad Gerstner · Altimeter", "Altimeter Capital Management LP", "0001541617", "growth"],
+  ["Gavin Baker · Atreides", "Atreides Management, LP", "0001777813", "growth", "加文贝克"],
   ["柏基投资 · Baillie Gifford", "Baillie Gifford & Co", "0001088875", "growth"],
   ["Sands Capital", "Sands Capital Management LLC", "0001020066", "growth"],
   ["桥水 · Bridgewater", "Bridgewater Associates, LP", "0001350694", "macro", "Ray Dalio 达利欧"],

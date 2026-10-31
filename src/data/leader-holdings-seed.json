@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-10-25T06:53:13.976Z",
+  "asOf": "2026-10-31T19:29:51.743Z",
   "managers": {
     "0001067983": {
       "period": "2026-06-30",
@@ -4009,6 +4009,156 @@
         }
       ],
       "checkedAt": "2026-10-25T06:53:11.872Z"
+    },
+    "0001777813": {
+      "period": "2026-06-30",
+      "filedAt": "2026-08-14",
+      "accession": "000177781326000009",
+      "formType": "13F-HR",
+      "reportedValueThousands": 14335417,
+      "sourceCik": "0001777813",
+      "secUrl": "https://www.sec.gov/Archives/edgar/data/1777813/000177781326000009/0001777813-26-000009-index.html",
+      "providerUrl": "https://13f.info/13f/000177781326000009-atreides-management-lp-q2-2026",
+      "cik": "0001777813",
+      "holdingsCount": 49,
+      "nonOptionCount": 46,
+      "optionCount": 3,
+      "totalValueThousands": 14335417,
+      "topHoldings": [
+        {
+          "symbol": "SPCX",
+          "issuer": "SPACE EXPLORATION TECHN CORP",
+          "securityClass": "CLASS A COM STK",
+          "cusip": "84615Q103",
+          "valueThousands": 4670106,
+          "percent": 32.6,
+          "shares": 27332943,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "MU",
+          "issuer": "MICRON TECHNOLOGY INC",
+          "securityClass": "COM",
+          "cusip": "595112103",
+          "valueThousands": 821120,
+          "percent": 5.7,
+          "shares": 711364,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "CBRS",
+          "issuer": "CEREBRAS SYSTEMS INC",
+          "securityClass": "COM CL A",
+          "cusip": "15675D103",
+          "valueThousands": 687329,
+          "percent": 4.8,
+          "shares": 3110086,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "ALAB",
+          "issuer": "ASTERA LABS INC",
+          "securityClass": "COM",
+          "cusip": "04626A103",
+          "valueThousands": 587736,
+          "percent": 4.1,
+          "shares": 1216795,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "CIEN",
+          "issuer": "CIENA CORP",
+          "securityClass": "COM NEW",
+          "cusip": "171779309",
+          "valueThousands": 337760,
+          "percent": 2.4,
+          "shares": 688521,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "CRDO",
+          "issuer": "CREDO TECHNOLOGY GROUP HOLDI",
+          "securityClass": "ORDINARY SHARES",
+          "cusip": "G25457105",
+          "valueThousands": 307109,
+          "percent": 2.1,
+          "shares": 1129285,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "PANW",
+          "issuer": "PALO ALTO NETWORKS INC",
+          "securityClass": "COM",
+          "cusip": "697435105",
+          "valueThousands": 299058,
+          "percent": 2.1,
+          "shares": 876954,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "U",
+          "issuer": "UNITY SOFTWARE INC",
+          "securityClass": "COM",
+          "cusip": "91332U101",
+          "valueThousands": 292825,
+          "percent": 2,
+          "shares": 10245819,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "COHR",
+          "issuer": "COHERENT CORP",
+          "securityClass": "COM",
+          "cusip": "19247G107",
+          "valueThousands": 253289,
+          "percent": 1.8,
+          "shares": 642101,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "NVDA",
+          "issuer": "NVIDIA CORPORATION",
+          "securityClass": "COM",
+          "cusip": "67066G104",
+          "valueThousands": 249970,
+          "percent": 1.7,
+          "shares": 1249291,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "AMZN",
+          "issuer": "AMAZON COM INC",
+          "securityClass": "COM",
+          "cusip": "023135106",
+          "valueThousands": 231101,
+          "percent": 1.6,
+          "shares": 969629,
+          "principal": null,
+          "optionType": null
+        },
+        {
+          "symbol": "META",
+          "issuer": "META PLATFORMS INC",
+          "securityClass": "CL A",
+          "cusip": "30303M102",
+          "valueThousands": 226876,
+          "percent": 1.6,
+          "shares": 402770,
+          "principal": null,
+          "optionType": null
+        }
+      ],
+      "checkedAt": "2026-10-31T19:29:51.274Z"
     }
   }
 }
