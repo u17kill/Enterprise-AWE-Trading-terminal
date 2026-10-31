@@ -6,6 +6,7 @@ import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type Matr
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
 import { Brand } from "./brand";
+import { FundCharterLink } from "./fund-charter-link";
 
 type Editor =
   | { kind: "item"; value: MatrixItem; fresh: boolean }
@@ -122,7 +123,7 @@ export function PortfolioMapPage() {
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.3 · 持仓矩阵</div><p>地图只保存在这个浏览器中，请定期导出备份。</p></div>
     </aside>
     <main className="main-content">
-      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>持仓地图</strong></div><span className="sample-pill">{saveError ? "保存失败" : "本地保存"}</span></header>
+      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>持仓地图</strong></div><div className="topbar-actions"><span className="sample-pill">{saveError ? "保存失败" : "本地保存"}</span><FundCharterLink /></div></header>
       <div className="matrix-content">
         <div className="matrix-intro"><div><span className="section-eyebrow">FULL SATELLITE MAP · V0.3</span><h1>持仓地图</h1><p>按策略、主题和地区展开。点击任何标题或标的即可编辑。</p></div>
           <div className="matrix-toolbar"><button className="primary-button" onClick={() => openItem()}>＋ 添加标的</button><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: true, value: { id: newId(), name: "", color: "#90d9f5" } }); }}>＋ 策略</button><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: true, value: { id: newId(), name: "" } }); }}>＋ 地区</button></div>

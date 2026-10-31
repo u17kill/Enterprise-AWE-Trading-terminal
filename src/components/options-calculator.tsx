@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { Brand } from "./brand";
+import { FundCharterLink } from "./fund-charter-link";
 import { OptionsPayoffChart } from "./options-payoff-chart";
 import { analyzeScenario, type PayoffSummary } from "../lib/options-payoff";
 import { getStrategy, STRATEGIES, type ScenarioInput, type Strategy } from "../lib/options-strategies";
@@ -70,7 +71,7 @@ export function OptionsCalculator() {
 
   return <div className="app-shell options-shell">
     <aside className="sidebar"><Brand /><div className="sidebar-label">工作台</div><nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item active" href="/options" aria-current="page"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link></nav><div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.8 · 策略实验室</div><p>手填价格，探索到期日可能出现的盈亏。</p></div></aside>
-    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>期权计算</strong></div><span className="sample-pill">手动输入 · 到期情景</span></header>
+    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>期权计算</strong></div><div className="topbar-actions"><span className="sample-pill">手动输入 · 到期情景</span><FundCharterLink /></div></header>
       <div className="options-content"><div className="options-hero"><span className="section-eyebrow">AWE / OPTIONS LAB · V0.8</span><h1>期权计算</h1><p>先看懂策略的盈亏形状，再代入自己的价格。所有结果均为同一到期日的情景计算。</p></div>
         <div className="options-scope"><strong>十二种策略 · 到期盈亏</strong><span>价格与权利金均手动输入；图表不使用实时行情，也不预测到期前价格。</span></div>
         <section className="options-catalog" aria-label="期权策略目录"><div className="options-section-head"><div><span className="section-eyebrow">STRATEGY LIBRARY</span><h2>选择策略</h2></div><p>蓝线为使用示例参数绘制的到期盈亏形状</p></div><div className="options-strategy-grid">{STRATEGIES.map((item) => <ExampleCard key={item.id} strategy={item} active={item.id === selectedId} onSelect={() => selectStrategy(item)} />)}</div></section>

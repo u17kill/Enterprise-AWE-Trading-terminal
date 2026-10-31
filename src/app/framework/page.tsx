@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Brand } from "../../components/brand";
+import { FundCharterLink } from "../../components/fund-charter-link";
 
 export default function InvestmentFrameworkPage() {
   return <div className="app-shell framework-shell">
@@ -22,7 +23,7 @@ export default function InvestmentFrameworkPage() {
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.2 · 投资框架</div><p>一页查看完整的投资哲学与决策结构。</p></div>
     </aside>
     <main className="main-content">
-      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>投资框架</strong></div><span className="sample-pill">原图展示</span></header>
+      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>投资框架</strong></div><div className="topbar-actions"><span className="sample-pill">原图展示</span><FundCharterLink /></div></header>
       <div className="framework-content">
         <div className="framework-heading"><span className="section-eyebrow">AWE / INVESTMENT FRAMEWORK</span><h1>投资哲学与决策框架</h1><p>从价值、价格与机会，走向组合纪律与长期复利。</p></div>
         <div className="framework-image-stage">

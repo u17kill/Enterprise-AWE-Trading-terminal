@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Brand } from "./brand";
+import { FundCharterLink } from "./fund-charter-link";
 import { filterManagers, GROUPS, MANAGERS, type GroupFilter, type Manager } from "../lib/leader-holdings";
 import type { ManagerSnapshot } from "../lib/leader-holdings-source";
 import seed from "../data/leader-holdings-seed.json";
@@ -91,7 +92,7 @@ export function LeaderHoldings() {
 
   return <div className="app-shell holdings-shell">
     <aside className="sidebar"><Brand /><div className="sidebar-label">工作台</div><nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item active" href="/holdings" aria-current="page"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link></nav><div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.7 · 13F 机构</div><p>查看公开申报主体，核对披露日期和原件。</p></div></aside>
-    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>大佬持仓</strong></div><span className="sample-pill">SEC 13F · 按季披露</span></header>
+    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>大佬持仓</strong></div><div className="topbar-actions"><span className="sample-pill">SEC 13F · 按季披露</span><FundCharterLink /></div></header>
       <div className="holdings-content"><div className="holdings-hero"><div><span className="section-eyebrow">AWE / LEADER HOLDINGS · V0.7</span><h1>大佬持仓</h1><p>浏览 29 家机构最近一次已公开的 13F，并从 SEC 原件核对。</p></div><button type="button" className="primary-button" disabled={refreshing} onClick={() => { void refresh(); }}>{refreshing ? "正在核对申报…" : "更新持仓"}</button></div>
         <div className="holdings-notice" role="status"><strong>已载入 29 家机构的公开持仓。</strong> 页面先显示已保存的申报快照；点击更新会逐家检查新季度。数据由 13f.info 转录，详情可打开 SEC 原件。{refreshMessage && <span className="holdings-refresh-message">{refreshMessage}</span>}</div>
         <section className="holdings-focus"><div className="holdings-section-title"><span className="section-eyebrow">DISCLOSURE WATCH</span><h2>季度变化</h2></div><div className="holdings-focus-empty">目前只有每家机构最近一期快照；相邻两期的增减持对比仍待接入。请按详情中的报告期和提交日理解这些持仓。</div></section>

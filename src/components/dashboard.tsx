@@ -12,6 +12,7 @@ import { CUSTOM_SYMBOLS_KEY, loadCustomSymbols, saveCustomSymbol } from "../lib/
 import { toLongbridgeSymbol } from "../lib/longbridge-data";
 import { FiveLightsPanel } from "./five-lights-panel";
 import { Brand } from "./brand";
+import { FundCharterLink } from "./fund-charter-link";
 
 const SOURCE_NOTES: Record<string, string> = {
   XAUUSD: "黄金现货参考价暂不可用", US10Y: "美国财政部日度收益率暂不可用",
@@ -137,7 +138,7 @@ export function Dashboard() {
       </aside>
 
       <main className="main-content">
-        <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>总览看板</strong></div><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath="/" onRefresh={() => market.refresh([...watchlist.macro, ...watchlist.stocks, "VIX"]) } /><div className="topbar-right"><span className="sample-pill"><span />{market.result ? "行情已更新" : "等待更新"}</span><span className="avatar">A</span></div></header>
+        <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>总览看板</strong></div><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath="/" onRefresh={() => market.refresh([...watchlist.macro, ...watchlist.stocks, "VIX"]) } /><div className="topbar-right"><span className="sample-pill"><span />{market.result ? "行情已更新" : "等待更新"}</span><FundCharterLink /><span className="avatar">A</span></div></header>
         <div className="dashboard-content">
           <div className="page-hero"><div><div className="hero-kicker"><span className="kicker-line" /> AWE MARKET OVERVIEW</div><h1>你的市场，<em>一目了然。</em></h1><p>集中查看关注的宏观资产和个股，点开任意卡片进入专属图表空间。</p></div><button className="primary-button" aria-label="添加资产" onClick={openSearch}><span>＋</span> 添加资产</button></div>
 
