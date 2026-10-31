@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { CURATED_EVENTS, DATE_PENDING, eventsOnDate, mergeCalendarEvents, monthCells, type CalendarCategory, type CalendarEvent } from "../lib/financial-calendar";
 import { Brand } from "./brand";
+import { FundCharterLink } from "./fund-charter-link";
 
 const LABELS: Record<CalendarCategory, string> = { industry: "产业展会", summit: "国际峰会", company: "科技发布", earnings: "重点财报", "central-bank": "央行会议", macro: "经济指标" };
 const CATEGORIES = Object.keys(LABELS) as CalendarCategory[];
@@ -65,7 +66,7 @@ export function FinancialCalendar() {
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.4 · 事件观察</div><p>来源明确的日期才进入日历；财报和宏观事件按需更新。</p></div>
     </aside>
     <main className="main-content">
-      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>财经日历</strong></div><span className="sample-pill">日期可能变更 · 以来源为准</span></header>
+      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>财经日历</strong></div><div className="topbar-actions"><span className="sample-pill">日期可能变更 · 以来源为准</span><FundCharterLink /></div></header>
       <div className="calendar-content">
         <div className="calendar-hero"><div><span className="section-eyebrow">AWE / EVENT RADAR · V0.4</span><h1>财经日历</h1><p>把影响市场的会议、发布会、财报与经济指标放在同一张月历上。</p></div><div className="calendar-hero-actions"><button className="calendar-today" disabled={refreshing} onClick={() => { setMonth(monthFromDate(today)); setSelected(today); setError(""); }}>今天</button><button className="primary-button" disabled={!connected || checking || refreshing} onClick={() => void refresh()}>{refreshing ? "更新中…" : "↻ 更新日历"}</button>{!connected && !checking && <a className="calendar-connect" href="/api/longbridge/connect?return=%2Fcalendar">连接 Longbridge</a>}</div></div>
         <div className="calendar-source-note"><strong>数据说明</strong><span>大会、央行会议及部分重点财报来自官方已发布日程；点击更新后，再补充 Longbridge 的当月财报和经济指标。未公布日期的事件列在下方。</span></div>
