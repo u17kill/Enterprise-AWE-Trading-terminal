@@ -6,6 +6,16 @@ import seed from "../data/leader-holdings-seed.json";
 beforeEach(() => { localStorage.clear(); vi.unstubAllGlobals(); });
 
 describe("V0.7 holdings directory", () => {
+  it("shows Gavin Baker's filed Atreides holdings under growth and technology", () => {
+    render(<LeaderHoldings />);
+    fireEvent.click(screen.getByRole("button", { name: /成长与科技/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Gavin Baker · Atreides/ }));
+    const detail = screen.getByRole("dialog", { name: /Gavin Baker · Atreides/ });
+    expect(within(detail).getByText(/报告期 2026-06-30，提交日 2026-08-14/)).toBeInTheDocument();
+    expect(within(detail).getByRole("link", { name: /SEC 原件/ })).toHaveAttribute("href", expect.stringContaining("/Archives/edgar/data/1777813/"));
+    expect(within(detail).getByText("MICRON TECHNOLOGY INC", { exact: false })).toBeInTheDocument();
+  });
+
   it("shows filed holdings for an ordinary manager and keeps old filings clearly dated", () => {
     render(<LeaderHoldings />);
     expect(screen.getByRole("button", { name: "更新持仓" })).toBeEnabled();

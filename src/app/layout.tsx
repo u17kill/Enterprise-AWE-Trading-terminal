@@ -10,6 +10,7 @@ import "./master-philosophy.css";
 import "./canary.css";
 import "./investment-framework.css";
 import "./fund-charter.css";
+import "./latest-voices.css";
 
 export const metadata: Metadata = {
   title: "Enterprise AWE Trading Terminal",
