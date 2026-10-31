@@ -18,5 +18,6 @@
 | V1.1（金丝雀指标，用户已验收） | [设计与数据边界](superpowers/specs/2026-10-27-v11-canary-design.md) | [V1.1 交付、修复、导航图标微调与剩余数据限制](v1.1-status.md) | [需求与来源核验 Issue #15](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/issues/15) · [PR #16](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/16) |
 | V1.2（投资框架原图展示，待验收） | [展示范围](superpowers/specs/2026-10-29-v12-investment-framework-image.md) | [V1.2 交付与限制](v1.2-status.md) | [草稿 PR #17](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/17) |
 | V1.3（基金宪法，待验收） | [正文及阅读页设计](superpowers/specs/2026-10-31-v13-fund-charter-design.md) | [V1.3 基金宪法交付与验证](v1.3-fund-charter-status.md) | [草稿 PR #18](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/18)；与上方 2026-10-24 的旧 V1.3 终端增强记录区分 |
+| V1.4（最新风向，设计中） | [人物分组与数据原则草案](superpowers/specs/2026-11-01-v14-latest-voices-design.md) | [V1.4 状态](v1.4-status.md) | [草稿 PR #21](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/21) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
