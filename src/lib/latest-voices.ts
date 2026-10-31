@@ -2,8 +2,9 @@ import { XMLParser } from "fast-xml-parser";
 
 export type VoicePerson = { id: string; name: string; role: string; aliases: string[] };
 export type VoiceGroup = { id: string; title: string; description: string; people: VoicePerson[] };
-export type VoiceItem = { id: string; groupId: string; personId: string; person: string; role: string; title: string; summary: string; source: string; url: string; publishedAt: string };
-export type VoiceSnapshot = { asOf: string; windowStart: string; items: VoiceItem[]; missing: string[]; searched: number };
+export type VoiceItem = { id: string; groupId: string; personId: string; person: string; role: string; title: string; summary: string; source: string; url: string; publishedAt: string; kind?: "media" | "truth-social" };
+export type VoiceGroupSummary = { groupId: string; text: string; sourceIds: string[]; translated: boolean };
+export type VoiceSnapshot = { asOf: string; windowStart: string; items: VoiceItem[]; groupSummaries?: VoiceGroupSummary[]; missing: string[]; searched: number };
 
 const person = (name: string, role: string, ...aliases: string[]): VoicePerson => ({ id: name.toLowerCase().replace(/[^a-z0-9\u3400-\u9fff]+/g, "-"), name, role, aliases: [name, ...aliases] });
 
@@ -70,4 +71,37 @@ export function selectVoiceItems(items: VoiceItem[]): VoiceItem[] {
     seen.add(key);
     return true;
   });
+}
+
+const MARKET_POST = /\b(?:tariffs?|trade|china|economy|economic|federal reserve|interest rates?|inflation|dollar|oil|energy|stock market|taxes?|sanctions?|semiconductors?|chips?|artificial intelligence|\bai\b|technology|iran|ukraine|nato|employment|unemployment|payroll|manufacturing|investment|markets?)\b/i;
+const CAMPAIGN_POST = /\b(?:endorse(?:ment)?|vote|election|campaign|senator|governor|congress(?:man|woman)?|ballot|rally|candidate|midterm|democrat|republican)\b/i;
+const OFF_TOPIC_POST = /\b(?:golf course|judge|collusion hoax)\b/i;
+export function parseTrumpTruthFeed(xml: string, now = new Date()): VoiceItem[] {
+  const parsed = parser.parse(xml) as { rss?: { channel?: { item?: unknown } } };
+  const entries = parsed.rss?.channel?.item;
+  const list = Array.isArray(entries) ? entries : entries ? [entries] : [];
+  return list.flatMap((entry: unknown) => {
+    if (!entry || typeof entry !== "object") return [];
+    const row = entry as Record<string, unknown>;
+    const body = text(row.title).replace(/\s+/g, " ").trim();
+    const original = text(row["truth:originalUrl"]);
+    const published = new Date(text(row.pubDate));
+    if (body.length < 40 || /^RT\b/i.test(body) || CAMPAIGN_POST.test(body) || OFF_TOPIC_POST.test(body) || !MARKET_POST.test(body) || !/^https:\/\/truthsocial\.com\/@realDonaldTrump\/\d+$/i.test(original) || !Number.isFinite(published.getTime()) || published.getTime() < windowStart(now).getTime() || published.getTime() > now.getTime() + 86_400_000) return [];
+    return [{ id: `donald-trump:${original}`, groupId: "government", personId: "donald-trump", person: "Donald Trump", role: "Truth Social @realDonaldTrump", title: body.slice(0, 170), summary: body.slice(0, 440), source: "Truth Social 原帖", url: original, publishedAt: published.toISOString(), kind: "truth-social" as const }];
+  }).slice(0, 3);
+}
+
+export function selectSummarySources(items: VoiceItem[], groupId: string): VoiceItem[] {
+  const seen = new Set<string>();
+  const directView = /\b(?:says?|said|warns?|warned|argues?|argued|predicts?|predicted|expects?|expected|believes?|believed|thinks?|thought|calls? for|on)\b|表示|称|认为|指出|警告|预计|强调/iu;
+  const clickbait = /\b(?:here(?:'|’)s|what (?:it|this) means|fantastic news|one investor|you need to know|stock investors)\b/iu;
+  const topics: Record<string, RegExp> = {
+    macro: /\b(?:inflation|tariff|fed|economy|economic|rates?|debt|liquidity|markets?|bubble|stocks?)\b|通胀|关税|经济|市场/i,
+    value: /\b(?:ai|artificial intelligence|valuation|invest|stocks?|market|bubble|business)\b|估值|投资|市场/i,
+    "tech-investors": /\b(?:ai|artificial intelligence|tech|nvidia|nasdaq|markets?|stocks?|data centers?)\b|科技|人工智能|市场/i,
+    "tech-leaders": /\b(?:ai|artificial intelligence|cloud|chips?|products?|revenue|data centers?|technology|amazon|nvidia|microsoft|openai)\b|科技|人工智能|芯片/i,
+    "central-banks": /\b(?:fed|federal reserve|inflation|interest|rates?|monetary|policy|economy)\b|美联储|利率|通胀|货币/i,
+    government: /\b(?:tariff|economy|economic|inflation|ai|artificial intelligence|trade|china|fiscal|credit|markets?)\b|关税|经济|通胀|贸易/i,
+  };
+  return items.filter((item) => item.groupId === groupId && !seen.has(item.personId) && topics[groupId]?.test(item.title) && (item.kind === "truth-social" || ((directView.test(item.title) || /[:：]/.test(item.title) && /\b(?:tells?|says?|warns?|said)\b/i.test(item.summary)) && !clickbait.test(item.title))) && (seen.add(item.personId), true)).slice(0, 2);
 }
