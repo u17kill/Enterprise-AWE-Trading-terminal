@@ -7,7 +7,7 @@ const navigation = [
   ["/", "◫", "总览看板"], ["/chart/SPX", "⌁", "图表空间"], ["/portfolio", "▦", "持仓地图"],
   ["/calendar", "▤", "财经日历"], ["/news", "◉", "市场动态"], ["/holdings", "♟", "大佬持仓"],
   ["/options", "◇", "期权计算"], ["/philosophy", "✦", "大师哲学"], ["/canary", "◈", "金丝雀指标"],
-  ["/framework", "⌂", "投资框架"],
+  ["/voices", "◌", "最新风向"], ["/framework", "⌂", "投资框架"],
 ];
 
 export default function FundCharterPage() {

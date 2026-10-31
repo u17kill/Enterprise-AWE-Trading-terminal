@@ -18,6 +18,7 @@ export default function InvestmentFrameworkPage() {
         <Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link>
         <Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link>
         <Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link>
+        <Link className="nav-item" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link>
         <Link className="nav-item active" href="/framework" aria-current="page"><span className="nav-glyph">⌂</span>投资框架</Link>
       </nav>
       <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.2 · 投资框架</div><p>一页查看完整的投资哲学与决策结构。</p></div>
