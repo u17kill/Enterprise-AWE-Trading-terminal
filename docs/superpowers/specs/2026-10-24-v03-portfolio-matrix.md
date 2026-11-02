@@ -14,6 +14,13 @@ Reference: the user-supplied full satellite matrix screenshot in the product con
 - Preserve the wider app navigation, with horizontal scrolling on narrower screens so matrix columns remain aligned.
 - A region row has no fixed height. Its height is determined by the tallest theme cell in that region; adding or removing a tile changes the row height, and the next region follows immediately.
 
+## 2026-11-03 follow-up: persistence and responsive layout
+
+- User-edited holdings must survive local preview rebuilds, page reloads and switching between local ports. The browser copy remains a fallback and migration source; a validated, local-only file outside the Git repository becomes the shared copy. Do not commit personal edits.
+- On first use, migrate the current browser origin's saved matrix into the local file. On later visits, prefer the newer timestamped browser edit if it was made before a pending save completed. Preserve a divergent legacy browser copy as a downloadable backup before showing the shared copy.
+- The original wide matrix remains at desktop widths where it fits. Narrow windows use a responsive strategy/theme/region card layout with the same edit and add actions, avoiding a horizontal drag across the whole matrix.
+- A browser copy on an older port cannot be read automatically from another port. The existing export/import controls remain the recovery path for that copy.
+
 ## Alternatives considered
 - Reuse the old lane/card model: too little structure for the screenshot's region-by-theme matrix.
 - Render the screenshot as a static image: cannot edit or add entries.
