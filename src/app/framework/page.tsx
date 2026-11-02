@@ -1,28 +1,10 @@
+import { AppSidebar } from "../../components/app-sidebar";
 import Image from "next/image";
-import Link from "next/link";
-import { Brand } from "../../components/brand";
 import { FundCharterLink } from "../../components/fund-charter-link";
 
 export default function InvestmentFrameworkPage() {
   return <div className="app-shell framework-shell">
-    <aside className="sidebar">
-      <Brand />
-      <div className="sidebar-label">工作台</div>
-      <nav aria-label="主导航">
-        <Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link>
-        <Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link>
-        <Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link>
-        <Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link>
-        <Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link>
-        <Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link>
-        <Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link>
-        <Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link>
-        <Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link>
-        <Link className="nav-item" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link>
-        <Link className="nav-item active" href="/framework" aria-current="page"><span className="nav-glyph">⌂</span>投资框架</Link>
-      </nav>
-      <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.2 · 投资框架</div><p>一页查看完整的投资哲学与决策结构。</p></div>
-    </aside>
+    <AppSidebar currentPath="/framework" />
     <main className="main-content">
       <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>投资框架</strong></div><div className="topbar-actions"><span className="sample-pill">原图展示</span><FundCharterLink /></div></header>
       <div className="framework-content">

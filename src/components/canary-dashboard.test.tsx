@@ -10,7 +10,7 @@ describe("V1.1 canary dashboard", () => {
   it("shows the agreed bands, guidance, and an explicit pending value without fetching on entry", () => {
     const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
     render(<CanaryDashboard />);
-    expect(screen.getByRole("heading", { name: "金丝雀指标" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "指标大全" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "宏观先行" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "美股风险" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "A 股资金与情绪" })).toBeInTheDocument();
