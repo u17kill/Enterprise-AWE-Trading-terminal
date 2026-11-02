@@ -42,6 +42,7 @@ describe("V1.1 canary dashboard", () => {
     let saved = normalizeCanaryOrder(null);
     const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
       if (url === "/api/canary-order" && options?.method === "PUT") { saved = JSON.parse(options.body as string); return { ok: true, json: async () => ({ saved: true }) }; }
+      if (url === "/api/canary") return { ok: true, json: async () => ({ refreshedAt: "2026-10-27T10:00:00Z", readings: { us10: { value: 4.27, unit: "%", asOf: "2026-10-27", source: "FRED", sourceUrl: "https://fred.stlouisfed.org/series/DGS10", state: "unknown", summary: "美国国债 10 年期" } }, errors: {} }) };
       return { ok: true, json: async () => ({ order: saved }) };
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -54,6 +55,9 @@ describe("V1.1 canary dashboard", () => {
     expect(saved.us).toEqual(originalUs);
     expect(within(macro).getAllByTestId(/^canary-/).slice(0, 2).map((node) => node.getAttribute("data-testid"))).toEqual(["canary-us10", "canary-us30"]);
     expect(screen.getByTestId("canary-us10")).not.toHaveAttribute("open");
+    fireEvent.click(screen.getByRole("button", { name: /更新指标/ }));
+    await waitFor(() => expect(within(screen.getByTestId("canary-us10")).getByText("4.27")).toBeInTheDocument());
+    expect(within(macro).getAllByTestId(/^canary-/)[0]).toHaveAttribute("data-testid", "canary-us10");
     view.unmount();
     render(<CanaryDashboard />);
     await waitFor(() => expect(screen.getByRole("heading", { name: "宏观先行" }).closest("section")!.querySelector('[data-testid^="canary-"]')?.getAttribute("data-testid")).toBe("canary-us10"));
