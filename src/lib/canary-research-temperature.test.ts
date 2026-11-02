@@ -23,4 +23,11 @@ describe("canary temperature calculation", () => {
     const result = calculateTemperature(bars(600), bars(600).map((bar) => ({ ...bar, turnover: 0 })));
     expect(result.score).toBeNull();
   });
+  it("does not date an old score as the latest day when the last factors cannot be calculated", () => {
+    const source = bars(600);
+    const flat = source.map((bar, index) => index >= 570 ? { ...bar, close: source[569].close } : bar);
+    const result = calculateTemperature(flat, bars(600, 4));
+    expect(result.history.at(-1)?.date).not.toBe(flat.at(-1)?.date);
+    expect(result.score).toBeNull();
+  });
 });

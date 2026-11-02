@@ -6,6 +6,7 @@ import { OAuthClientProvider, type OAuthDiscoveryState, UnauthorizedError } from
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { OAuthClientInformationMixed, OAuthClientMetadata, OAuthTokens } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { LONG_BRIDGE_COOKIE } from "./longbridge-cookie";
+import { marketDataAuthorizationUrl } from "./longbridge-authorization-url";
 
 const MCP_URL = new URL("https://mcp.longbridge.com");
 const COOKIE_NAME = LONG_BRIDGE_COOKIE;
@@ -23,14 +24,14 @@ class LongbridgeOAuthProvider implements OAuthClientProvider {
 
   constructor(origin: string) {
     this.redirectUrl = `${origin}/api/longbridge/callback`;
-    this.clientMetadata = { client_name: "Enterprise AWE Trading Terminal", redirect_uris: [this.redirectUrl] };
+    this.clientMetadata = { client_name: "Enterprise AWE Trading Terminal", redirect_uris: [this.redirectUrl], scope: "" };
   }
   state() { this.expectedState = randomUUID(); return this.expectedState; }
   clientInformation() { return this.registration; }
   saveClientInformation(value: OAuthClientInformationMixed) { this.registration = value; }
   tokens() { return this.storedTokens; }
   saveTokens(value: OAuthTokens) { this.storedTokens = value; }
-  redirectToAuthorization(value: URL) { this.authorizationUrl = value; }
+  redirectToAuthorization(value: URL) { this.authorizationUrl = marketDataAuthorizationUrl(value); }
   saveCodeVerifier(value: string) { this.verifier = value; }
   codeVerifier() { if (!this.verifier) throw new Error("OAuth verifier missing"); return this.verifier; }
   saveDiscoveryState(value: OAuthDiscoveryState) { this.discovery = value; }

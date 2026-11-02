@@ -30,19 +30,35 @@ export function parseTemperatureBars(raw: unknown, market: Market): TemperatureB
   }
   return [...rows.values()].filter((bar) => !conflicting.has(bar.date)).sort((a, b) => a.date.localeCompare(b.date));
 }
-export function completedTemperatureBars(rows: TemperatureBar[], market: Market, now = new Date()): TemperatureBar[] {
+export function completedMarketCutoff(market: Market, now = new Date()): string | null {
   const zone = market === "us" ? "America/New_York" : "Asia/Shanghai";
   const today = marketDate(now.toISOString(), market);
-  if (!today) return [];
+  if (!today) return null;
   const clock = new Intl.DateTimeFormat("en-US", { timeZone: zone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
   const hour = Number(clock.find((part) => part.type === "hour")?.value), minute = Number(clock.find((part) => part.type === "minute")?.value);
   const closeMinute = market === "us" ? 16 * 60 : 15 * 60;
-  const cutoff = hour * 60 + minute >= closeMinute ? today : new Date(Date.parse(`${today}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
-  return rows.filter((bar) => bar.date <= cutoff);
+  return hour * 60 + minute >= closeMinute ? today : new Date(Date.parse(`${today}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 }
-async function loadBars(session: Session, symbol: string, market: Market, forwardAdjust = false) {
-  const raw = await callLongbridgeTool(session, "candlesticks", { symbol, period: "day", count: 700, forward_adjust: forwardAdjust, trade_sessions: "intraday" });
-  return completedTemperatureBars(parseTemperatureBars(raw, market), market);
+export function completedTemperatureBars(rows: TemperatureBar[], market: Market, now = new Date()): TemperatureBar[] {
+  const cutoff = completedMarketCutoff(market, now);
+  return cutoff ? rows.filter((bar) => bar.date <= cutoff) : [];
+}
+export async function loadPagedTemperatureBars(session: Session, symbol: string, market: Market, forwardAdjust = false, now = new Date()) {
+  const all: unknown[] = [];
+  let time: string | undefined;
+  let oldest: string | undefined;
+  for (let page = 0; page < 4; page++) {
+    const raw = await callLongbridgeTool(session, "history_candlesticks_by_offset", { symbol, period: "day", count: 250, forward_adjust: forwardAdjust, forward: false, trade_sessions: "intraday", ...(time ? { time } : {}), _jq: "map({timestamp,close,volume,turnover})" });
+    if (!Array.isArray(raw) || !raw.length) break;
+    const first = raw[0];
+    const stamp = first && typeof first === "object" && "timestamp" in first ? first.timestamp : null;
+    if (typeof stamp !== "string" || !Number.isFinite(Date.parse(stamp)) || stamp === oldest) throw new Error("Longbridge 历史日 K 分页未前进");
+    oldest = stamp;
+    all.push(...raw);
+    if (completedTemperatureBars(parseTemperatureBars(all, market), market, now).length >= 700) break;
+    time = new Date(Date.parse(stamp) - 1000).toISOString().slice(0, 19);
+  }
+  return completedTemperatureBars(parseTemperatureBars(all, market), market, now);
 }
 function basketDenominator(series: TemperatureBar[][]): TemperatureBar[] {
   const dates = new Set(series.flatMap((rows) => rows.map((row) => row.date)));
@@ -56,20 +72,24 @@ export async function collectTemperature(session: Session, market: Market) {
   const readings = [];
   const errors: Record<string, string> = {};
   const raw = new Map<string, TemperatureBar[]>();
-  for (const item of SYMBOLS[market]) {
-    try {
-      const unadjusted = await loadBars(session, item.id, market);
-      if (market === "us") {
-        const adjusted = new Map((await loadBars(session, item.id, market, true)).map((bar) => [bar.date, bar]));
-        raw.set(item.id, unadjusted.flatMap((bar) => { const normalized = adjusted.get(bar.date); return normalized ? [{ ...bar, close: normalized.close, volume: normalized.volume }] : []; }));
-      } else raw.set(item.id, unadjusted);
-    }
-    catch (error) { errors[item.id] = error instanceof Error ? error.message : "行情请求失败"; }
+  for (let index = 0; index < SYMBOLS[market].length; index += 2) {
+    const batch = await Promise.all(SYMBOLS[market].slice(index, index + 2).map(async (item) => {
+      try {
+        if (market === "us") {
+          const [unadjusted, adjustedRows] = await Promise.all([loadPagedTemperatureBars(session, item.id, market), loadPagedTemperatureBars(session, item.id, market, true)]);
+          const adjusted = new Map(adjustedRows.map((bar) => [bar.date, bar]));
+          return { id: item.id, rows: unadjusted.flatMap((bar) => { const normalized = adjusted.get(bar.date); return normalized ? [{ ...bar, close: normalized.close, volume: normalized.volume }] : []; }) };
+        }
+        return { id: item.id, rows: await loadPagedTemperatureBars(session, item.id, market) };
+      } catch (error) { return { id: item.id, error: error instanceof Error ? error.message : "行情请求失败" }; }
+    }));
+    for (const item of batch) if ("rows" in item && item.rows) raw.set(item.id, item.rows);
+    else if ("error" in item && item.error) errors[item.id] = item.error;
   }
   let denominator: TemperatureBar[] = [];
   if (market === "us") denominator = basketDenominator(SYMBOLS.us.map((item) => raw.get(item.id) ?? []));
   else {
-    try { denominator = basketDenominator([await loadBars(session, "000001.SH", "cn"), await loadBars(session, "399001.SZ", "cn")]); }
+    try { denominator = basketDenominator(await Promise.all(["000001.SH", "399001.SZ"].map((symbol) => loadPagedTemperatureBars(session, symbol, "cn")))); }
     catch (error) { errors["market-turnover"] = error instanceof Error ? error.message : "沪深成交额未取到"; }
   }
   for (const item of SYMBOLS[market]) {

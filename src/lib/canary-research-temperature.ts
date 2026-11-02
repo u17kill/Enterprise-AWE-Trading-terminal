@@ -55,5 +55,6 @@ export function calculateTemperature(target: TemperatureBar[], denominator: Temp
     if (raw !== null) { smooth = smooth === null ? raw : .5 * raw + .5 * smooth; history.push({ date: rows[i].date, value: smooth }); }
     if (i === rows.length - 1) { position = p; crowding = c; momentum = m; }
   }
-  return { score: smooth, position, crowding, momentum, asOf: rows.at(-1)?.date ?? null, history, sample: rows.length };
+  const latestDate = rows.at(-1)?.date ?? null;
+  return { score: history.at(-1)?.date === latestDate ? smooth : null, position, crowding, momentum, asOf: latestDate, history, sample: rows.length };
 }
