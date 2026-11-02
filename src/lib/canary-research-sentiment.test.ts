@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./longbridge-mcp", () => ({ callLongbridgeTool: vi.fn() }));
-import { buildMagSeven, completedSentimentPulses, parseChinaMarketBreadth, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, rankLargeCapMovers, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
+import { buildMagSeven, completedCloseQuote, completedSectorReading, completedSentimentPulses, moverObservationDate, parseChinaMarketBreadth, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, rankLargeCapMovers, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
 import { callLongbridgeTool } from "./longbridge-mcp";
 
 describe("short-term sentiment sources", () => {
@@ -16,6 +16,23 @@ describe("short-term sentiment sources", () => {
   it("only accepts sectors from the same US close date", () => {
     const raw = [{ symbol: "XLK.US", last_done: "110", prev_close: "100", timestamp: "2026-10-30T20:00:00Z" }, { symbol: "XLF.US", last_done: "90", prev_close: "100", timestamp: "2026-10-29T20:00:00Z" }];
     expect(parseSectorQuotes(raw, "2026-10-30")).toEqual([{ symbol: "XLK.US", title: "科技", changePercent: 10 }]);
+  });
+  it("uses the previous completed daily bar while the US market is open", () => {
+    const bars = [
+      { timestamp: "2026-10-29T20:00:00Z", close: "100" },
+      { timestamp: "2026-10-30T20:00:00Z", close: "105" },
+      { timestamp: "2026-11-02T15:00:00Z", close: "111" },
+    ];
+    expect(completedCloseQuote(bars, "AAPL.US", "2026-10-30")).toEqual({ symbol: "AAPL.US", last_done: "105", prev_close: "100", timestamp: "2026-10-30T20:00:00Z" });
+    expect(completedCloseQuote(bars, "AAPL.US", "2026-10-29")).toBeNull();
+    expect(completedCloseQuote(bars.slice(0, 1).concat(bars.slice(2)), "AAPL.US", "2026-10-30")).toBeNull();
+  });
+  it("builds the sector close and 5/20/60-day trend from completed bars", () => {
+    const bars = Array.from({ length: 63 }, (_, index) => ({ timestamp: new Date(Date.UTC(2026, 7, index + 1, 20)).toISOString(), close: String(100 + index) }));
+    const closeDate = "2026-09-30";
+    const result = completedSectorReading(bars, "XLK.US", "科技", closeDate);
+    expect(result).toEqual({ symbol: "XLK.US", title: "科技", changePercent: 0.63, change5: 3.23, change20: 14.29, change60: 60 });
+    expect(completedSectorReading(bars.slice(0, -3), "XLK.US", "科技", closeDate)).toBeNull();
   });
   it("keeps an A-share sector observation separate when it is newer than the close review", () => {
     const raw = { items: [{ lists: [{ symbol: "IN001.CN", name: "半导体", chg: "0.025", last: Date.parse("2026-11-02T04:00:00Z") / 1000 }] }] };
@@ -62,6 +79,15 @@ describe("short-term sentiment sources", () => {
     expect(result?.gainers).toEqual([{ symbol: "AAA.US", name: "AAA.US", changePercent: 10, marketCap: 20_000_000_000 }]);
     expect(result?.losers).toEqual([{ symbol: "BBB.US", name: "BBB.US", changePercent: -10, marketCap: 30_000_000_000 }]);
     expect(rankLargeCapMovers(winners, losers, [quote("AAA.US", 110, 100), quote("BBB.US", 90, 100, "2026-10-29T20:00:00Z")], "2026-10-30")).toBeNull();
+  });
+  it("labels same-day mover quotes as intraday without changing the completed-close review", () => {
+    const quotes = [
+      { timestamp: "2026-11-02T15:00:00Z" }, { timestamp: "2026-11-02T15:01:00Z" },
+      { timestamp: "2026-10-30T20:00:00Z" },
+    ];
+    expect(moverObservationDate(quotes, "2026-10-30", new Date("2026-11-02T15:05:00Z"))).toEqual({ date: "2026-11-02", layer: "intraday" });
+    expect(moverObservationDate(quotes.slice(2), "2026-10-30", new Date("2026-11-02T15:05:00Z"))).toEqual({ date: "2026-10-30", layer: "close" });
+    expect(moverObservationDate([{ timestamp: "2026-11-03T15:00:00Z" }], "2026-10-30", new Date("2026-11-02T15:05:00Z"))).toBeNull();
   });
   it("accepts A-share advances and declines only when the source date and totals match the close", () => {
     const html = `<span class="market-activity-time">2026-11-02 15:00:00</span><div id="total" data-chart="5223"></div><div id="totalUp" data-chart="4382"></div><div id="totalDown" data-chart="767"></div><div id="priceStop" data-chart="68"></div><div id="pricePaused" data-chart="6"></div>`;

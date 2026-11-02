@@ -37,4 +37,11 @@ describe("V1.5 research page frame", () => {
     expect(screen.getByText("甲公司")).toBeInTheDocument();
     expect(screen.getByText("乙公司")).toBeInTheDocument();
   });
+  it("separates intraday large-cap movers from the completed US close", () => {
+    localStorage.setItem("awe-v15-sentiment-us", JSON.stringify({ market: "us", kind: "sentiment", refreshedAt: "2026-11-02T15:05:00Z", closeAsOf: "2026-10-30", readings: [{ id: "temperature", title: "市场温度", value: 34, unit: "/100", asOf: "2026-10-30", source: "Longbridge", summary: "", explanation: "", points: [], status: "正常" }], moverAsOf: "2026-11-02", moverLayer: "intraday", movers: { universe: 1200, gainers: [{ symbol: "AAA.US", name: "甲公司", changePercent: 10, marketCap: 20_000_000_000 }], losers: [{ symbol: "BBB.US", name: "乙公司", changePercent: -10, marketCap: 30_000_000_000 }] }, errors: {} }));
+    render(<CanaryResearchShell kind="sentiment" />);
+    expect(screen.getByText(/2026-10-30 · 最近完整交易日/)).toBeInTheDocument();
+    expect(screen.getByText(/2026-11-02 · 1200 只筛选样本 · 盘中观察/)).toBeInTheDocument();
+    expect(screen.getByText(/盘中数值会变化，不纳入上方收盘判断/)).toBeInTheDocument();
+  });
 });

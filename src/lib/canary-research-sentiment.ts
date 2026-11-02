@@ -76,6 +76,18 @@ export function rankLargeCapMovers(gainersRaw: unknown, losersRaw: unknown, quot
   const gainers = parse(gainersData.items, 1), losers = parse(losersData.items, -1);
   return gainers.length && losers.length ? { universe: Number(gainersData.total), gainers, losers } : null;
 }
+export function moverObservationDate(raw: unknown, closeDate: string, now = new Date()): { date: string; layer: "close" | "intraday" } | null {
+  if (!Array.isArray(raw)) return null;
+  const today = localDate(now.toISOString(), "us");
+  const counts = new Map<string, number>();
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || typeof item.timestamp !== "string") continue;
+    const date = localDate(item.timestamp, "us");
+    if (date && today && date >= closeDate && date <= today) counts.set(date, (counts.get(date) ?? 0) + 1);
+  }
+  const date = [...counts.entries()].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))[0]?.[0];
+  return date ? { date, layer: date === closeDate ? "close" : "intraday" } : null;
+}
 export function parseChinaMarketBreadth(html: string, closeDate: string): { date: string; up: number; down: number; flat: number; suspended: number; total: number } | null {
   const sourceDate = html.match(/class="market-activity-time"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s+15:00:00\s*</)?.[1];
   if (sourceDate !== closeDate) return null;
@@ -118,19 +130,47 @@ function parseSectorBars(raw: unknown) {
     return date && Number.isFinite(close) && close > 0 ? [{ date, close }] : [];
   });
 }
-async function enrichUsSectors(session: Session, sectors: SectorReading[], closeDate: string) {
-  const enriched: SectorReading[] = [];
-  for (let index = 0; index < sectors.length; index += 4) {
-    const batch = await Promise.all(sectors.slice(index, index + 4).map(async (sector) => {
-      try {
-        const raw = await callLongbridgeTool(session, "candlesticks", { symbol: sector.symbol, period: "day", count: 70, trade_sessions: "intraday" });
-        const trend = sectorReturns(parseSectorBars(raw).filter((bar) => bar.date <= closeDate), closeDate);
-        return trend ? { ...sector, ...trend } : sector;
-      } catch { return sector; }
+export function completedCloseQuote(raw: unknown, symbol: string, closeDate: string) {
+  if (!Array.isArray(raw)) return null;
+  const bars = raw.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const row = item as Record<string, unknown>;
+    const date = typeof row.timestamp === "string" ? localDate(row.timestamp, "us") : null;
+    const close = Number(row.close);
+    return date && date <= closeDate && Number.isFinite(close) && close > 0 ? [{ date, timestamp: row.timestamp as string, close }] : [];
+  }).sort((a, b) => a.date.localeCompare(b.date));
+  if (bars.length < 2 || bars.at(-1)?.date !== closeDate || bars.at(-2)?.date === closeDate) return null;
+  return { symbol, last_done: String(bars.at(-1)!.close), prev_close: String(bars.at(-2)!.close), timestamp: bars.at(-1)!.timestamp };
+}
+export function completedSectorReading(raw: unknown, symbol: string, title: string, closeDate: string): SectorReading | null {
+  const bars = parseSectorBars(raw).filter((item) => item.date <= closeDate).sort((a, b) => a.date.localeCompare(b.date));
+  const trend = sectorReturns(bars, closeDate);
+  if (!trend || bars.at(-2)?.date === closeDate) return null;
+  const last = bars.at(-1)!.close, prior = bars.at(-2)!.close;
+  return { symbol, title, changePercent: Math.round((last / prior - 1) * 10_000) / 100, ...trend };
+}
+async function completedUsQuotes(session: Session, closeDate: string) {
+  const quotes: NonNullable<ReturnType<typeof completedCloseQuote>>[] = [];
+  for (let index = 0; index < MAG_SEVEN.length; index += 4) {
+    const batch = await Promise.all(MAG_SEVEN.slice(index, index + 4).map(async ([symbol]) => {
+      const raw = await callLongbridgeTool(session, "candlesticks", { symbol, period: "day", count: 5, trade_sessions: "intraday" });
+      return completedCloseQuote(raw, symbol, closeDate);
     }));
-    enriched.push(...batch);
+    if (batch.some((quote) => !quote)) return [];
+    quotes.push(...batch as NonNullable<ReturnType<typeof completedCloseQuote>>[]);
   }
-  return enriched;
+  return quotes;
+}
+async function completedUsSectors(session: Session, closeDate: string) {
+  const sectors: SectorReading[] = [];
+  for (let index = 0; index < SECTORS.length; index += 4) {
+    const batch = await Promise.all(SECTORS.slice(index, index + 4).map(async ([symbol, title]) => {
+      const raw = await callLongbridgeTool(session, "candlesticks", { symbol, period: "day", count: 72, trade_sessions: "intraday" });
+      return completedSectorReading(raw, symbol, title, closeDate);
+    }));
+    sectors.push(...batch.filter((sector): sector is SectorReading => sector !== null));
+  }
+  return sectors;
 }
 export function parseChinaSectorRanking(raw: unknown) {
   const groups = raw && typeof raw === "object" ? (raw as { items?: unknown }).items : null;
@@ -204,6 +244,8 @@ export async function collectSentiment(session: Session, market: Market) {
   const errors: Record<string, string> = {};
   let leaders: ReturnType<typeof buildMagSeven> = null;
   let movers: ReturnType<typeof rankLargeCapMovers> = null;
+  let moverAsOf: string | null = null;
+  let moverLayer: "close" | "intraday" | null = null;
   if (market === "us") {
     const health = await collectMarketHealth(session).catch(() => null);
     for (const [id, title, explanation] of [
@@ -219,7 +261,7 @@ export async function collectSentiment(session: Session, market: Market) {
     }
     try {
       const symbols = MAG_SEVEN.map(([symbol]) => symbol);
-      const [quotes, infos] = await Promise.all([callLongbridgeTool(session, "quote", { symbols }), callLongbridgeTool(session, "static_info", { symbols })]);
+      const [quotes, infos] = await Promise.all([completedUsQuotes(session, latest.date), callLongbridgeTool(session, "static_info", { symbols })]);
       leaders = buildMagSeven(quotes, infos, latest.date);
       if (!leaders) throw new Error("七巨头未返回同一收盘日的完整价格与股本");
       const value = leaders.weightedChangePercent;
@@ -231,8 +273,12 @@ export async function collectSentiment(session: Session, market: Market) {
       const symbols = [...new Set([gainersRaw, losersRaw].flatMap((raw) => raw && typeof raw === "object" && Array.isArray((raw as { items?: unknown }).items) ? (raw as { items: { symbol?: string }[] }).items.map((item) => item.symbol).filter((symbol): symbol is string => typeof symbol === "string") : []))];
       if (symbols.length < 20) throw new Error("美股大市值筛选样本不足");
       const quotes = await callLongbridgeTool(session, "quote", { symbols, _jq: "map({symbol,last_done,prev_close,timestamp})" });
-      movers = rankLargeCapMovers(gainersRaw, losersRaw, quotes, latest.date);
-      if (!movers || movers.gainers.length < 5 || movers.losers.length < 5) throw new Error("美股涨跌榜未返回足够的同日收盘报价");
+      const observation = moverObservationDate(quotes, latest.date);
+      if (!observation) throw new Error("美股大市值榜未返回可核验的报价日期");
+      movers = rankLargeCapMovers(gainersRaw, losersRaw, quotes, observation.date);
+      if (!movers || movers.gainers.length < 5 || movers.losers.length < 5) throw new Error("美股涨跌榜未返回足够的同日报价");
+      moverAsOf = observation.date;
+      moverLayer = observation.layer;
     } catch (error) { movers = null; errors.largeCapMovers = error instanceof Error ? error.message : "美股大市值榜暂不可用"; }
   }
   if (market === "cn") {
@@ -261,7 +307,7 @@ export async function collectSentiment(session: Session, market: Market) {
   let sectors: SectorReading[] = [];
   let sectorAsOf: string | null = null;
   try {
-    if (market === "us") { sectors = parseSectorQuotes(await callLongbridgeTool(session, "quote", { symbols: SECTORS.map(([symbol]) => symbol) }), latest.date); sectorAsOf = sectors.length ? latest.date : null; if (sectors.length) sectors = await enrichUsSectors(session, sectors, latest.date); }
+    if (market === "us") { sectors = await completedUsSectors(session, latest.date); sectorAsOf = sectors.length ? latest.date : null; }
     else { const ranking = parseChinaSectorRanking(await callLongbridgeTool(session, "industry_rank", { market: "CN", indicator: "1", sort_type: "0", _jq: "{items:(.items|map({lists:(.lists|map({symbol,name,chg,last:(.minutes[-1].timestamp)}))}))}" })); sectors = ranking.sectors; sectorAsOf = ranking.asOf; }
     if (!sectors.length) errors.sectors = "板块来源未返回带日期的可核验行情";
   } catch (error) { errors.sectors = error instanceof Error ? error.message : "行业数据请求失败"; }
@@ -280,5 +326,5 @@ export async function collectSentiment(session: Session, market: Market) {
       for (const [days, value] of [[20, strength.change20], [60, strength.change60]] as const) readings.push({ id: `semiconductorRelative${days}`, title: `半导体相对强弱 · ${days} 日`, value, unit: "%", asOf: latest.date, source: "Longbridge · SOXX/SPY 前复权日 K", status: value > 0 ? "半导体领先" : value < 0 ? "半导体落后" : "持平", summary: `SOXX/SPY 价格比在 ${days} 个交易日内变化 ${value.toFixed(2)}%。`, explanation: "SOXX ETF 与 SPY ETF 的前复权收盘价比值变化；是美股半导体相对大盘的代理，不等于费城半导体指数相对标普指数，也不代表未来收益。", points: [] });
     } catch (error) { errors.semiconductorRelative = error instanceof Error ? error.message : "半导体相对强弱暂不可用"; }
   }
-  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], movers, sectors: market === "cn" ? [...sectors.slice(0, 6), ...sectors.slice(-6)] : sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
+  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], movers, moverAsOf, moverLayer, sectors: market === "cn" ? [...sectors.slice(0, 6), ...sectors.slice(-6)] : sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
 }
