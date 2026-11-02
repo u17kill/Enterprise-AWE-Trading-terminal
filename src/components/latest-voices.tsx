@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { AppSidebar } from "./app-sidebar";
+
+
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Brand } from "./brand";
 import { FundCharterLink } from "./fund-charter-link";
 import { VOICE_GROUPS, type VoiceItem, type VoiceSnapshot } from "../lib/latest-voices";
 
@@ -46,9 +47,7 @@ export function LatestVoices() {
     finally { setBusy(false); }
   }
 
-  return <div className="app-shell voices-shell"><aside className="sidebar"><Brand /><div className="sidebar-label">工作台</div><nav aria-label="主导航">
-    <Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item active" aria-current="page" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link>
-  </nav><div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V1.4 · 人物观点</div><p>近三个月公开报道，手动核对更新。</p></div></aside>
+  return <div className="app-shell voices-shell"><AppSidebar currentPath="/voices" />
     <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>最新风向</strong></div><div className="topbar-actions"><span className="sample-pill">按人物分组 · 近三个月</span><FundCharterLink /></div></header>
       <div className="voices-content"><div className="voices-hero"><div><span className="section-eyebrow">AWE / LATEST VOICES · V1.4</span><h1>最新风向</h1><p>跟踪关键人物近期公开观点。每条摘要附有媒体来源和发布日期。</p></div><button className="primary-button" type="button" onClick={() => void refresh()} disabled={busy}>{busy ? "正在核对来源…" : "↻ 更新观点"}</button></div>
         <div className="voices-status"><span>{snapshot ? `上次更新 ${displayDate(snapshot.asOf)} · 窗口自 ${displayDate(snapshot.windowStart)} 起` : "尚无本地快照 · 点击“更新观点”开始"}</span><span>{snapshot ? `已收录 ${snapshot.items.length} 条 · 查询 ${snapshot.searched} 位人物` : "仅显示可追溯的近期内容"}</span></div>

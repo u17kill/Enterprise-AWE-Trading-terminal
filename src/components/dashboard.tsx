@@ -1,5 +1,8 @@
 "use client";
 
+import { AppSidebar } from "./app-sidebar";
+
+
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { CATALOG, findSymbol, searchSymbols, type MarketSymbol, type SymbolGroup } from "../lib/catalog";
@@ -11,7 +14,6 @@ import type { IntradayPoint, LiveQuote } from "../lib/longbridge-data";
 import { CUSTOM_SYMBOLS_KEY, loadCustomSymbols, saveCustomSymbol } from "../lib/custom-symbols";
 import { toLongbridgeSymbol } from "../lib/longbridge-data";
 import { FiveLightsPanel } from "./five-lights-panel";
-import { Brand } from "./brand";
 import { FundCharterLink } from "./fund-charter-link";
 
 const SOURCE_NOTES: Record<string, string> = {
@@ -130,12 +132,7 @@ export function Dashboard() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <Brand />
-        <div className="sidebar-label">工作台</div>
-        <nav aria-label="主导航"><Link className="nav-item active" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href={`/chart/${watchlist.macro[0] ?? watchlist.stocks[0] ?? "SPX"}`}><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link></nav>
-        <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.9 · 市场健康预览</div><p>自选资产和市场健康快照保存在此浏览器中。</p></div>
-      </aside>
+      <AppSidebar currentPath="/" />
 
       <main className="main-content">
         <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>总览看板</strong></div><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath="/" onRefresh={() => market.refresh([...watchlist.macro, ...watchlist.stocks, "VIX"]) } /><div className="topbar-right"><span className="sample-pill"><span />{market.result ? "行情已更新" : "等待更新"}</span><FundCharterLink /><span className="avatar">A</span></div></header>

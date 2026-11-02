@@ -47,8 +47,10 @@ describe("dashboard", () => {
 
   it("opens the chart workspace from the left navigation", () => {
     render(<Dashboard />);
+    fireEvent.click(screen.getByRole("button", { name: /投资工具/ }));
     expect(screen.getByRole("link", { name: /图表空间/ })).toHaveAttribute("href", "/chart/SPX");
     expect(screen.getByRole("link", { name: /期权计算/ })).toHaveAttribute("href", "/options");
+    fireEvent.click(screen.getByRole("button", { name: /投资学堂/ }));
     expect(screen.getByRole("link", { name: /大师哲学/ })).toHaveAttribute("href", "/philosophy");
   });
 

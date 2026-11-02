@@ -13,6 +13,18 @@
 .matrix-source{font-size:10px;color:#93a0b1;margin:0 0 18px;line-height:1.6}
 .matrix-message{color:#b1544b;font-size:12px;margin:12px 0}
 .matrix-scroll{overflow:auto;background:#fff;border:1px solid #e2e7ed;border-radius:12px;box-shadow:0 6px 25px #1b426009}
+.matrix-responsive{display:none}
+.matrix-responsive-group{margin-bottom:22px}
+.matrix-responsive-group-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-left:5px solid;padding:12px 15px;background:#fff;border-radius:10px;margin-bottom:10px}
+.matrix-responsive-group-head button,.matrix-responsive-title,.matrix-responsive-region-head button{border:0;background:transparent;color:#26394f;font-weight:700}
+.matrix-responsive-group-head button:first-child{font-size:15px}.matrix-responsive-group-head button:last-child{font-size:11px;color:#3d70c1}
+.matrix-responsive-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.matrix-responsive-column{min-width:0;background:#fff;border:1px solid #e1e8f1;border-radius:10px;padding:11px}
+.matrix-responsive-title{width:100%;min-height:38px;text-align:left;font-size:12px;border-bottom:1px solid #e7edf4}
+.matrix-responsive-region{padding:7px 0;border-bottom:1px solid #f0f3f7}
+.matrix-responsive-region-head{display:flex;justify-content:space-between;align-items:center}
+.matrix-responsive-region-head button{font-size:11px;color:#73849a}.matrix-responsive-region-head button:last-child{font-size:18px;color:#3970c8}
+.matrix-responsive-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:5px}
 .matrix-table{border-collapse:separate;border-spacing:0;table-layout:auto;min-width:1570px;width:max-content;color:#263345}
 .matrix-table th,.matrix-table td{padding:0;vertical-align:top}
 .matrix-corner{width:80px;min-width:80px;background:#f7f8fa;color:#8590a0;font-size:10px;font-weight:700;text-align:center;vertical-align:middle!important;border-right:1px dashed #cbd2da;border-bottom:1px solid #e5e9ef}
@@ -50,5 +62,8 @@
 .portfolio-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}
 .portfolio-editor-actions button:not(.primary-button){border:1px solid #d8e2ef;border-radius:8px;background:#fff;padding:9px 14px;font-size:12px}
 .portfolio-editor-actions .danger{margin-right:auto;color:#c8515f;border-color:#f0d8dc!important}
-@media(max-width:950px){.matrix-content{padding:24px 18px}.matrix-intro{align-items:start;flex-direction:column}.matrix-table{min-width:1570px}}
+@media(max-width:1850px){.matrix-scroll{display:none}.matrix-responsive{display:block}}
+@media(max-width:1350px){.matrix-responsive-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1050px){.matrix-responsive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.matrix-content{padding:24px 18px}.matrix-intro{align-items:start;flex-direction:column}}
 @media(max-width:720px){.portfolio-shell{display:block}.portfolio-fields{grid-template-columns:1fr}.matrix-content{padding:22px 14px}}
+@media(max-width:580px){.matrix-responsive-grid{grid-template-columns:1fr}.matrix-meta{align-items:flex-start}.matrix-responsive-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}

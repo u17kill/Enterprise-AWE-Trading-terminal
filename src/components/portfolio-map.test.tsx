@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { PortfolioMapPage } from "./portfolio-map";
 import { DEFAULT_MATRIX, MATRIX_KEY } from "../lib/portfolio-matrix";
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 
 beforeEach(() => { localStorage.clear(); vi.stubGlobal("confirm", () => true); });
+afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("V0.3 portfolio matrix", () => {
   it("renders the screenshot hierarchy and seeded status colors", async () => {
@@ -30,6 +31,38 @@ describe("V0.3 portfolio matrix", () => {
     render(<PortfolioMapPage />);
     expect(await screen.findByRole("button", { name: "编辑 NVDA" })).toHaveTextContent("12k");
     expect(JSON.parse(localStorage.getItem(MATRIX_KEY) ?? "{}").items.find((item: { symbol: string }) => item.symbol === "NVDA").status).toBe("add");
+  });
+
+  it("loads the durable copy before showing the map and saves the next edit", async () => {
+    const stale = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "old" } : item) };
+    const current = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "latest" } : item) };
+    localStorage.setItem(MATRIX_KEY, JSON.stringify(stale));
+    const writes: Array<{ items: typeof DEFAULT_MATRIX.items }> = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { writes.push(JSON.parse(String(init.body))); return { ok: true }; }
+      return { ok: true, json: async () => ({ snapshot: { matrix: current, updatedAt: Date.now() } }) };
+    }));
+    render(<PortfolioMapPage />);
+    expect(await screen.findByRole("button", { name: "编辑 NVDA" })).toHaveTextContent("latest");
+    expect(writes).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "编辑 NVDA" }));
+    fireEvent.change(screen.getByLabelText("仓位 / 备注"), { target: { value: "newest" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存标的" }));
+    await waitFor(() => expect(writes.at(-1)?.items.find((item) => item.symbol === "NVDA")?.amount).toBe("newest"));
+  });
+
+  it("recovers a browser edit that was newer than the last durable write", async () => {
+    const pending = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "pending edit" } : item) };
+    localStorage.setItem(MATRIX_KEY, JSON.stringify(pending));
+    localStorage.setItem(`${MATRIX_KEY}.updatedAt`, "2000");
+    const writes: Array<{ items: typeof DEFAULT_MATRIX.items }> = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { writes.push(JSON.parse(String(init.body))); return { ok: true }; }
+      return { ok: true, json: async () => ({ snapshot: { matrix: DEFAULT_MATRIX, updatedAt: 1000 } }) };
+    }));
+    render(<PortfolioMapPage />);
+    expect(await screen.findByRole("button", { name: "编辑 NVDA" })).toHaveTextContent("pending edit");
+    await waitFor(() => expect(writes.at(-1)?.items.find((item) => item.symbol === "NVDA")?.amount).toBe("pending edit"));
   });
 
   it("adds and removes a theme and its tiles without changing other themes", async () => {
@@ -62,7 +95,7 @@ describe("V0.3 portfolio matrix", () => {
   it("warns when browser storage refuses to save", async () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("Quota exceeded"); });
     render(<PortfolioMapPage />);
-    expect(await screen.findByRole("alert", { name: "保存失败" })).toHaveTextContent("没有保存");
+    expect(await screen.findByRole("alert", { name: "保存失败" })).toHaveTextContent("持久保存失败");
     vi.restoreAllMocks();
   });
 });

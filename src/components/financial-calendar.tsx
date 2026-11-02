@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { AppSidebar } from "./app-sidebar";
+
+
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { CURATED_EVENTS, DATE_PENDING, eventsOnDate, mergeCalendarEvents, monthCells, type CalendarCategory, type CalendarEvent } from "../lib/financial-calendar";
-import { Brand } from "./brand";
 import { FundCharterLink } from "./fund-charter-link";
 
 const LABELS: Record<CalendarCategory, string> = { industry: "产业展会", summit: "国际峰会", company: "科技发布", earnings: "重点财报", "central-bank": "央行会议", macro: "经济指标" };
@@ -59,12 +60,7 @@ export function FinancialCalendar() {
   }
 
   return <div className="app-shell calendar-shell">
-    <aside className="sidebar">
-      <Brand />
-      <div className="sidebar-label">工作台</div>
-      <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item active" href="/calendar" aria-current="page"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link></nav>
-      <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.4 · 事件观察</div><p>来源明确的日期才进入日历；财报和宏观事件按需更新。</p></div>
-    </aside>
+    <AppSidebar currentPath="/calendar" />
     <main className="main-content">
       <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>财经日历</strong></div><div className="topbar-actions"><span className="sample-pill">日期可能变更 · 以来源为准</span><FundCharterLink /></div></header>
       <div className="calendar-content">

@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { AppSidebar } from "./app-sidebar";
+
+
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type MatrixColumn, type MatrixGroup, type MatrixItem, type MatrixRegion, type PortfolioMatrix, type TileStatus } from "../lib/portfolio-matrix";
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
-import { Brand } from "./brand";
 import { FundCharterLink } from "./fund-charter-link";
 
 type Editor =
@@ -16,6 +17,8 @@ type Editor =
 const newId = () => crypto.randomUUID();
 const statusLabels: Record<TileStatus, string> = { held: "已持仓", watch: "观察中", add: "计划加仓" };
 const kindLabels = { item: "标的", column: "主题", group: "策略", region: "地区" };
+const MATRIX_UPDATED_KEY = `${MATRIX_KEY}.updatedAt`;
+const MATRIX_LEGACY_BACKUP_KEY = `${MATRIX_KEY}.legacyBackup`;
 
 function downloadJson(name: string, value: string) {
   const url = URL.createObjectURL(new Blob([value], { type: "application/json" }));
@@ -42,17 +45,67 @@ export function PortfolioMapPage() {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [message, setMessage] = useState("");
   const [saveError, setSaveError] = useState(false);
+  const [hasLegacyBackup, setHasLegacyBackup] = useState(false);
+  const [ready, setReady] = useState(false);
+  const initialized = useRef(false);
+  const skipInitialSave = useRef(true);
+  const saveQueue = useRef(Promise.resolve());
   const hasOldData = useSyncExternalStore(() => () => {}, () => {
     try { return Boolean(window.localStorage.getItem(PORTFOLIO_KEY)); } catch { return false; }
   }, () => false);
   useEffect(() => {
-    if (!mounted) return;
-    let failed = false;
-    try { localStorage.setItem(MATRIX_KEY, JSON.stringify(matrix)); }
-    catch { failed = true; }
-    const timer = window.setTimeout(() => setSaveError(failed), 0);
-    return () => window.clearTimeout(timer);
-  }, [matrix, mounted]);
+    if (!mounted || initialized.current) return;
+    initialized.current = true;
+    void (async () => {
+      try {
+        const response = await fetch("/api/portfolio-matrix", { cache: "no-store" });
+        if (!response.ok) throw new Error("Unable to read portfolio file");
+        const payload = await response.json() as { snapshot: { matrix: PortfolioMatrix; updatedAt: number } | null };
+        const localRaw = localStorage.getItem(MATRIX_KEY);
+        const localTime = Number(localStorage.getItem(MATRIX_UPDATED_KEY) ?? 0);
+        let validLocal: PortfolioMatrix | null = null;
+        try { if (localRaw) validLocal = validateMatrixBackup(JSON.parse(localRaw)); } catch { /* Keep the raw browser copy for backup. */ }
+        setHasLegacyBackup(Boolean(localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY)));
+        if (payload.snapshot) {
+          const restored = validateMatrixBackup(payload.snapshot.matrix);
+          if (!restored) throw new Error("Invalid portfolio file");
+          if (validLocal && localTime > payload.snapshot.updatedAt) {
+            const saved = await fetch("/api/portfolio-matrix", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(validLocal) });
+            if (!saved.ok) throw new Error("Unable to recover pending edit");
+            setMatrix(validLocal);
+          } else {
+            if (localRaw && localRaw !== JSON.stringify(DEFAULT_MATRIX) && localRaw !== JSON.stringify(restored)) {
+              if (!localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY)) localStorage.setItem(MATRIX_LEGACY_BACKUP_KEY, localRaw);
+              setHasLegacyBackup(true);
+            }
+            setMatrix(restored);
+            localStorage.setItem(MATRIX_KEY, JSON.stringify(restored));
+            localStorage.setItem(MATRIX_UPDATED_KEY, String(payload.snapshot.updatedAt));
+          }
+        } else {
+          // First visit after this fix: migrate the current origin's browser copy.
+          const local = loadMatrix(localStorage);
+          localStorage.setItem(MATRIX_UPDATED_KEY, String(Date.now()));
+          const saved = await fetch("/api/portfolio-matrix", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(local) });
+          if (!saved.ok) throw new Error("Unable to migrate portfolio");
+          setMatrix(local);
+        }
+        setSaveError(false);
+      } catch { setSaveError(true); }
+      finally { setReady(true); }
+    })();
+  }, [mounted]);
+  useEffect(() => {
+    if (!ready) return;
+    if (skipInitialSave.current) { skipInitialSave.current = false; return; }
+    try { localStorage.setItem(MATRIX_KEY, JSON.stringify(matrix)); localStorage.setItem(MATRIX_UPDATED_KEY, String(Date.now())); }
+    catch { /* The durable server copy is still attempted below. */ }
+    saveQueue.current = saveQueue.current.catch(() => {}).then(async () => {
+      const response = await fetch("/api/portfolio-matrix", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(matrix), keepalive: true });
+      if (!response.ok) throw new Error("Unable to save portfolio file");
+      setSaveError(false);
+    }).catch(() => setSaveError(true));
+  }, [matrix, ready]);
 
   const columns = matrix.groups.flatMap((group) => {
     const own = matrix.columns.filter((column) => column.groupId === group.id);
@@ -114,25 +167,20 @@ export function PortfolioMapPage() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "导入失败。"); }
   };
 
-  if (!mounted) return <div className="portfolio-shell" aria-label="正在读取本地持仓" />;
+  if (!mounted || !ready) return <div className="portfolio-shell" aria-label="正在读取本地持仓" />;
   return <div className="portfolio-shell">
-    <aside className="sidebar">
-      <Brand />
-      <div className="sidebar-label">工作台</div>
-      <nav aria-label="主导航"><Link className="nav-item" href="/"><span className="nav-glyph">◫</span>总览看板</Link><Link className="nav-item" href="/chart/SPX"><span className="nav-glyph">⌁</span>图表空间</Link><Link className="nav-item active" href="/portfolio"><span className="nav-glyph">▦</span>持仓地图</Link><Link className="nav-item" href="/calendar"><span className="nav-glyph">▤</span>财经日历</Link><Link className="nav-item" href="/news"><span className="nav-glyph">◉</span>市场动态</Link><Link className="nav-item" href="/holdings"><span className="nav-glyph">♟</span>大佬持仓</Link><Link className="nav-item" href="/options"><span className="nav-glyph">◇</span>期权计算</Link><Link className="nav-item" href="/philosophy"><span className="nav-glyph">✦</span>大师哲学</Link><Link className="nav-item" href="/canary"><span className="nav-glyph">◈</span>金丝雀指标</Link><Link className="nav-item" href="/voices"><span className="nav-glyph">◌</span>最新风向</Link><Link className="nav-item" href="/framework"><span className="nav-glyph">⌂</span>投资框架</Link></nav>
-      <div className="sidebar-bottom"><div className="sidebar-note"><span className="note-dot" />V0.3 · 持仓矩阵</div><p>地图只保存在这个浏览器中，请定期导出备份。</p></div>
-    </aside>
+    <AppSidebar currentPath="/portfolio" />
     <main className="main-content">
-      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>持仓地图</strong></div><div className="topbar-actions"><span className="sample-pill">{saveError ? "保存失败" : "本地保存"}</span><FundCharterLink /></div></header>
+      <header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>持仓地图</strong></div><div className="topbar-actions"><span className="sample-pill">{saveError ? "保存失败" : "本机持久保存"}</span><FundCharterLink /></div></header>
       <div className="matrix-content">
         <div className="matrix-intro"><div><span className="section-eyebrow">FULL SATELLITE MAP · V0.3</span><h1>持仓地图</h1><p>按策略、主题和地区展开。点击任何标题或标的即可编辑。</p></div>
           <div className="matrix-toolbar"><button className="primary-button" onClick={() => openItem()}>＋ 添加标的</button><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: true, value: { id: newId(), name: "", color: "#90d9f5" } }); }}>＋ 策略</button><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: true, value: { id: newId(), name: "" } }); }}>＋ 地区</button></div>
         </div>
-        <div className="matrix-meta"><div className="matrix-legend"><span><i className="status-held" />已持仓</span><span><i className="status-watch" />暂未持仓 · 观察</span><span><i className="status-add" />计划加仓</span></div><div className="matrix-backup"><button onClick={() => downloadJson("awe-portfolio-matrix-v03.json", JSON.stringify(matrix, null, 2))}>导出地图</button><label className="matrix-import">导入地图<input type="file" accept="application/json,.json" onChange={(event) => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></label>{hasOldData && <button onClick={() => { const old = localStorage.getItem(PORTFOLIO_KEY); if (old) downloadJson("awe-portfolio-v13-backup.json", old); }}>下载旧版持仓备份</button>}</div></div>
-        <p className="matrix-source">初始内容按你提供的示意图录入；图中数字是原样备注，不代表已核验的当前持仓、市价或盈亏。{saveError ? "当前浏览器没有保存修改。" : "修改后自动保存在本浏览器。"}</p>
-        {saveError && <p role="alert" aria-label="保存失败" className="matrix-message">浏览器存储不可用，本次修改没有保存。请导出地图备份。</p>}
+        <div className="matrix-meta"><div className="matrix-legend"><span><i className="status-held" />已持仓</span><span><i className="status-watch" />暂未持仓 · 观察</span><span><i className="status-add" />计划加仓</span></div><div className="matrix-backup"><button onClick={() => downloadJson("awe-portfolio-matrix-v03.json", JSON.stringify(matrix, null, 2))}>导出地图</button><label className="matrix-import">导入地图<input type="file" accept="application/json,.json" onChange={(event) => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></label>{hasLegacyBackup && <button onClick={() => { const old = localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY); if (old) downloadJson("awe-portfolio-browser-legacy-backup.json", old); }}>下载旧浏览器副本</button>}{hasOldData && <button onClick={() => { const old = localStorage.getItem(PORTFOLIO_KEY); if (old) downloadJson("awe-portfolio-v13-backup.json", old); }}>下载旧版持仓备份</button>}</div></div>
+        <p className="matrix-source">初始内容按你提供的示意图录入；图中数字是原样备注，不代表已核验的当前持仓、市价或盈亏。{saveError ? "本机持久保存暂不可用，请导出地图备份。" : "修改后自动保存在本机；不同本地预览端口共用。"}</p>
+        {saveError && <p role="alert" aria-label="保存失败" className="matrix-message">本机持久保存失败。请导出地图备份，避免修改丢失。</p>}
         {message && !editor && <p role="status" className="matrix-message">{message}</p>}
-        {matrix.groups.length ? <div className="matrix-scroll"><table className="matrix-table" aria-label="持仓矩阵"><thead>
+        {matrix.groups.length ? <><div className="matrix-scroll"><table className="matrix-table" aria-label="持仓矩阵"><thead>
           <tr><th className="matrix-corner" rowSpan={2}>地区 / 主题</th>{matrix.groups.map((group) => <th key={group.id} colSpan={Math.max(1, matrix.columns.filter((column) => column.groupId === group.id).length)} className="matrix-group"><div style={{ backgroundColor: group.color }}><button aria-label={`编辑策略 ${group.name}`} onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>{group.name}</button><button aria-label={`添加主题到 ${group.name}`} title="添加主题" onClick={() => openColumn(group.id)}>＋</button></div></th>)}</tr>
           <tr>{columns.map((column) => <th key={column.id} className="matrix-column">{"placeholder" in column && column.placeholder ? <button aria-label={`添加主题到 ${matrix.groups.find((group) => group.id === column.groupId)?.name}`} onClick={() => openColumn(column.groupId)}>＋ 添加主题</button> : <button aria-label={`编辑主题 ${column.name}`} onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name}</button>}</th>)}</tr>
         </thead><tbody>{matrix.regions.map((region) => <tr key={region.id}>
@@ -151,7 +199,21 @@ export function PortfolioMapPage() {
               </>}
             </td>;
           })}
-        </tr>)}</tbody></table></div> : <div className="matrix-empty">还没有策略。点击“＋ 策略”开始创建地图。</div>}
+        </tr>)}</tbody></table></div>
+          <div className="matrix-responsive" aria-label="持仓矩阵窄屏布局">{matrix.groups.map((group) => <section className="matrix-responsive-group" key={group.id}>
+            <div className="matrix-responsive-group-head" style={{ borderColor: group.color }}><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>编辑策略 · {group.name}</button><button onClick={() => openColumn(group.id)}>＋ 添加主题</button></div>
+            <div className="matrix-responsive-grid">{matrix.columns.filter((column) => column.groupId === group.id).map((column) => <article className="matrix-responsive-column" key={column.id}>
+              <button className="matrix-responsive-title" onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name} · 编辑主题</button>
+              {matrix.regions.map((region) => {
+                const tiles = matrix.items.filter((item) => item.columnId === column.id && item.regionId === region.id);
+                return <div className="matrix-responsive-region" key={region.id}>
+                  <div className="matrix-responsive-region-head"><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button><button aria-label={`在 ${column.name} ${region.name} 添加标的`} onClick={() => openItem(column.id, region.id)}>＋</button></div>
+                  {tiles.length > 0 && <div className="matrix-responsive-tiles">{tiles.map((item) => <button key={item.id} className={`matrix-tile status-${item.status}`} aria-label={`编辑卡片 ${item.symbol}`} onClick={() => { setMessage(""); setEditor({ kind: "item", fresh: false, value: item }); }}><strong>{item.symbol}</strong>{item.name !== item.symbol && <small>{item.name}</small>}{item.amount && <span>{item.amount}</span>}</button>)}</div>}
+                </div>;
+              })}
+            </article>)}</div>
+          </section>)}</div>
+        </> : <div className="matrix-empty">还没有策略。点击“＋ 策略”开始创建地图。</div>}
       </div>
     </main>
     {editor && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) { setEditor(null); setMessage(""); } }}><section className="portfolio-editor" role="dialog" aria-modal="true" aria-label={`编辑${kindLabels[editor.kind]}`}>
