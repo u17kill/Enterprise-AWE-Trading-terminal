@@ -1,6 +1,6 @@
 # V1.6 Indicator Card Ordering Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Let the user reorder indicator cards within each Indicator Catalog category and retain that order on this computer across refreshes and local preview ports.
 
@@ -33,10 +33,10 @@
 
 **Interfaces:** `normalizeCanaryOrder(raw): CanaryOrder`, `moveCanaryIndicator(order, band, sourceId, targetId, after): CanaryOrder`, `readStoredCanaryOrder(directory?): Promise<CanaryOrder>`, `writeStoredCanaryOrder(value, directory?): Promise<void>`.
 
-- [ ] Write tests for defaults, valid moves, stale IDs, new IDs, file roundtrip, invalid writes, and local route access.
-- [ ] Run targeted tests to observe the missing-feature failures.
-- [ ] Implement model, atomic file store, and localhost-only GET/PUT route.
-- [ ] Run targeted tests until green; commit Task 1.
+- [x] Write tests for defaults, valid moves, stale IDs, new IDs, file roundtrip, invalid writes, and local route access.
+- [x] Run targeted tests to observe the missing-feature failures.
+- [x] Implement model, atomic file store, and localhost-only GET/PUT route.
+- [x] Run targeted tests until green; commit Task 1.
 
 ### Task 2: Card controls and persistence
 
@@ -44,16 +44,16 @@
 
 **Interfaces:** Client loads `/api/canary-order` on entry and saves moved order through `PUT`. Reorder controls operate only in the current category.
 
-- [ ] Write tests for independent category move, refresh data preserving order, save failure feedback, and controls that do not expand cards.
-- [ ] Run targeted tests to observe failures.
-- [ ] Add drag handle, drop target styling, keyboard up/down controls, reset action, and server persistence.
-- [ ] Run targeted tests until green; commit Task 2.
+- [x] Write tests for independent category move, refresh data preserving order, save failure feedback, and controls that do not expand cards.
+- [x] Run targeted tests to observe failures.
+- [x] Add drag handle, drop target styling, keyboard up/down controls, reset action, and server persistence.
+- [x] Run targeted tests until green; commit Task 2.
 
 ### Task 3: Version record and verification
 
 **Files:** Update `docs/v1.6-status.md`, `docs/README.md`, and the V1.6 design doc if decisions changed.
 
-- [ ] Run focused tests, TypeScript, ESLint, and production build.
-- [ ] Check the page in a separate preview, including drag/drop, refresh, and persisted order.
-- [ ] Record delivered behavior, limits, and test results; commit documentation.
-- [ ] Push `codex/v1.6-indicator-order` and open a V1.6 PR with matching description.
+- [x] Run focused tests, TypeScript, ESLint, and production build.
+- [x] Check the page in a separate preview, including drag/drop, refresh, and persisted order.
+- [x] Record delivered behavior, limits, and test results; commit documentation.
+- [x] Push `codex/v1.6-indicator-order` and open a V1.6 PR with matching description.
