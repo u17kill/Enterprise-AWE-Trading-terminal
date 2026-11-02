@@ -122,11 +122,11 @@ export function relativeSectorStrength(soxx: { date: string; close: number }[], 
   const result = sectorReturns(ratios, closeDate);
   return result ? { change20: result.change20, change60: result.change60 } : null;
 }
-function parseSectorBars(raw: unknown) {
+function parseSectorBars(raw: unknown, market: Market = "us") {
   if (!Array.isArray(raw)) return [];
   return raw.flatMap((item) => {
     if (!item || typeof item !== "object") return [];
-    const row = item as Record<string, unknown>, date = typeof row.timestamp === "string" ? localDate(row.timestamp, "us") : null, close = Number(row.close);
+    const row = item as Record<string, unknown>, date = typeof row.timestamp === "string" ? localDate(row.timestamp, market) : null, close = Number(row.close);
     return date && Number.isFinite(close) && close > 0 ? [{ date, close }] : [];
   });
 }
@@ -142,8 +142,8 @@ export function completedCloseQuote(raw: unknown, symbol: string, closeDate: str
   if (bars.length < 2 || bars.at(-1)?.date !== closeDate || bars.at(-2)?.date === closeDate) return null;
   return { symbol, last_done: String(bars.at(-1)!.close), prev_close: String(bars.at(-2)!.close), timestamp: bars.at(-1)!.timestamp };
 }
-export function completedSectorReading(raw: unknown, symbol: string, title: string, closeDate: string): SectorReading | null {
-  const bars = parseSectorBars(raw).filter((item) => item.date <= closeDate).sort((a, b) => a.date.localeCompare(b.date));
+export function completedSectorReading(raw: unknown, symbol: string, title: string, closeDate: string, market: Market = "us"): SectorReading | null {
+  const bars = parseSectorBars(raw, market).filter((item) => item.date <= closeDate).sort((a, b) => a.date.localeCompare(b.date));
   const trend = sectorReturns(bars, closeDate);
   if (!trend || bars.at(-2)?.date === closeDate) return null;
   const last = bars.at(-1)!.close, prior = bars.at(-2)!.close;
@@ -171,6 +171,20 @@ async function completedUsSectors(session: Session, closeDate: string) {
     sectors.push(...batch.filter((sector): sector is SectorReading => sector !== null));
   }
   return sectors;
+}
+async function completedChinaSectorTrends(session: Session, sectors: SectorReading[], closeDate: string) {
+  const result: SectorReading[] = [];
+  for (let index = 0; index < sectors.length; index += 4) {
+    const batch = await Promise.all(sectors.slice(index, index + 4).map(async (sector) => {
+      try {
+        const raw = await callLongbridgeTool(session, "candlesticks", { symbol: sector.symbol, period: "day", count: 72, trade_sessions: "intraday" });
+        const dated = completedSectorReading(raw, sector.symbol, sector.title, closeDate, "cn");
+        return dated && Math.abs(dated.changePercent - sector.changePercent) <= 0.15 ? dated : sector;
+      } catch { return sector; }
+    }));
+    result.push(...batch);
+  }
+  return result;
 }
 export function parseChinaSectorRanking(raw: unknown) {
   const groups = raw && typeof raw === "object" ? (raw as { items?: unknown }).items : null;
@@ -308,7 +322,15 @@ export async function collectSentiment(session: Session, market: Market) {
   let sectorAsOf: string | null = null;
   try {
     if (market === "us") { sectors = await completedUsSectors(session, latest.date); sectorAsOf = sectors.length ? latest.date : null; }
-    else { const ranking = parseChinaSectorRanking(await callLongbridgeTool(session, "industry_rank", { market: "CN", indicator: "1", sort_type: "0", _jq: "{items:(.items|map({lists:(.lists|map({symbol,name,chg,last:(.minutes[-1].timestamp)}))}))}" })); sectors = ranking.sectors; sectorAsOf = ranking.asOf; }
+    else {
+      const ranking = parseChinaSectorRanking(await callLongbridgeTool(session, "industry_rank", { market: "CN", indicator: "1", sort_type: "0", _jq: "{items:(.items|map({lists:(.lists|map({symbol,name,chg,last:(.minutes[-1].timestamp)}))}))}" }));
+      sectors = [...new Map([...ranking.sectors.slice(0, 6), ...ranking.sectors.slice(-6)].map((sector) => [sector.symbol, sector])).values()];
+      sectorAsOf = ranking.asOf;
+      if (ranking.asOf === latest.date && sectors.length) {
+        sectors = await completedChinaSectorTrends(session, sectors, latest.date);
+        if (sectors.some((sector) => sector.change20 === undefined)) errors.cnSectorTrend = "部分 A 股行业指数未返回与榜单同日且至少 61 个交易日的历史；这些行不展示持续性";
+      }
+    }
     if (!sectors.length) errors.sectors = "板块来源未返回带日期的可核验行情";
   } catch (error) { errors.sectors = error instanceof Error ? error.message : "行业数据请求失败"; }
   if (market === "us") {
@@ -326,5 +348,5 @@ export async function collectSentiment(session: Session, market: Market) {
       for (const [days, value] of [[20, strength.change20], [60, strength.change60]] as const) readings.push({ id: `semiconductorRelative${days}`, title: `半导体相对强弱 · ${days} 日`, value, unit: "%", asOf: latest.date, source: "Longbridge · SOXX/SPY 前复权日 K", status: value > 0 ? "半导体领先" : value < 0 ? "半导体落后" : "持平", summary: `SOXX/SPY 价格比在 ${days} 个交易日内变化 ${value.toFixed(2)}%。`, explanation: "SOXX ETF 与 SPY ETF 的前复权收盘价比值变化；是美股半导体相对大盘的代理，不等于费城半导体指数相对标普指数，也不代表未来收益。", points: [] });
     } catch (error) { errors.semiconductorRelative = error instanceof Error ? error.message : "半导体相对强弱暂不可用"; }
   }
-  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], movers, moverAsOf, moverLayer, sectors: market === "cn" ? [...sectors.slice(0, 6), ...sectors.slice(-6)] : sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
+  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], movers, moverAsOf, moverLayer, sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
 }

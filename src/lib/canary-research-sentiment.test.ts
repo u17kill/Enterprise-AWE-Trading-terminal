@@ -34,6 +34,11 @@ describe("short-term sentiment sources", () => {
     expect(result).toEqual({ symbol: "XLK.US", title: "科技", changePercent: 0.63, change5: 3.23, change20: 14.29, change60: 60 });
     expect(completedSectorReading(bars.slice(0, -3), "XLK.US", "科技", closeDate)).toBeNull();
   });
+  it("reads A-share industry daily bars in the Shanghai market date", () => {
+    const bars = Array.from({ length: 62 }, (_, index) => ({ timestamp: new Date(Date.UTC(2026, 7, index, 16)).toISOString(), close: String(100 + index) }));
+    expect(completedSectorReading(bars, "IN40197.SH", "电影和娱乐", "2026-09-30", "cn")).toEqual({ symbol: "IN40197.SH", title: "电影和娱乐", changePercent: 0.63, change5: 3.23, change20: 14.29, change60: 60 });
+    expect(completedSectorReading(bars, "IN40197.SH", "电影和娱乐", "2026-09-29", "cn")).toBeNull();
+  });
   it("keeps an A-share sector observation separate when it is newer than the close review", () => {
     const raw = { items: [{ lists: [{ symbol: "IN001.CN", name: "半导体", chg: "0.025", last: Date.parse("2026-11-02T04:00:00Z") / 1000 }] }] };
     expect(parseChinaSectorRanking(raw)).toEqual({ asOf: "2026-11-02", sectors: [{ symbol: "IN001.CN", title: "半导体", changePercent: 2.5 }] });

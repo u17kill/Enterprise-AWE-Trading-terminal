@@ -44,4 +44,12 @@ describe("V1.5 research page frame", () => {
     expect(screen.getByText(/2026-11-02 · 1200 只筛选样本 · 盘中观察/)).toBeInTheDocument();
     expect(screen.getByText(/盘中数值会变化，不纳入上方收盘判断/)).toBeInTheDocument();
   });
+  it("shows verified 5/20/60-session A-share industry trends beneath the heatmap", () => {
+    localStorage.setItem("awe-v15-sentiment-cn", JSON.stringify({ market: "cn", kind: "sentiment", refreshedAt: "2026-11-02T08:00:00Z", closeAsOf: "2026-11-02", readings: [{ id: "temperature", title: "市场温度", value: 63, unit: "/100", asOf: "2026-11-02", source: "Longbridge", summary: "", explanation: "", points: [], status: "正常" }], sectorAsOf: "2026-11-02", sectorLayer: "close", sectors: [{ symbol: "IN40197.SH", title: "电影和娱乐", changePercent: 10.53, change5: 12.4, change20: 23.5, change60: 31.6 }], errors: {} }));
+    localStorage.setItem("awe-v15-market", "cn");
+    render(<CanaryResearchShell kind="sentiment" />);
+    expect(screen.getByText("行业指数")).toBeInTheDocument();
+    expect(screen.getByText("+12.40%")).toBeInTheDocument();
+    expect(screen.getByText("+23.50%")).toBeInTheDocument();
+  });
 });
