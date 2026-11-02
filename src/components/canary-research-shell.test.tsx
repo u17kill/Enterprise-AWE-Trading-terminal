@@ -29,4 +29,12 @@ describe("V1.5 research page frame", () => {
     expect(screen.getByText("61.00")).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
+  it("labels the US movers as a dated large-cap sample rather than full-market breadth", () => {
+    localStorage.setItem("awe-v15-sentiment-us", JSON.stringify({ market: "us", kind: "sentiment", refreshedAt: "2026-11-02T05:00:00Z", closeAsOf: "2026-10-30", readings: [{ id: "temperature", title: "市场温度", value: 34, unit: "/100", asOf: "2026-10-30", source: "Longbridge", summary: "", explanation: "", points: [], status: "正常" }], movers: { universe: 1195, gainers: [{ symbol: "AAA.US", name: "甲公司", changePercent: 10, marketCap: 20_000_000_000 }], losers: [{ symbol: "BBB.US", name: "乙公司", changePercent: -10, marketCap: 30_000_000_000 }] }, errors: {} }));
+    render(<CanaryResearchShell kind="sentiment" />);
+    expect(screen.getByRole("heading", { name: "美股大市值涨跌榜" })).toBeInTheDocument();
+    expect(screen.getByText(/市值至少 100 亿美元/)).toBeInTheDocument();
+    expect(screen.getByText("甲公司")).toBeInTheDocument();
+    expect(screen.getByText("乙公司")).toBeInTheDocument();
+  });
 });

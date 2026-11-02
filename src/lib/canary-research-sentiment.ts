@@ -10,6 +10,7 @@ const SECTORS = [
 const MAG_SEVEN = [["AAPL.US", "苹果"], ["MSFT.US", "微软"], ["GOOGL.US", "Alphabet"], ["AMZN.US", "亚马逊"], ["META.US", "Meta"], ["NVDA.US", "英伟达"], ["TSLA.US", "特斯拉"]] as const;
 type Pulse = { date: string; temperature: number; sentiment: number; valuation: number };
 type SectorReading = { symbol: string; title: string; changePercent: number; change5?: number; change20?: number; change60?: number };
+type Mover = { symbol: string; name: string; changePercent: number; marketCap: number };
 function localDate(timestamp: string | number, market: Market): string | null {
   const date = new Date(typeof timestamp === "number" ? timestamp * 1000 : timestamp);
   if (!Number.isFinite(date.getTime())) return null;
@@ -56,6 +57,24 @@ export function buildMagSeven(quotesRaw: unknown, infosRaw: unknown, closeDate: 
   const base = members.reduce((sum, item) => sum + item.priorMarketCap, 0);
   if (!Number.isFinite(base) || base <= 0) return null;
   return { weightedChangePercent: Math.round(members.reduce((sum, item) => sum + item.deltaCap, 0) / base * 10_000) / 100, members: members.map(({ symbol, title, changePercent, priorMarketCap }) => ({ symbol, title, changePercent, weightPercent: Math.round(priorMarketCap / base * 10_000) / 100 })) };
+}
+export function rankLargeCapMovers(gainersRaw: unknown, losersRaw: unknown, quotesRaw: unknown, closeDate: string): { universe: number; gainers: Mover[]; losers: Mover[] } | null {
+  if (!gainersRaw || !losersRaw || typeof gainersRaw !== "object" || typeof losersRaw !== "object" || !Array.isArray(quotesRaw)) return null;
+  const gainersData = gainersRaw as { total?: unknown; items?: unknown }, losersData = losersRaw as { total?: unknown; items?: unknown };
+  if (!Array.isArray(gainersData.items) || !Array.isArray(losersData.items) || !Number.isInteger(gainersData.total) || Number(gainersData.total) !== Number(losersData.total)) return null;
+  const quotes = new Map(quotesRaw.flatMap((item) => item && typeof item === "object" && typeof item.symbol === "string" ? [[item.symbol as string, item as Record<string, unknown>] as const] : []));
+  const parse = (items: unknown[], direction: 1 | -1) => items.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const row = entry as Record<string, unknown>, symbol = row.symbol, name = row.name;
+    if (typeof symbol !== "string" || !/^[A-Z0-9.-]+\.US$/.test(symbol) || typeof name !== "string" || !Array.isArray(row.indicators)) return [];
+    const capField = row.indicators.find((field) => field && typeof field === "object" && field.key === "marketcap") as { value?: unknown } | undefined;
+    const marketCap = Number(capField?.value), quote = quotes.get(symbol), last = Number(quote?.last_done), previous = Number(quote?.prev_close);
+    if (!Number.isFinite(marketCap) || marketCap < 10_000_000_000 || !quote || typeof quote.timestamp !== "string" || localDate(quote.timestamp, "us") !== closeDate || !Number.isFinite(last) || last <= 0 || !Number.isFinite(previous) || previous <= 0) return [];
+    const changePercent = Math.round((last / previous - 1) * 10_000) / 100;
+    return changePercent * direction > 0 ? [{ symbol, name, changePercent, marketCap }] : [];
+  }).sort((a, b) => direction * (b.changePercent - a.changePercent)).slice(0, 10);
+  const gainers = parse(gainersData.items, 1), losers = parse(losersData.items, -1);
+  return gainers.length && losers.length ? { universe: Number(gainersData.total), gainers, losers } : null;
 }
 export function sectorReturns(bars: { date: string; close: number }[], closeDate: string) {
   const ordered = [...bars].sort((a, b) => a.date.localeCompare(b.date));
@@ -166,6 +185,7 @@ export async function collectSentiment(session: Session, market: Market) {
   ] as const).map(([id, title, value, explanation]) => ({ id, title, value, unit: "/ 100", asOf: latest.date, source: "Longbridge · 市场温度历史", status: value < 30 ? "偏冷" : value > 70 ? "偏热" : "中性", summary: `${title}为 ${value}/100；请结合近六次观测和板块变化。`, explanation, points: pulse.slice(-6).map((point) => ({ date: point.date, value: point[id] })) }));
   const errors: Record<string, string> = {};
   let leaders: ReturnType<typeof buildMagSeven> = null;
+  let movers: ReturnType<typeof rankLargeCapMovers> = null;
   if (market === "us") {
     const health = await collectMarketHealth(session).catch(() => null);
     for (const [id, title, explanation] of [
@@ -187,6 +207,15 @@ export async function collectSentiment(session: Session, market: Market) {
       const value = leaders.weightedChangePercent;
       readings.push({ id: "magSevenBasket", title: "七巨头市值加权涨跌", value, unit: "%", asOf: latest.date, source: "Longbridge · 七股收盘价与总股本", status: value > 0 ? "整体上涨" : value < 0 ? "整体下跌" : "持平", summary: `七家公司以昨日市值加权，合计变动 ${value.toFixed(2)}%。`, explanation: "苹果、微软、Alphabet（以 GOOGL 代表公司，避免与 GOOG 重复计算）、亚马逊、Meta、英伟达、特斯拉。用昨日价格 × 总股本作权重计算七家公司自身的加权日涨跌；不是对纳指或标普的指数点数贡献，股本披露变化可能影响权重。", points: [] });
     } catch (error) { errors.magSevenBasket = error instanceof Error ? error.message : "七巨头行情暂不可用"; }
+    try {
+      const screener = { market: "US", conditions: [{ key: "marketcap", min: "100", max: "" }], extra_returns: ["marketcap", "prevchg"], sort_by_key: "prevchg", size: 20, page: 0 };
+      const [gainersRaw, losersRaw] = await Promise.all(["desc", "asc"].map((sort_order) => callLongbridgeTool(session, "screener_search", { ...screener, sort_order, _jq: "{total,items:(.items|map({symbol,name,indicators}))}" })));
+      const symbols = [...new Set([gainersRaw, losersRaw].flatMap((raw) => raw && typeof raw === "object" && Array.isArray((raw as { items?: unknown }).items) ? (raw as { items: { symbol?: string }[] }).items.map((item) => item.symbol).filter((symbol): symbol is string => typeof symbol === "string") : []))];
+      if (symbols.length < 20) throw new Error("美股大市值筛选样本不足");
+      const quotes = await callLongbridgeTool(session, "quote", { symbols, _jq: "map({symbol,last_done,prev_close,timestamp})" });
+      movers = rankLargeCapMovers(gainersRaw, losersRaw, quotes, latest.date);
+      if (!movers || movers.gainers.length < 5 || movers.losers.length < 5) throw new Error("美股涨跌榜未返回足够的同日收盘报价");
+    } catch (error) { movers = null; errors.largeCapMovers = error instanceof Error ? error.message : "美股大市值榜暂不可用"; }
   }
   if (market === "cn") {
     try {
@@ -224,5 +253,5 @@ export async function collectSentiment(session: Session, market: Market) {
       for (const [days, value] of [[20, strength.change20], [60, strength.change60]] as const) readings.push({ id: `semiconductorRelative${days}`, title: `半导体相对强弱 · ${days} 日`, value, unit: "%", asOf: latest.date, source: "Longbridge · SOXX/SPY 前复权日 K", status: value > 0 ? "半导体领先" : value < 0 ? "半导体落后" : "持平", summary: `SOXX/SPY 价格比在 ${days} 个交易日内变化 ${value.toFixed(2)}%。`, explanation: "SOXX ETF 与 SPY ETF 的前复权收盘价比值变化；是美股半导体相对大盘的代理，不等于费城半导体指数相对标普指数，也不代表未来收益。", points: [] });
     } catch (error) { errors.semiconductorRelative = error instanceof Error ? error.message : "半导体相对强弱暂不可用"; }
   }
-  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], sectors: market === "cn" ? [...sectors.slice(0, 6), ...sectors.slice(-6)] : sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
+  return { kind: "sentiment" as const, market, refreshedAt: new Date().toISOString(), closeAsOf: latest.date, readings, leaders: leaders?.members ?? [], movers, sectors: market === "cn" ? [...sectors.slice(0, 6), ...sectors.slice(-6)] : sectors, sectorAsOf, sectorLayer: sectorAsOf && sectorAsOf !== latest.date ? "intraday" : "close", errors };
 }

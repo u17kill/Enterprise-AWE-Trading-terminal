@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./longbridge-mcp", () => ({ callLongbridgeTool: vi.fn() }));
-import { buildMagSeven, completedSentimentPulses, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
+import { buildMagSeven, completedSentimentPulses, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, rankLargeCapMovers, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
 import { callLongbridgeTool } from "./longbridge-mcp";
 
 describe("short-term sentiment sources", () => {
@@ -51,5 +51,16 @@ describe("short-term sentiment sources", () => {
     expect(result?.weightedChangePercent).toBe(1.43);
     expect(buildMagSeven(quotes.slice(1), infos, "2026-10-30")).toBeNull();
     expect(buildMagSeven(quotes, infos, "2026-10-29")).toBeNull();
+  });
+  it("shows only same-close verified US large-cap movers and labels the sample", () => {
+    const row = (symbol: string, cap: number) => ({ symbol, name: symbol, indicators: [{ key: "marketcap", value: String(cap) }] });
+    const winners = { total: 1200, items: [row("AAA.US", 20_000_000_000), row("SMALL.US", 9_000_000_000), row("STALE.US", 20_000_000_000)] };
+    const losers = { total: 1200, items: [row("BBB.US", 30_000_000_000)] };
+    const quote = (symbol: string, last: number, prior: number, timestamp = "2026-10-30T20:00:00Z") => ({ symbol, last_done: String(last), prev_close: String(prior), timestamp });
+    const result = rankLargeCapMovers(winners, losers, [quote("AAA.US", 110, 100), quote("SMALL.US", 130, 100), quote("STALE.US", 120, 100, "2026-10-29T20:00:00Z"), quote("BBB.US", 90, 100)], "2026-10-30");
+    expect(result?.universe).toBe(1200);
+    expect(result?.gainers).toEqual([{ symbol: "AAA.US", name: "AAA.US", changePercent: 10, marketCap: 20_000_000_000 }]);
+    expect(result?.losers).toEqual([{ symbol: "BBB.US", name: "BBB.US", changePercent: -10, marketCap: 30_000_000_000 }]);
+    expect(rankLargeCapMovers(winners, losers, [quote("AAA.US", 110, 100), quote("BBB.US", 90, 100, "2026-10-29T20:00:00Z")], "2026-10-30")).toBeNull();
   });
 });
