@@ -76,6 +76,24 @@ export function rankLargeCapMovers(gainersRaw: unknown, losersRaw: unknown, quot
   const gainers = parse(gainersData.items, 1), losers = parse(losersData.items, -1);
   return gainers.length && losers.length ? { universe: Number(gainersData.total), gainers, losers } : null;
 }
+export function parseChinaMarketBreadth(html: string, closeDate: string): { date: string; up: number; down: number; flat: number; suspended: number; total: number } | null {
+  const sourceDate = html.match(/class="market-activity-time"[^>]*>\s*(\d{4}-\d{2}-\d{2})\s+15:00:00\s*</)?.[1];
+  if (sourceDate !== closeDate) return null;
+  const count = (id: string) => {
+    const value = html.match(new RegExp(`id="${id}"\\s+data-chart="(\\d+)"`))?.[1];
+    return value === undefined ? null : Number(value);
+  };
+  const [total, up, down, flat, suspended] = ["total", "totalUp", "totalDown", "priceStop", "pricePaused"].map(count);
+  if ([total, up, down, flat, suspended].some((value) => value === null || !Number.isSafeInteger(value) || value < 0) || total === null || up === null || down === null || flat === null || suspended === null || total < 1000 || total > 10000 || up + down + flat + suspended !== total) return null;
+  return { date: sourceDate, up, down, flat, suspended, total };
+}
+async function fetchChinaMarketBreadth(closeDate: string) {
+  const response = await fetch("https://legulegu.com/stockdata/market-activity", { cache: "no-store", signal: AbortSignal.timeout(12_000), headers: { Accept: "text/html,application/xhtml+xml", Referer: "https://legulegu.com/", "User-Agent": "Mozilla/5.0" } });
+  if (!response.ok) throw new Error(`乐咕乐股市场活跃度请求失败（HTTP ${response.status}）`);
+  const result = parseChinaMarketBreadth(await response.text(), closeDate);
+  if (!result) throw new Error("乐咕乐股涨跌家数的日期或总数未通过核验");
+  return result;
+}
 export function sectorReturns(bars: { date: string; close: number }[], closeDate: string) {
   const ordered = [...bars].sort((a, b) => a.date.localeCompare(b.date));
   if (ordered.length < 61 || ordered.at(-1)?.date !== closeDate || ordered.some((item) => !Number.isFinite(item.close) || item.close <= 0)) return null;
@@ -218,6 +236,15 @@ export async function collectSentiment(session: Session, market: Market) {
     } catch (error) { movers = null; errors.largeCapMovers = error instanceof Error ? error.message : "美股大市值榜暂不可用"; }
   }
   if (market === "cn") {
+    try {
+      const breadth = await fetchChinaMarketBreadth(latest.date);
+      const advanceShare = Math.round(breadth.up / breadth.total * 10_000) / 100;
+      for (const [id, title, value, unit, explanation] of [
+        ["advances", "A 股上涨家数", breadth.up, "家", "乐咕乐股沪深 A 股当日上涨股票数；与下跌、平盘和停牌家数同页核对，不等于涨停家数。"],
+        ["declines", "A 股下跌家数", breadth.down, "家", "乐咕乐股沪深 A 股当日下跌股票数；交易所与停牌股票的统计范围按源站口径。"],
+        ["advanceShare", "A 股上涨占比", advanceShare, "%", "上涨家数除以源站总数，分母包含平盘与停牌；它描述当日参与面，不预测次日涨跌。"],
+      ] as const) readings.push({ id, title, value, unit, asOf: breadth.date, source: "乐咕乐股 · 沪深 A 股赚钱效应", status: "已核对", summary: `${title} ${value}${unit}。`, explanation: `${explanation} 源站同日合计 ${breadth.total} 家，其中平盘 ${breadth.flat}、停牌 ${breadth.suspended} 家。`, points: [] });
+    } catch (error) { errors.advancesDeclines = error instanceof Error ? error.message : "A 股涨跌家数暂不可用"; }
     try {
       const turnover = await fetchChinaTurnover(latest.date);
       readings.push({ id: "turnover", title: "沪深 A 股成交额", value: Math.round(turnover.value * 1000) / 1000, unit: "万亿元", asOf: turnover.date, source: "上交所 / 深交所 · A 股成交概况", status: "已核对", summary: "两所主板与创业板 A 股成交额同日相加。", explanation: "A 股股票成交金额，不含 B 股与基金。它表示交易活跃度，不是资金净流入；应结合涨跌家数与市场方向阅读。", points: [] });

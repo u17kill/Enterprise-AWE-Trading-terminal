@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("./longbridge-mcp", () => ({ callLongbridgeTool: vi.fn() }));
-import { buildMagSeven, completedSentimentPulses, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, rankLargeCapMovers, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
+import { buildMagSeven, completedSentimentPulses, parseChinaMarketBreadth, parseChinaSectorRanking, parseSentimentHistory, parseSectorQuotes, rankLargeCapMovers, relativeSectorStrength, sectorReturns, verifyHistoricalLimitPools } from "./canary-research-sentiment";
 import { callLongbridgeTool } from "./longbridge-mcp";
 
 describe("short-term sentiment sources", () => {
@@ -62,5 +62,11 @@ describe("short-term sentiment sources", () => {
     expect(result?.gainers).toEqual([{ symbol: "AAA.US", name: "AAA.US", changePercent: 10, marketCap: 20_000_000_000 }]);
     expect(result?.losers).toEqual([{ symbol: "BBB.US", name: "BBB.US", changePercent: -10, marketCap: 30_000_000_000 }]);
     expect(rankLargeCapMovers(winners, losers, [quote("AAA.US", 110, 100), quote("BBB.US", 90, 100, "2026-10-29T20:00:00Z")], "2026-10-30")).toBeNull();
+  });
+  it("accepts A-share advances and declines only when the source date and totals match the close", () => {
+    const html = `<span class="market-activity-time">2026-11-02 15:00:00</span><div id="total" data-chart="5223"></div><div id="totalUp" data-chart="4382"></div><div id="totalDown" data-chart="767"></div><div id="priceStop" data-chart="68"></div><div id="pricePaused" data-chart="6"></div>`;
+    expect(parseChinaMarketBreadth(html, "2026-11-02")).toEqual({ date: "2026-11-02", up: 4382, down: 767, flat: 68, suspended: 6, total: 5223 });
+    expect(parseChinaMarketBreadth(html, "2026-10-30")).toBeNull();
+    expect(parseChinaMarketBreadth(html.replace('data-chart="5223"', 'data-chart="5224"'), "2026-11-02")).toBeNull();
   });
 });
