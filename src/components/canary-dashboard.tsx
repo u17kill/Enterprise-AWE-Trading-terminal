@@ -3,9 +3,11 @@
 import { AppSidebar } from "./app-sidebar";
 
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 import { FundCharterLink } from "./fund-charter-link";
 import { buildCanaryAnalysis, CANARY_INDICATORS, CANARY_STORAGE_KEY, mergeCanarySnapshot, parseCanarySnapshot, type CanaryAnalysis, type CanaryIndicator, type CanaryReading, type CanarySnapshot } from "../lib/canary";
+import { moveCanaryIndicator, normalizeCanaryOrder, type CanaryOrder } from "../lib/canary-order";
+import type { CanaryBand } from "../lib/canary";
 
 const sections = [
   { band: "macro", number: "01", title: "宏观先行", subtitle: "美国 · 日本 · 中国", description: "从利率曲线、信用和汇率观察全球金融条件。" },
@@ -78,10 +80,72 @@ export function CanaryDashboard() {
   const [volatileSnapshot, setVolatileSnapshot] = useState<CanarySnapshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [order, setOrder] = useState<CanaryOrder>(() => normalizeCanaryOrder(null));
+  const [orderReady, setOrderReady] = useState(false);
+  const [orderSaving, setOrderSaving] = useState(false);
+  const [orderFeedback, setOrderFeedback] = useState("");
+  const [dropMark, setDropMark] = useState<{ id: string; after: boolean } | null>(null);
+  const pointerDrag = useRef<{ id: string; band: CanaryBand; x: number; y: number } | null>(null);
+  const saving = useRef(false);
   const storedSnapshot = useMemo(() => { try { return parseCanarySnapshot(JSON.parse(saved)); } catch { return null; } }, [saved]);
   const snapshot = volatileSnapshot ?? storedSnapshot;
   const report = useMemo(() => buildCanaryAnalysis(snapshot), [snapshot]);
   const updated = snapshot ? Object.keys(snapshot.readings).length : 0;
+  useEffect(() => {
+    let active = true;
+    fetch("/api/canary-order", { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) throw new Error("排序读取失败，当前显示默认顺序。");
+      const body = await response.json();
+      if (active) { setOrder(normalizeCanaryOrder(body.order)); setOrderReady(true); }
+    }).catch(() => { if (active) setOrderFeedback("排序读取失败，当前显示默认顺序；请刷新后再调整。"); });
+    return () => { active = false; };
+  }, []);
+
+  const saveOrder = async (next: CanaryOrder) => {
+    if (!orderReady || saving.current || next === order) return;
+    saving.current = true;
+    setOrderSaving(true);
+    setOrder(next);
+    setOrderFeedback("");
+    try {
+      const response = await fetch("/api/canary-order", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(next) });
+      if (!response.ok) throw new Error("save failed");
+      setOrderFeedback("指标顺序已保存在本机。");
+    } catch {
+      setOrder(order);
+      setOrderFeedback("排序保存失败，已恢复上次保存的顺序；请重试。");
+    } finally {
+      saving.current = false;
+      setOrderSaving(false);
+    }
+  };
+
+  const moveByOne = (band: CanaryBand, id: string, direction: -1 | 1) => {
+    const list = order[band];
+    const index = list.indexOf(id);
+    const target = list[index + direction];
+    if (target) void saveOrder(moveCanaryIndicator(order, band, id, target, direction > 0));
+  };
+
+  const positionAfter = (clientY: number, element: HTMLElement) => clientY >= element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2;
+  const pointerTarget = (event: PointerEvent<HTMLElement>) => {
+    const hovered = document.elementFromPoint?.(event.clientX, event.clientY) ?? event.target;
+    return hovered instanceof Element ? hovered.closest<HTMLElement>(".canary-card-slot") : null;
+  };
+  const onPointerMove = (event: PointerEvent<HTMLElement>, band: CanaryBand) => {
+    const source = pointerDrag.current;
+    if (!source || source.band !== band || Math.hypot(event.clientX - source.x, event.clientY - source.y) < 8) return;
+    const target = pointerTarget(event);
+    setDropMark(target?.dataset.canaryId && target.dataset.canaryId !== source.id ? { id: target.dataset.canaryId, after: positionAfter(event.clientY, target) } : null);
+  };
+  const onPointerUp = (event: PointerEvent<HTMLElement>, band: CanaryBand) => {
+    const source = pointerDrag.current;
+    pointerDrag.current = null;
+    setDropMark(null);
+    if (!source || source.band !== band || Math.hypot(event.clientX - source.x, event.clientY - source.y) < 8) return;
+    const target = pointerTarget(event);
+    if (target?.dataset.canaryId && target.dataset.canaryId !== source.id) void saveOrder(moveCanaryIndicator(order, band, source.id, target.dataset.canaryId, positionAfter(event.clientY, target)));
+  };
   const refresh = async () => {
     setBusy(true); setFeedback("");
     try {
@@ -102,9 +166,17 @@ export function CanaryDashboard() {
   <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> 金丝雀指标 <span>/</span> <strong>指标大全</strong></div><div className="topbar-actions"><span className="sample-pill">手动刷新 · 本地保存</span><FundCharterLink /></div></header>
     <div className="canary-content"><div className="canary-hero"><div><span className="section-eyebrow">AWE / MARKET INTELLIGENCE</span><h1>指标大全</h1><p>宏观先行，再看美股风险与 A 股资金。让风险变化有出处、有日期，也有解释。</p></div><div className="canary-hero-actions"><button type="button" onClick={refresh} disabled={busy}>{busy ? "正在核对数据…" : "↻ 更新指标"}</button><span>{snapshot ? `上次更新 ${displayDate(snapshot.refreshedAt)} · 已有 ${updated} 项读数` : "点击更新获取已接入指标"}</span><a href="/api/longbridge/connect?return=%2Fcanary">连接 Longbridge · 读取 VIX 与期权指标</a></div></div>
       {feedback && <p className="canary-feedback" role="status">{feedback}</p>}
+      {orderFeedback && <p className="canary-feedback" role="status">{orderFeedback}</p>}
       <div className="canary-legend"><span><i className="legend-live" />有效读数</span><span><i className="legend-old" />旧数据</span><span><i className="legend-pending" />待接入</span><small>数值显示在卡片上；点开可看使用说明、来源与限制。CDS 留待后续版本。</small></div>
       <section className="canary-outlook" aria-label="市场阶段判断"><div className="canary-section-intro"><span>MARKET OUTLOOK</span><h2>分时间尺度看市场</h2><p>只根据有效读数形成条件性判断，缺失数据不会被视为平稳。</p></div><div className="canary-outlook-grid"><AnalysisCard report={report.short} horizon="中短期 · 几天至约一个月" index="01" /><AnalysisCard report={report.long} horizon="中长期 · 三个月至一年" index="02" /></div></section>
-      {sections.map((section) => <section className="canary-band" key={section.band} aria-labelledby={`canary-${section.band}-title`}><div className="canary-band-title"><span>{section.number}</span><div><h2 id={`canary-${section.band}-title`}>{section.title}</h2><p>{section.description}</p></div><small>{section.subtitle}</small></div><div className="canary-grid">{CANARY_INDICATORS.filter((item) => item.band === section.band).map((item) => <IndicatorCard key={item.id} item={item} reading={snapshot?.readings[item.id]} error={snapshot?.errors[item.id]} />)}<article className="canary-placeholder"><strong>＋</strong><span>预留指标</span><p>以后可在这一层增加已核验的先行信号。</p></article></div></section>)}
+      {sections.map((section) => <section className="canary-band" key={section.band} aria-labelledby={`canary-${section.band}-title`}><div className="canary-band-title"><span>{section.number}</span><div><h2 id={`canary-${section.band}-title`}>{section.title}</h2><p>{section.description}</p></div><div className="canary-band-actions"><small>{section.subtitle}</small><button type="button" disabled={!orderReady || orderSaving || order[section.band].every((id, index) => id === normalizeCanaryOrder(null)[section.band][index])} onClick={() => void saveOrder({ ...order, [section.band]: normalizeCanaryOrder(null)[section.band] })}>恢复默认顺序</button></div></div><div className="canary-grid" onPointerMove={(event) => onPointerMove(event, section.band)} onPointerUp={(event) => onPointerUp(event, section.band)} onPointerLeave={() => { pointerDrag.current = null; setDropMark(null); }} onPointerCancel={() => { pointerDrag.current = null; setDropMark(null); }}>{order[section.band].map((id, index) => {
+        const item = CANARY_INDICATORS.find((candidate) => candidate.id === id && candidate.band === section.band);
+        if (!item) return null;
+        return <div className={`canary-card-slot${dropMark?.id === id ? ` canary-drop-${dropMark.after ? "after" : "before"}` : ""}`} data-canary-id={id} key={id}>
+          <div className="canary-order-tools"><button type="button" aria-label={`向上移动${item.title}`} title="向前移动" disabled={!orderReady || orderSaving || index === 0} onClick={() => moveByOne(section.band, id, -1)}>↑</button><button type="button" aria-label={`向下移动${item.title}`} title="向后移动" disabled={!orderReady || orderSaving || index === order[section.band].length - 1} onClick={() => moveByOne(section.band, id, 1)}>↓</button><button type="button" className="canary-drag-handle" aria-label={`拖动${item.title}`} title="拖动调整顺序" disabled={!orderReady || orderSaving} onPointerDown={(event) => { pointerDrag.current = { id, band: section.band, x: event.clientX, y: event.clientY }; }}>⠿</button></div>
+          <IndicatorCard item={item} reading={snapshot?.readings[id]} error={snapshot?.errors[id]} />
+        </div>;
+      })}<article className="canary-placeholder"><strong>＋</strong><span>预留指标</span><p>以后可在这一层增加已核验的先行信号。</p></article></div></section>)}
       <p className="canary-footer">不同来源的更新时间、样本范围和许可不同；请按每项卡片的观测日阅读。亮灯是观察提示，不构成交易建议。</p>
     </div></main></div>;
 }

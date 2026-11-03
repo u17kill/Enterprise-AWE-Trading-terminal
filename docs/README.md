@@ -20,6 +20,6 @@
 | V1.3（基金宪法，用户已验收） | [正文及阅读页设计](superpowers/specs/2026-10-31-v13-fund-charter-design.md) | [V1.3 基金宪法交付、验证与验收](v1.3-fund-charter-status.md) | [PR #18](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/18)；与上方 2026-10-24 的旧 V1.3 终端增强记录区分 |
 | V1.4（最新风向、中文速览、Truth Social 原帖、Atreides 13F，已验收） | [人物分组与数据原则](superpowers/specs/2026-11-01-v14-latest-voices-design.md) · [实施计划](superpowers/plans/2026-11-01-v14-latest-voices.md) | [V1.4 交付、数据边界与验收](v1.4-status.md) | [PR #21](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/21) |
 | V1.5（金丝雀三页与两级导航，用户已验收；已知缺口继续跟踪） | [当前方案、代理指标与核验边界](superpowers/specs/2026-11-02-v15-canary-navigation-design.md) · [历史七 Tab 草案](superpowers/specs/2026-11-01-v15-canary-redesign-design.md) | [V1.5 交付、验收与已知缺口](v1.5-status.md) · [来源核验](v1.5-source-audit.md) · [A 股短线预览](v1.5-sentiment-cn-preview.png) · [美股短线预览](v1.5-sentiment-us-preview.png) | [草稿 PR #22](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/22) |
-| V1.6（指标大全卡片排序，需求讨论中） | [需求草案](superpowers/specs/2026-11-03-v16-indicator-order-design.md) | [V1.6 状态](v1.6-status.md) | 尚未开发或提交 PR |
+| V1.6（指标大全卡片排序，用户已验收） | [需求与实现决定](superpowers/specs/2026-11-03-v16-indicator-order-design.md) · [实施计划](superpowers/plans/2026-11-03-v16-indicator-order.md) | [V1.6 交付、验证与限制](v1.6-status.md) · [界面预览](v1.6-order-preview.png) | [草稿 PR #23](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/23) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
