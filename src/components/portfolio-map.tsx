@@ -8,7 +8,7 @@ import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type Matr
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
 import { FundCharterLink } from "./fund-charter-link";
-import { calculateMatrixTotals, formatUsdAmount } from "../lib/portfolio-matrix-totals";
+import { calculateMatrixTotals, formatUsdAmount, totalCellKey } from "../lib/portfolio-matrix-totals";
 import { PortfolioMatrixSummary } from "./portfolio-matrix-summary";
 
 type Editor =
@@ -200,7 +200,7 @@ export function PortfolioMapPage() {
                     <strong>{item.symbol}</strong>{item.name !== item.symbol && <small>{item.name}</small>}{item.amount && <span>{item.amount}</span>}
                   </button>)}
                 </div>
-                {tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{totals.cells[`${column.id}:${region.id}`] === undefined ? "—" : formatUsdAmount(totals.cells[`${column.id}:${region.id}`])}</span>}
+                {tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{displayTotal(totals.cells[totalCellKey(column.id, region.id)])}</span>}
                 <button className="matrix-add-tile" aria-label={`添加标的到 ${column.name} ${region.name}`} title="添加标的" onClick={() => openItem(column.id, region.id)}>＋</button>
               </>}
             </td>;
@@ -213,7 +213,7 @@ export function PortfolioMapPage() {
               {matrix.regions.map((region) => {
                 const tiles = matrix.items.filter((item) => item.columnId === column.id && item.regionId === region.id);
                 return <div className="matrix-responsive-region" key={region.id}>
-                  <div className="matrix-responsive-region-head"><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button>{tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{totals.cells[`${column.id}:${region.id}`] === undefined ? "—" : formatUsdAmount(totals.cells[`${column.id}:${region.id}`])}</span>}<button aria-label={`在 ${column.name} ${region.name} 添加标的`} onClick={() => openItem(column.id, region.id)}>＋</button></div>
+                  <div className="matrix-responsive-region-head"><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button>{tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{displayTotal(totals.cells[totalCellKey(column.id, region.id)])}</span>}<button aria-label={`在 ${column.name} ${region.name} 添加标的`} onClick={() => openItem(column.id, region.id)}>＋</button></div>
                   {tiles.length > 0 && <div className="matrix-responsive-tiles">{tiles.map((item) => <button key={item.id} className={`matrix-tile status-${item.status}`} aria-label={`编辑卡片 ${item.symbol}`} onClick={() => { setMessage(""); setEditor({ kind: "item", fresh: false, value: item }); }}><strong>{item.symbol}</strong>{item.name !== item.symbol && <small>{item.name}</small>}{item.amount && <span>{item.amount}</span>}</button>)}</div>}
                 </div>;
               })}

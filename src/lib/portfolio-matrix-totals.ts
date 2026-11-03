@@ -12,16 +12,18 @@ export type MatrixTotals = {
 
 export function parseUsdKAmount(amount: string): number | null {
   const trimmed = amount.trim();
-  if (!/^\d+(?:\.\d+)?k$/i.test(trimmed)) return null;
-  const dollars = Number(trimmed.slice(0, -1)) * 1000;
-  return Number.isFinite(dollars) && dollars <= Number.MAX_SAFE_INTEGER ? dollars : null;
+  if (!/^\d+(?:\.\d{1,5})?k$/i.test(trimmed)) return null;
+  const cents = Math.round(Number(trimmed.slice(0, -1)) * 100_000);
+  return Number.isSafeInteger(cents) ? cents / 100 : null;
 }
 
 export function formatUsdAmount(dollars: number): string {
   const value = Math.abs(dollars) >= 1000 ? dollars / 1000 : dollars;
   const suffix = Math.abs(dollars) >= 1000 ? "k" : "";
-  return `$${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value)}${suffix}`;
+  return `$${new Intl.NumberFormat("en-US", { maximumFractionDigits: suffix ? 5 : 2 }).format(value)}${suffix}`;
 }
+
+export const totalCellKey = (columnId: string, regionId: string): string => JSON.stringify([columnId, regionId]);
 
 function add(map: Map<string, number>, key: string, amount: number) {
   map.set(key, (map.get(key) ?? 0) + amount);
@@ -51,7 +53,7 @@ export function calculateMatrixTotals(matrix: PortfolioMatrix): MatrixTotals {
     add(groups, groupId, amount);
     add(regions, item.regionId, amount);
     add(columns, item.columnId, amount);
-    add(cells, `${item.columnId}:${item.regionId}`, amount);
+    add(cells, totalCellKey(item.columnId, item.regionId), amount);
   }
 
   return {
