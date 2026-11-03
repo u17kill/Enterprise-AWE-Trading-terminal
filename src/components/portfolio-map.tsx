@@ -8,6 +8,8 @@ import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type Matr
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
 import { FundCharterLink } from "./fund-charter-link";
+import { calculateMatrixTotals, formatUsdAmount } from "../lib/portfolio-matrix-totals";
+import { PortfolioMatrixSummary } from "./portfolio-matrix-summary";
 
 type Editor =
   | { kind: "item"; value: MatrixItem; fresh: boolean }
@@ -15,7 +17,8 @@ type Editor =
   | { kind: "group"; value: MatrixGroup; fresh: boolean }
   | { kind: "region"; value: MatrixRegion; fresh: boolean };
 const newId = () => crypto.randomUUID();
-const statusLabels: Record<TileStatus, string> = { held: "已持仓", watch: "观察中", add: "计划加仓" };
+const statusLabels: Record<TileStatus, string> = { held: "已持仓", watch: "观察中", add: "计划加仓", option: "期权" };
+const displayTotal = (amount: number | undefined) => amount === undefined ? "—" : formatUsdAmount(amount);
 const kindLabels = { item: "标的", column: "主题", group: "策略", region: "地区" };
 const MATRIX_UPDATED_KEY = `${MATRIX_KEY}.updatedAt`;
 const MATRIX_LEGACY_BACKUP_KEY = `${MATRIX_KEY}.legacyBackup`;
@@ -111,6 +114,7 @@ export function PortfolioMapPage() {
     const own = matrix.columns.filter((column) => column.groupId === group.id);
     return own.length ? own : [{ id: `empty-${group.id}`, groupId: group.id, name: "", placeholder: true }];
   });
+  const totals = calculateMatrixTotals(matrix);
   const openItem = (columnId = matrix.columns[0]?.id, regionId = matrix.regions[0]?.id) => {
     if (!columnId || !regionId) { setMessage("请先添加策略、主题和地区。"); return; }
     setMessage("");
@@ -176,15 +180,16 @@ export function PortfolioMapPage() {
         <div className="matrix-intro"><div><span className="section-eyebrow">FULL SATELLITE MAP · V0.3</span><h1>持仓地图</h1><p>按策略、主题和地区展开。点击任何标题或标的即可编辑。</p></div>
           <div className="matrix-toolbar"><button className="primary-button" onClick={() => openItem()}>＋ 添加标的</button><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: true, value: { id: newId(), name: "", color: "#90d9f5" } }); }}>＋ 策略</button><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: true, value: { id: newId(), name: "" } }); }}>＋ 地区</button></div>
         </div>
-        <div className="matrix-meta"><div className="matrix-legend"><span><i className="status-held" />已持仓</span><span><i className="status-watch" />暂未持仓 · 观察</span><span><i className="status-add" />计划加仓</span></div><div className="matrix-backup"><button onClick={() => downloadJson("awe-portfolio-matrix-v03.json", JSON.stringify(matrix, null, 2))}>导出地图</button><label className="matrix-import">导入地图<input type="file" accept="application/json,.json" onChange={(event) => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></label>{hasLegacyBackup && <button onClick={() => { const old = localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY); if (old) downloadJson("awe-portfolio-browser-legacy-backup.json", old); }}>下载旧浏览器副本</button>}{hasOldData && <button onClick={() => { const old = localStorage.getItem(PORTFOLIO_KEY); if (old) downloadJson("awe-portfolio-v13-backup.json", old); }}>下载旧版持仓备份</button>}</div></div>
+        <PortfolioMatrixSummary matrix={matrix} totals={totals} />
+        <div className="matrix-meta"><div className="matrix-legend"><span><i className="status-held" />已持仓</span><span><i className="status-watch" />暂未持仓 · 观察</span><span><i className="status-add" />计划加仓</span><span><i className="status-option" />期权</span></div><div className="matrix-backup"><button onClick={() => downloadJson("awe-portfolio-matrix-v03.json", JSON.stringify(matrix, null, 2))}>导出地图</button><label className="matrix-import">导入地图<input type="file" accept="application/json,.json" onChange={(event) => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></label>{hasLegacyBackup && <button onClick={() => { const old = localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY); if (old) downloadJson("awe-portfolio-browser-legacy-backup.json", old); }}>下载旧浏览器副本</button>}{hasOldData && <button onClick={() => { const old = localStorage.getItem(PORTFOLIO_KEY); if (old) downloadJson("awe-portfolio-v13-backup.json", old); }}>下载旧版持仓备份</button>}</div></div>
         <p className="matrix-source">初始内容按你提供的示意图录入；图中数字是原样备注，不代表已核验的当前持仓、市价或盈亏。{saveError ? "本机持久保存暂不可用，请导出地图备份。" : "修改后自动保存在本机；不同本地预览端口共用。"}</p>
         {saveError && <p role="alert" aria-label="保存失败" className="matrix-message">本机持久保存失败。请导出地图备份，避免修改丢失。</p>}
         {message && !editor && <p role="status" className="matrix-message">{message}</p>}
         {matrix.groups.length ? <><div className="matrix-scroll"><table className="matrix-table" aria-label="持仓矩阵"><thead>
-          <tr><th className="matrix-corner" rowSpan={2}>地区 / 主题</th>{matrix.groups.map((group) => <th key={group.id} colSpan={Math.max(1, matrix.columns.filter((column) => column.groupId === group.id).length)} className="matrix-group"><div style={{ backgroundColor: group.color }}><button aria-label={`编辑策略 ${group.name}`} onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>{group.name}</button><button aria-label={`添加主题到 ${group.name}`} title="添加主题" onClick={() => openColumn(group.id)}>＋</button></div></th>)}</tr>
-          <tr>{columns.map((column) => <th key={column.id} className="matrix-column">{"placeholder" in column && column.placeholder ? <button aria-label={`添加主题到 ${matrix.groups.find((group) => group.id === column.groupId)?.name}`} onClick={() => openColumn(column.groupId)}>＋ 添加主题</button> : <button aria-label={`编辑主题 ${column.name}`} onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name}</button>}</th>)}</tr>
+          <tr><th className="matrix-corner" rowSpan={2}>地区 / 主题</th>{matrix.groups.map((group) => <th key={group.id} colSpan={Math.max(1, matrix.columns.filter((column) => column.groupId === group.id).length)} className="matrix-group"><div style={{ backgroundColor: group.color }}><button aria-label={`编辑策略 ${group.name}`} onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>{group.name}</button><span className="matrix-heading-total" aria-label={`${group.name}策略小计`}>{displayTotal(totals.groups[group.id])}</span><button aria-label={`添加主题到 ${group.name}`} title="添加主题" onClick={() => openColumn(group.id)}>＋</button></div></th>)}</tr>
+          <tr>{columns.map((column) => <th key={column.id} className="matrix-column">{"placeholder" in column && column.placeholder ? <button aria-label={`添加主题到 ${matrix.groups.find((group) => group.id === column.groupId)?.name}`} onClick={() => openColumn(column.groupId)}>＋ 添加主题</button> : <button aria-label={`编辑主题 ${column.name}`} onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name}<span className="matrix-column-total" aria-label={`${column.name}主题小计`}>{displayTotal(totals.columns[column.id])}</span></button>}</th>)}</tr>
         </thead><tbody>{matrix.regions.map((region) => <tr key={region.id}>
-          <th scope="row" className="matrix-region"><button aria-label={`编辑地区 ${region.name}`} onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button></th>
+          <th scope="row" className="matrix-region"><button aria-label={`编辑地区 ${region.name}`} onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button><span className="matrix-region-total" aria-label={`${region.name}地区小计`}>{displayTotal(totals.regions[region.id])}</span></th>
           {columns.map((column) => {
             const tiles = matrix.items.filter((item) => item.columnId === column.id && item.regionId === region.id);
             const double = ["ai-infra", "ai-app"].includes(column.id);
@@ -195,19 +200,20 @@ export function PortfolioMapPage() {
                     <strong>{item.symbol}</strong>{item.name !== item.symbol && <small>{item.name}</small>}{item.amount && <span>{item.amount}</span>}
                   </button>)}
                 </div>
+                {tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{totals.cells[`${column.id}:${region.id}`] === undefined ? "—" : formatUsdAmount(totals.cells[`${column.id}:${region.id}`])}</span>}
                 <button className="matrix-add-tile" aria-label={`添加标的到 ${column.name} ${region.name}`} title="添加标的" onClick={() => openItem(column.id, region.id)}>＋</button>
               </>}
             </td>;
           })}
         </tr>)}</tbody></table></div>
           <div className="matrix-responsive" aria-label="持仓矩阵窄屏布局">{matrix.groups.map((group) => <section className="matrix-responsive-group" key={group.id}>
-            <div className="matrix-responsive-group-head" style={{ borderColor: group.color }}><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>编辑策略 · {group.name}</button><button onClick={() => openColumn(group.id)}>＋ 添加主题</button></div>
+            <div className="matrix-responsive-group-head" style={{ borderColor: group.color }}><button onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>编辑策略 · {group.name}</button><span className="matrix-heading-total" aria-label={`${group.name}策略小计`}>{displayTotal(totals.groups[group.id])}</span><button onClick={() => openColumn(group.id)}>＋ 添加主题</button></div>
             <div className="matrix-responsive-grid">{matrix.columns.filter((column) => column.groupId === group.id).map((column) => <article className="matrix-responsive-column" key={column.id}>
-              <button className="matrix-responsive-title" onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name} · 编辑主题</button>
+              <button className="matrix-responsive-title" onClick={() => { setMessage(""); setEditor({ kind: "column", fresh: false, value: column }); }}>{column.name} · 编辑主题 <span className="matrix-column-total" aria-label={`${column.name}主题小计`}>{displayTotal(totals.columns[column.id])}</span></button>
               {matrix.regions.map((region) => {
                 const tiles = matrix.items.filter((item) => item.columnId === column.id && item.regionId === region.id);
                 return <div className="matrix-responsive-region" key={region.id}>
-                  <div className="matrix-responsive-region-head"><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button><button aria-label={`在 ${column.name} ${region.name} 添加标的`} onClick={() => openItem(column.id, region.id)}>＋</button></div>
+                  <div className="matrix-responsive-region-head"><button onClick={() => { setMessage(""); setEditor({ kind: "region", fresh: false, value: region }); }}>{region.name}</button>{tiles.length > 0 && <span className="matrix-cell-total" aria-label={`${column.name} / ${region.name}小计`}>{totals.cells[`${column.id}:${region.id}`] === undefined ? "—" : formatUsdAmount(totals.cells[`${column.id}:${region.id}`])}</span>}<button aria-label={`在 ${column.name} ${region.name} 添加标的`} onClick={() => openItem(column.id, region.id)}>＋</button></div>
                   {tiles.length > 0 && <div className="matrix-responsive-tiles">{tiles.map((item) => <button key={item.id} className={`matrix-tile status-${item.status}`} aria-label={`编辑卡片 ${item.symbol}`} onClick={() => { setMessage(""); setEditor({ kind: "item", fresh: false, value: item }); }}><strong>{item.symbol}</strong>{item.name !== item.symbol && <small>{item.name}</small>}{item.amount && <span>{item.amount}</span>}</button>)}</div>}
                 </div>;
               })}
@@ -218,7 +224,16 @@ export function PortfolioMapPage() {
     </main>
     {editor && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) { setEditor(null); setMessage(""); } }}><section className="portfolio-editor" role="dialog" aria-modal="true" aria-label={`编辑${kindLabels[editor.kind]}`}>
       <h2>{editor.fresh ? "添加" : "编辑"}{kindLabels[editor.kind]}</h2>
-      {editor.kind === "item" && <div className="portfolio-fields"><label>代码 / 简称<input value={editor.value.symbol} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, symbol: event.target.value } })} /></label><label>公司 / 资产名称<input value={editor.value.name} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, name: event.target.value } })} /></label><label>仓位 / 备注<input value={editor.value.amount} placeholder="例如 9.5k、put 115" onChange={(event) => setEditor({ ...editor, value: { ...editor.value, amount: event.target.value } })} /></label><label>状态<select value={editor.value.status} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, status: event.target.value as TileStatus } })}><option value="held">已持仓 · 灰色</option><option value="watch">观察中 · 黄色</option><option value="add">计划加仓 · 绿色</option></select></label><label>主题<select value={editor.value.columnId} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, columnId: event.target.value } })}>{matrix.groups.flatMap((group) => matrix.columns.filter((column) => column.groupId === group.id).map((column) => <option key={column.id} value={column.id}>{group.name} / {column.name}</option>))}</select></label><label>地区<select value={editor.value.regionId} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, regionId: event.target.value } })}>{matrix.regions.map((region) => <option key={region.id} value={region.id}>{region.name}</option>)}</select></label></div>}
+      {editor.kind === "item" && <div className="portfolio-fields">
+        <label>代码 / 简称<input value={editor.value.symbol} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, symbol: event.target.value } })} /></label>
+        <label>公司 / 资产名称<input value={editor.value.name} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, name: event.target.value } })} /></label>
+        <label>仓位 / 备注<input value={editor.value.amount} placeholder="例如 9.5k、put 115" onChange={(event) => setEditor({ ...editor, value: { ...editor.value, amount: event.target.value } })} /></label>
+        <label>状态<select value={editor.value.status} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, status: event.target.value as TileStatus } })}>
+          <option value="held">已持仓 · 灰色</option><option value="watch">观察中 · 黄色</option><option value="add">计划加仓 · 绿色</option><option value="option">期权 · 蓝色</option>
+        </select></label>
+        <label>主题<select value={editor.value.columnId} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, columnId: event.target.value } })}>{matrix.groups.flatMap((group) => matrix.columns.filter((column) => column.groupId === group.id).map((column) => <option key={column.id} value={column.id}>{group.name} / {column.name}</option>))}</select></label>
+        <label>地区<select value={editor.value.regionId} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, regionId: event.target.value } })}>{matrix.regions.map((region) => <option key={region.id} value={region.id}>{region.name}</option>)}</select></label>
+      </div>}
       {editor.kind === "column" && <div className="portfolio-fields"><label>主题名称<input value={editor.value.name} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, name: event.target.value } })} /></label><label>所属策略<select value={editor.value.groupId} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, groupId: event.target.value } })}>{matrix.groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label></div>}
       {editor.kind === "group" && <div className="portfolio-fields"><label>策略名称<input value={editor.value.name} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, name: event.target.value } })} /></label><label>标题颜色<input type="color" value={editor.value.color} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, color: event.target.value } })} /></label></div>}
       {editor.kind === "region" && <div className="portfolio-fields"><label>地区名称<input value={editor.value.name} onChange={(event) => setEditor({ ...editor, value: { ...editor.value, name: event.target.value } })} /></label></div>}

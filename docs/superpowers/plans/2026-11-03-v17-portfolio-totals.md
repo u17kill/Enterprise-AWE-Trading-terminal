@@ -44,10 +44,10 @@
 
 **Interfaces:** Consume `calculateMatrixTotals(matrix)`; keep editing and persistence path unchanged.
 
-- [ ] Add failing UI tests for option status, ordinary total and breakdown, cell subtotal, and exclusion wording.
-- [ ] Run targeted UI tests to confirm failures.
-- [ ] Add status option / legend, dashboard sections, per-cell badges in desktop and narrow layouts, and responsive CSS.
-- [ ] Run targeted UI tests to confirm they pass.
+- [x] Add failing UI tests for option status, ordinary total and breakdown, cell subtotal, and exclusion wording.
+- [x] Run targeted UI tests to confirm failures.
+- [x] Add status option / legend, dashboard sections, per-cell badges in desktop and narrow layouts, and responsive CSS.
+- [x] Run targeted UI tests to confirm they pass (focused set 17/17).
 
 ### Task 3: Verification and GitHub archive
 

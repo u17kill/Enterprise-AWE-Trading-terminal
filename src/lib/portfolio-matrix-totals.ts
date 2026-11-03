@@ -17,6 +17,12 @@ export function parseUsdKAmount(amount: string): number | null {
   return Number.isFinite(dollars) && dollars <= Number.MAX_SAFE_INTEGER ? dollars : null;
 }
 
+export function formatUsdAmount(dollars: number): string {
+  const value = Math.abs(dollars) >= 1000 ? dollars / 1000 : dollars;
+  const suffix = Math.abs(dollars) >= 1000 ? "k" : "";
+  return `$${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value)}${suffix}`;
+}
+
 function add(map: Map<string, number>, key: string, amount: number) {
   map.set(key, (map.get(key) ?? 0) + amount);
 }
