@@ -3,13 +3,14 @@
 import { AppSidebar } from "./app-sidebar";
 
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DEFAULT_MATRIX, loadMatrix, MATRIX_KEY, validateMatrixBackup, type MatrixColumn, type MatrixGroup, type MatrixItem, type MatrixRegion, type PortfolioMatrix, type TileStatus } from "../lib/portfolio-matrix";
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
 import "../app/portfolio-map.css";
 import { FundCharterLink } from "./fund-charter-link";
 import { calculateMatrixTotals, formatUsdAmount, totalCellKey } from "../lib/portfolio-matrix-totals";
 import { PortfolioMatrixSummary } from "./portfolio-matrix-summary";
+import { syncPortfolioMatrix } from "../lib/portfolio-matrix-sync";
 
 type Editor =
   | { kind: "item"; value: MatrixItem; fresh: boolean }
@@ -52,6 +53,8 @@ export function PortfolioMapPage() {
   const [ready, setReady] = useState(false);
   const initialized = useRef(false);
   const skipInitialSave = useRef(true);
+  const skipSyncedSave = useRef(false);
+  const retrying = useRef(false);
   const saveQueue = useRef(Promise.resolve());
   const hasOldData = useSyncExternalStore(() => () => {}, () => {
     try { return Boolean(window.localStorage.getItem(PORTFOLIO_KEY)); } catch { return false; }
@@ -61,38 +64,9 @@ export function PortfolioMapPage() {
     initialized.current = true;
     void (async () => {
       try {
-        const response = await fetch("/api/portfolio-matrix", { cache: "no-store" });
-        if (!response.ok) throw new Error("Unable to read portfolio file");
-        const payload = await response.json() as { snapshot: { matrix: PortfolioMatrix; updatedAt: number } | null };
-        const localRaw = localStorage.getItem(MATRIX_KEY);
-        const localTime = Number(localStorage.getItem(MATRIX_UPDATED_KEY) ?? 0);
-        let validLocal: PortfolioMatrix | null = null;
-        try { if (localRaw) validLocal = validateMatrixBackup(JSON.parse(localRaw)); } catch { /* Keep the raw browser copy for backup. */ }
-        setHasLegacyBackup(Boolean(localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY)));
-        if (payload.snapshot) {
-          const restored = validateMatrixBackup(payload.snapshot.matrix);
-          if (!restored) throw new Error("Invalid portfolio file");
-          if (validLocal && localTime > payload.snapshot.updatedAt) {
-            const saved = await fetch("/api/portfolio-matrix", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(validLocal) });
-            if (!saved.ok) throw new Error("Unable to recover pending edit");
-            setMatrix(validLocal);
-          } else {
-            if (localRaw && localRaw !== JSON.stringify(DEFAULT_MATRIX) && localRaw !== JSON.stringify(restored)) {
-              if (!localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY)) localStorage.setItem(MATRIX_LEGACY_BACKUP_KEY, localRaw);
-              setHasLegacyBackup(true);
-            }
-            setMatrix(restored);
-            localStorage.setItem(MATRIX_KEY, JSON.stringify(restored));
-            localStorage.setItem(MATRIX_UPDATED_KEY, String(payload.snapshot.updatedAt));
-          }
-        } else {
-          // First visit after this fix: migrate the current origin's browser copy.
-          const local = loadMatrix(localStorage);
-          localStorage.setItem(MATRIX_UPDATED_KEY, String(Date.now()));
-          const saved = await fetch("/api/portfolio-matrix", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(local) });
-          if (!saved.ok) throw new Error("Unable to migrate portfolio");
-          setMatrix(local);
-        }
+        const synced = await syncPortfolioMatrix(localStorage, fetch);
+        setMatrix(synced.matrix);
+        setHasLegacyBackup(synced.hasLegacyBackup);
         setSaveError(false);
       } catch { setSaveError(true); }
       finally { setReady(true); }
@@ -101,6 +75,7 @@ export function PortfolioMapPage() {
   useEffect(() => {
     if (!ready) return;
     if (skipInitialSave.current) { skipInitialSave.current = false; return; }
+    if (skipSyncedSave.current) { skipSyncedSave.current = false; return; }
     try { localStorage.setItem(MATRIX_KEY, JSON.stringify(matrix)); localStorage.setItem(MATRIX_UPDATED_KEY, String(Date.now())); }
     catch { /* The durable server copy is still attempted below. */ }
     saveQueue.current = saveQueue.current.catch(() => {}).then(async () => {
@@ -109,6 +84,29 @@ export function PortfolioMapPage() {
       setSaveError(false);
     }).catch(() => setSaveError(true));
   }, [matrix, ready]);
+
+  const retrySave = useCallback(async () => {
+    if (retrying.current) return;
+    retrying.current = true;
+    try {
+      await saveQueue.current;
+      const synced = await syncPortfolioMatrix(localStorage, fetch);
+      if (JSON.stringify(synced.matrix) !== JSON.stringify(matrix)) {
+        skipSyncedSave.current = true;
+        setMatrix(synced.matrix);
+      }
+      setHasLegacyBackup(synced.hasLegacyBackup);
+      setSaveError(false);
+    } catch { setSaveError(true); }
+    finally { retrying.current = false; }
+  }, [matrix]);
+  useEffect(() => {
+    if (!ready || !saveError) return;
+    const interval = window.setInterval(() => { void retrySave(); }, 5000);
+    const online = () => { void retrySave(); };
+    window.addEventListener("online", online);
+    return () => { window.clearInterval(interval); window.removeEventListener("online", online); };
+  }, [ready, saveError, retrySave]);
 
   const columns = matrix.groups.flatMap((group) => {
     const own = matrix.columns.filter((column) => column.groupId === group.id);
@@ -183,7 +181,7 @@ export function PortfolioMapPage() {
         <PortfolioMatrixSummary matrix={matrix} totals={totals} />
         <div className="matrix-meta"><div className="matrix-legend"><span><i className="status-held" />已持仓</span><span><i className="status-watch" />暂未持仓 · 观察</span><span><i className="status-add" />计划加仓</span><span><i className="status-option" />期权</span></div><div className="matrix-backup"><button onClick={() => downloadJson("awe-portfolio-matrix-v03.json", JSON.stringify(matrix, null, 2))}>导出地图</button><label className="matrix-import">导入地图<input type="file" accept="application/json,.json" onChange={(event) => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></label>{hasLegacyBackup && <button onClick={() => { const old = localStorage.getItem(MATRIX_LEGACY_BACKUP_KEY); if (old) downloadJson("awe-portfolio-browser-legacy-backup.json", old); }}>下载旧浏览器副本</button>}{hasOldData && <button onClick={() => { const old = localStorage.getItem(PORTFOLIO_KEY); if (old) downloadJson("awe-portfolio-v13-backup.json", old); }}>下载旧版持仓备份</button>}</div></div>
         <p className="matrix-source">初始内容按你提供的示意图录入；图中数字是原样备注，不代表已核验的当前持仓、市价或盈亏。{saveError ? "本机持久保存暂不可用，请导出地图备份。" : "修改后自动保存在本机；不同本地预览端口共用。"}</p>
-        {saveError && <p role="alert" aria-label="保存失败" className="matrix-message">本机持久保存失败。请导出地图备份，避免修改丢失。</p>}
+        {saveError && <p role="alert" aria-label="保存失败" className="matrix-message">本机持久保存失败，正在自动重试。请导出地图备份，避免修改丢失。 <button type="button" onClick={() => { void retrySave(); }}>重新尝试保存</button></p>}
         {message && !editor && <p role="status" className="matrix-message">{message}</p>}
         {matrix.groups.length ? <><div className="matrix-scroll"><table className="matrix-table" aria-label="持仓矩阵"><thead>
           <tr><th className="matrix-corner" rowSpan={2}>地区 / 主题</th>{matrix.groups.map((group) => <th key={group.id} colSpan={Math.max(1, matrix.columns.filter((column) => column.groupId === group.id).length)} className="matrix-group"><div style={{ backgroundColor: group.color }}><button aria-label={`编辑策略 ${group.name}`} onClick={() => { setMessage(""); setEditor({ kind: "group", fresh: false, value: group }); }}>{group.name}</button><span className="matrix-heading-total" aria-label={`${group.name}策略小计`}>{displayTotal(totals.groups[group.id])}</span><button aria-label={`添加主题到 ${group.name}`} title="添加主题" onClick={() => openColumn(group.id)}>＋</button></div></th>)}</tr>
