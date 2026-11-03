@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -32,6 +32,14 @@ export async function writeStoredMatrix(value: unknown, directory = defaultDirec
   const temporary = join(directory, `portfolio-matrix.${randomUUID()}.tmp`);
   try {
     await writeFile(temporary, JSON.stringify(matrix), { encoding: "utf8", mode: 0o600 });
+    try {
+      await stat(filePath(directory));
+      const backups = join(directory, "backups");
+      await mkdir(backups, { recursive: true });
+      await copyFile(filePath(directory), join(backups, `portfolio-matrix-${Date.now()}-${randomUUID()}.json`));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
     await rename(temporary, filePath(directory));
   } catch (error) {
     await unlink(temporary).catch(() => {});

@@ -26,4 +26,12 @@ describe("V0.3 portfolio matrix", () => {
     expect(validateMatrixBackup({ ...DEFAULT_MATRIX, items: [{ ...DEFAULT_MATRIX.items[0], status: "blue" }] })).toBeNull();
     expect(validateMatrixBackup({ groups: [], columns: [], regions: [], items: [] })).toEqual({ groups: [], columns: [], regions: [], items: [] });
   });
+
+  it("round-trips the new option status without rewriting old statuses", () => {
+    const source = { ...DEFAULT_MATRIX, items: [
+      { ...DEFAULT_MATRIX.items[0], status: "option" },
+      { ...DEFAULT_MATRIX.items[1], status: "watch" },
+    ] };
+    expect(validateMatrixBackup(source)?.items.map((item) => item.status)).toEqual(["option", "watch"]);
+  });
 });

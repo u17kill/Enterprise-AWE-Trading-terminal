@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { PortfolioMapPage } from "./portfolio-map";
 import { DEFAULT_MATRIX, MATRIX_KEY } from "../lib/portfolio-matrix";
 import { PORTFOLIO_KEY } from "../lib/portfolio-map";
@@ -97,5 +97,108 @@ describe("V0.3 portfolio matrix", () => {
     render(<PortfolioMapPage />);
     expect(await screen.findByRole("alert", { name: "保存失败" })).toHaveTextContent("持久保存失败");
     vi.restoreAllMocks();
+  });
+});
+
+describe("V1.7 portfolio totals", () => {
+  it("shows USD totals by strategy, region and theme, plus cell subtotals and a separate option list", async () => {
+    const matrix = { ...DEFAULT_MATRIX, items: [
+      { ...DEFAULT_MATRIX.items[0], amount: "1.5k", status: "held" as const },
+      { ...DEFAULT_MATRIX.items[1], amount: "10k", status: "add" as const },
+      { ...DEFAULT_MATRIX.items[2], amount: "9k", status: "watch" as const },
+      { ...DEFAULT_MATRIX.items[3], amount: "put 115", status: "option" as const },
+    ] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ snapshot: { matrix, updatedAt: Date.now() } }) })));
+    render(<PortfolioMapPage />);
+    const summary = await screen.findByRole("region", { name: "仓位汇总" });
+    expect(within(summary).getByRole("region", { name: "普通持仓总额" })).toHaveTextContent("$11.5k");
+    expect(within(summary).getByText(/2 张计入计算/)).toBeInTheDocument();
+    expect(within(summary).getByText("1 张期权")).toBeInTheDocument();
+    expect(within(summary).getByText(/VST.*put 115/)).toBeInTheDocument();
+    expect(within(summary).getByRole("region", { name: "按策略" })).toHaveTextContent("进攻");
+    expect(within(summary).getByRole("region", { name: "按地区" })).toHaveTextContent("美国");
+    expect(within(summary).getByRole("region", { name: "按主题" })).toHaveTextContent("AI 基建");
+    expect(screen.getAllByLabelText("进攻策略小计")[0]).toHaveTextContent("$11.5k");
+    expect(screen.getAllByLabelText("AI 基建主题小计")[0]).toHaveTextContent("$11.5k");
+    expect(screen.getByLabelText("美国地区小计")).toHaveTextContent("$11.5k");
+    expect(screen.getAllByLabelText("AI 基建 / 美国小计")[0]).toHaveTextContent("$11.5k");
+  });
+
+  it("allows editing a card to blue option and removes its amount from ordinary totals", async () => {
+    const matrix = { ...DEFAULT_MATRIX, items: [{ ...DEFAULT_MATRIX.items[0], amount: "1.5k", status: "held" as const }] };
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") return { ok: true };
+      return { ok: true, json: async () => ({ snapshot: { matrix, updatedAt: Date.now() } }) };
+    }));
+    render(<PortfolioMapPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "编辑 NVDA" }));
+    fireEvent.change(screen.getByLabelText("状态"), { target: { value: "option" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存标的" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "编辑 NVDA" })).toHaveClass("status-option"));
+    expect(screen.getByRole("region", { name: "仓位汇总" })).toHaveTextContent("$0");
+    expect(screen.getByRole("region", { name: "仓位汇总" })).toHaveTextContent("1 张期权");
+    expect(JSON.parse(localStorage.getItem(MATRIX_KEY) ?? "{}").items[0].status).toBe("option");
+  });
+});
+
+describe("V1.7 durable portfolio recovery", () => {
+  it("retries a failed edit and saves the newest browser copy", async () => {
+    let stored = DEFAULT_MATRIX;
+    let failedOnce = false;
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        if (!failedOnce) { failedOnce = true; return { ok: false }; }
+        stored = JSON.parse(String(init.body));
+        return { ok: true };
+      }
+      return { ok: true, json: async () => ({ snapshot: { matrix: stored, updatedAt: 1000 } }) };
+    }));
+    render(<PortfolioMapPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "编辑 NVDA" }));
+    fireEvent.change(screen.getByLabelText("仓位 / 备注"), { target: { value: "12k" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存标的" }));
+    expect(await screen.findByRole("alert", { name: "保存失败" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "重新尝试保存" }));
+    await waitFor(() => expect(stored.items.find((item) => item.symbol === "NVDA")?.amount).toBe("12k"));
+    await waitFor(() => expect(screen.queryByRole("alert", { name: "保存失败" })).not.toBeInTheDocument());
+  });
+
+  it("recovers from a failed initial read without overwriting the server with defaults", async () => {
+    let reads = 0;
+    const saved = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "latest" } : item) };
+    const writes: unknown[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") { writes.push(init.body); return { ok: true }; }
+      reads += 1;
+      if (reads === 1) throw new Error("temporary outage");
+      return { ok: true, json: async () => ({ snapshot: { matrix: saved, updatedAt: Date.now() } }) };
+    }));
+    render(<PortfolioMapPage />);
+    expect(await screen.findByRole("alert", { name: "保存失败" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "重新尝试保存" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "编辑 NVDA" })).toHaveTextContent("latest"));
+    expect(writes).toHaveLength(0);
+  });
+
+  it("automatically retries the newest edit when the connection returns", async () => {
+    let stored = DEFAULT_MATRIX;
+    let available = false;
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "PUT") {
+        if (!available) return { ok: false };
+        stored = JSON.parse(String(init.body));
+        return { ok: true };
+      }
+      return { ok: true, json: async () => ({ snapshot: { matrix: stored, updatedAt: 1000 } }) };
+    }));
+    render(<PortfolioMapPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "编辑 NVDA" }));
+    fireEvent.change(screen.getByLabelText("仓位 / 备注"), { target: { value: "14k" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存标的" }));
+    expect(await screen.findByRole("alert", { name: "保存失败" })).toBeInTheDocument();
+    available = true;
+    window.dispatchEvent(new Event("online"));
+    await waitFor(() => expect(stored.items.find((item) => item.symbol === "NVDA")?.amount).toBe("14k"));
+    await waitFor(() => expect(screen.queryByRole("alert", { name: "保存失败" })).not.toBeInTheDocument());
   });
 });

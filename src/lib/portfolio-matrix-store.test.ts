@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DEFAULT_MATRIX } from "./portfolio-matrix";
@@ -18,5 +18,18 @@ describe("local portfolio store", () => {
     await expect(writeStoredMatrix({ ...edited, items: [{ ...edited.items[0], columnId: "missing" }] }, directory)).rejects.toThrow();
     expect((await readStoredMatrix(directory))?.items.find((item) => item.symbol === "NVDA")?.amount).toBe("user-edited-12k");
     expect(JSON.parse(await readFile(join(directory, "portfolio-matrix.json"), "utf8")).items.length).toBe(edited.items.length);
+  });
+
+  it("keeps the previous saved version before replacing it", async () => {
+    directory = await mkdtemp(join(tmpdir(), "awe-portfolio-"));
+    const first = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "12k" } : item) };
+    const second = { ...DEFAULT_MATRIX, items: DEFAULT_MATRIX.items.map((item) => item.symbol === "NVDA" ? { ...item, amount: "14k" } : item) };
+    await writeStoredMatrix(first, directory);
+    await writeStoredMatrix(second, directory);
+    const backups = await readdir(join(directory, "backups"));
+    expect(backups).toHaveLength(1);
+    const previous = JSON.parse(await readFile(join(directory, "backups", backups[0]), "utf8"));
+    expect(previous.items.find((item: { symbol: string }) => item.symbol === "NVDA").amount).toBe("12k");
+    expect((await readStoredMatrix(directory))?.items.find((item) => item.symbol === "NVDA")?.amount).toBe("14k");
   });
 });
