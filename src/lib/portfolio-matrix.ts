@@ -1,4 +1,4 @@
-export type TileStatus = "held" | "watch" | "add";
+export type TileStatus = "held" | "watch" | "add" | "option";
 export type MatrixGroup = { id: string; name: string; color: string };
 export type MatrixColumn = { id: string; groupId: string; name: string };
 export type MatrixRegion = { id: string; name: string };
@@ -52,7 +52,7 @@ export const DEFAULT_MATRIX: PortfolioMatrix = {
 };
 
 const named = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
-const statuses: TileStatus[] = ["held", "watch", "add"];
+const statuses: TileStatus[] = ["held", "watch", "add", "option"];
 
 export function parseMatrix(raw: unknown): PortfolioMatrix {
   if (!raw || typeof raw !== "object") return DEFAULT_MATRIX;
