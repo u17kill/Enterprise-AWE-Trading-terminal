@@ -55,5 +55,5 @@
 
 - [x] Run targeted tests, TypeScript, lint, and build; investigate any failures that touch this change.
 - [x] Check desktop and narrow browser views plus local persistence without touching the accepted 3103 preview.
-- [x] Record delivered behavior, data limits, verification, preview location, and known failures in version docs; PR pending.
-- [ ] Commit, push, and open a draft PR targeting `codex/v1.6-indicator-order`; keep V1.7 marked pending user acceptance.
+- [x] Record delivered behavior, data limits, verification, preview location, and known failures in version docs and PR #24.
+- [x] Commit, push, and open draft PR #24 targeting `codex/v1.6-indicator-order`; keep V1.7 marked pending user acceptance.
