@@ -10,18 +10,16 @@ export type PortfolioVisuals = {
   themes: PortfolioVisualSlice[];
 };
 
-const REGION_COLORS = ["#35566d", "#4b947d", "#b77758", "#9386a9", "#567ab5", "#a8875c", "#6a949e", "#aa7392"];
-const STRATEGY_FALLBACK = ["#70d5a2", "#90d9f5", "#ee8d8c"];
+const REGION_COLORS = ["#315d78", "#387b70", "#a7755b", "#817394", "#5879a3", "#9c835d", "#5f898f", "#a06a85"];
+const STRATEGY_METALS = ["#318c71", "#397f9c", "#b46368", "#8b78a4", "#a37d53"];
 
 function share(amount: number, total: number) { return total > 0 ? amount / total * 100 : 0; }
-function safeColor(value: string, fallback: string) { return /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback; }
-
 export function buildPortfolioVisuals(matrix: PortfolioMatrix, totals: MatrixTotals): PortfolioVisuals {
   const total = totals.totalUsd;
-  const groups = new Map(matrix.groups.map((group, index) => [group.id, { ...group, color: safeColor(group.color, STRATEGY_FALLBACK[index % STRATEGY_FALLBACK.length]) }]));
+  const groups = new Map(matrix.groups.map((group, index) => [group.id, { ...group, color: STRATEGY_METALS[index % STRATEGY_METALS.length] }]));
   const strategies = matrix.groups.flatMap((group) => {
     const amount = totals.groups[group.id] ?? 0;
-    return amount > 0 ? [{ id: group.id, name: group.name, label: group.name, amount, share: share(amount, total), color: groups.get(group.id)?.color ?? STRATEGY_FALLBACK[0] }] : [];
+    return amount > 0 ? [{ id: group.id, name: group.name, label: group.name, amount, share: share(amount, total), color: groups.get(group.id)?.color ?? STRATEGY_METALS[0] }] : [];
   });
   const regions = matrix.regions.flatMap((region, index) => {
     const amount = totals.regions[region.id] ?? 0;
@@ -30,7 +28,7 @@ export function buildPortfolioVisuals(matrix: PortfolioMatrix, totals: MatrixTot
   const themes = matrix.columns.flatMap((column) => {
     const amount = totals.columns[column.id] ?? 0;
     const group = groups.get(column.groupId);
-    return amount > 0 ? [{ id: column.id, name: column.name, label: `${group?.name ?? "未分组"} / ${column.name}`, amount, share: share(amount, total), color: group?.color ?? STRATEGY_FALLBACK[0] }] : [];
+    return amount > 0 ? [{ id: column.id, name: column.name, label: `${group?.name ?? "未分组"} / ${column.name}`, amount, share: share(amount, total), color: group?.color ?? STRATEGY_METALS[0] }] : [];
   }).sort((a, b) => b.amount - a.amount);
   return { totalUsd: total, strategies, regions, themes };
 }
