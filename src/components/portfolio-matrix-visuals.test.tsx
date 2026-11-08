@@ -26,6 +26,8 @@ describe("V1.9 portfolio charts", () => {
     expect(summary.compareDocumentPosition(visuals) & Node.DOCUMENT_POSITION_CONTAINED_BY).toBeTruthy();
     expect(within(visuals).getByRole("region", { name: "按地区·环形图" })).toHaveTextContent("70.0%");
     expect(within(visuals).getByRole("region", { name: "按策略·比例条" })).toHaveTextContent("90.0%");
+    expect(within(visuals).getByRole("region", { name: "按地区·环形图" }).querySelectorAll(".matrix-donut-label")).toHaveLength(2);
+    expect(within(visuals).getByRole("region", { name: "按策略·比例条" }).querySelector(".matrix-strategy-watermark")).toHaveTextContent("90.0%");
     expect(within(visuals).getByRole("region", { name: "按主题·方块图" })).toHaveTextContent("AI 基建");
     expect(within(visuals).getByLabelText("进攻 / AI 基建，$9k，占 90.0%")).toBeInTheDocument();
     expect(within(visuals).getByLabelText("进攻 / AI 基建，$9k，占 90.0%").querySelector(".matrix-treemap-watermark")).toHaveTextContent("90.0%");
