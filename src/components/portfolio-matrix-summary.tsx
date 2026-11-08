@@ -1,5 +1,6 @@
 import type { PortfolioMatrix } from "../lib/portfolio-matrix";
 import { formatUsdAmount, type MatrixTotals } from "../lib/portfolio-matrix-totals";
+import { PortfolioMatrixVisuals } from "./portfolio-matrix-visuals";
 
 type SummaryProps = { matrix: PortfolioMatrix; totals: MatrixTotals };
 
@@ -33,6 +34,7 @@ export function PortfolioMatrixSummary({ matrix, totals }: SummaryProps) {
       <Breakdown title="按地区" entries={matrix.regions.map((region) => ({ id: region.id, name: region.name, amount: totals.regions[region.id] }))} />
       <Breakdown title="按主题" entries={matrix.columns.map((column) => ({ id: column.id, name: `${groupNames.get(column.groupId) ?? "未分组"} / ${column.name}`, amount: totals.columns[column.id] }))} />
     </div>
+    <PortfolioMatrixVisuals matrix={matrix} totals={totals} />
     <p className="matrix-summary-note">按备注中的数字k计算，统一视为美元；黄色观察与蓝色期权不计入。这里是仓位备注合计，并非实时市值。</p>
   </section>;
 }
