@@ -11,6 +11,7 @@ describe("two-level app navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: /市场情报/ }));
     expect(screen.getByRole("link", { name: "财经日历" })).toHaveAttribute("href", "/calendar");
     expect(screen.getByRole("link", { name: "大佬持仓" })).toHaveAttribute("href", "/holdings");
+    expect(screen.getByRole("link", { name: "机构研报" })).toHaveAttribute("href", "/research");
   });
   it("keeps the top-level dashboard and all three new canary links", () => {
     render(<AppSidebar currentPath="/" />);
