@@ -6,7 +6,7 @@ import { Brand } from "./brand";
 
 const groups = [
   { id: "canary", label: "金丝雀指标", icon: "◈", links: [["/canary", "指标大全"], ["/canary/temperature", "市场温度"], ["/canary/valuation", "估值分析"], ["/canary/sentiment", "短线精灵"]] },
-  { id: "intelligence", label: "市场情报", icon: "◉", links: [["/news", "市场动态"], ["/voices", "最新风向"], ["/calendar", "财经日历"], ["/holdings", "大佬持仓"]] },
+  { id: "intelligence", label: "市场情报", icon: "◉", links: [["/news", "市场动态"], ["/voices", "最新风向"], ["/calendar", "财经日历"], ["/holdings", "大佬持仓"], ["/research", "机构研报"]] },
   { id: "tools", label: "投资工具", icon: "⌁", links: [["/chart/SPX", "图表空间"], ["/portfolio", "持仓地图"], ["/options", "期权计算"]] },
   { id: "academy", label: "投资学堂", icon: "✦", links: [["/framework", "投资框架"], ["/philosophy", "大师哲学"]] },
 ] as const;
