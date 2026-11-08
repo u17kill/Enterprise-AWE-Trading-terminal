@@ -28,6 +28,7 @@ describe("V1.9 portfolio charts", () => {
     expect(within(visuals).getByRole("region", { name: "按策略·比例条" })).toHaveTextContent("90.0%");
     expect(within(visuals).getByRole("region", { name: "按主题·方块图" })).toHaveTextContent("AI 基建");
     expect(within(visuals).getByLabelText("进攻 / AI 基建，$9k，占 90.0%")).toBeInTheDocument();
+    expect(within(visuals).getByLabelText("进攻 / AI 基建，$9k，占 90.0%").querySelector(".matrix-treemap-watermark")).toHaveTextContent("90.0%");
     const themeKey = within(visuals).getByLabelText("主题完整名称与金额");
     expect(themeKey).toHaveTextContent("进攻 / AI 基建");
     expect(themeKey).toHaveTextContent("防御 / 金融");
