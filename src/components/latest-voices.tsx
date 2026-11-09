@@ -1,65 +1,88 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { AppSidebar } from "./app-sidebar";
-
-
-import { useMemo, useState, useSyncExternalStore } from "react";
 import { FundCharterLink } from "./fund-charter-link";
-import { VOICE_GROUPS, type VoiceItem, type VoiceSnapshot } from "../lib/latest-voices";
+import { filterCuratedPeople, type CuratedCategory, type CuratedPerson, type CuratedTag, type CuratedVoiceSnapshot } from "../lib/voices-curated";
 
-const STORAGE_KEY = "awe.latest-voices.v14";
-const subscribe = (callback: () => void) => { window.addEventListener("storage", callback); window.addEventListener("awe-voices-change", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("awe-voices-change", callback); }; };
-const readSaved = () => { try { return localStorage.getItem(STORAGE_KEY) ?? ""; } catch { return ""; } };
-function parseSaved(raw: string): VoiceSnapshot | null {
-  try { const value = JSON.parse(raw) as VoiceSnapshot; return value && typeof value.asOf === "string" && typeof value.windowStart === "string" && Array.isArray(value.items) && Array.isArray(value.missing) ? value : null; }
-  catch { return null; }
-}
-function displayDate(raw: string) { return new Date(raw).toLocaleDateString("zh-CN", { timeZone: "Asia/Singapore", year: "numeric", month: "short", day: "numeric" }); }
+const tagName: Record<CuratedTag, string> = { bull: "偏多", neutral: "中性", bear: "偏空" };
+const tagOptions: { value: CuratedTag | "all"; label: string }[] = [
+  { value: "all", label: "全部" }, { value: "bull", label: "偏多" }, { value: "neutral", label: "中性" }, { value: "bear", label: "偏空" },
+];
 
-function VoiceCard({ item }: { item: VoiceItem }) {
-  return <article className="voices-card">
-    <div className="voices-card-meta"><span className="voices-avatar" aria-hidden="true">{item.person.slice(0, 1).toUpperCase()}</span><span><strong>{item.person}</strong><small>{item.role}</small></span><time dateTime={item.publishedAt}>{displayDate(item.publishedAt)}</time></div>
-    <h3>{item.title}</h3><p>{item.summary}</p>
-    <footer><span>{item.kind === "truth-social" ? "Truth Social 原帖" : "媒体摘要"} · {item.source} · 发布 {displayDate(item.publishedAt)}</span><a href={item.url} target="_blank" rel="noopener noreferrer">查看来源 ↗</a></footer>
+function PersonCard({ person, compact }: { person: CuratedPerson; compact: boolean }) {
+  const points = compact ? person.points.slice(0, 1) : person.points;
+  return <article className={`voices-person-card voices-tag-${person.tag}`} aria-label={`${person.cn} ${person.name}`}>
+    <header className="voices-person-head"><span className="voices-person-avatar" aria-hidden="true">{person.cn.slice(0, 1)}</span><div><h3>{person.cn}</h3><strong>{person.name}</strong></div><span className={`voices-tag voices-tag-${person.tag}`}>{tagName[person.tag]}</span></header>
+    <p className="voices-person-role">{person.role}{person.org && !person.role.includes(person.org) ? ` · ${person.org}` : ""}</p>
+    <p className="voices-person-stance">{person.stance}</p>
+    <ol className="voices-person-points">{points.map((point, index) => <li key={`${person.id}-${index}`}><div><time dateTime={point.date}>{point.date}</time><span>{point.src}</span></div><p>{point.text}</p></li>)}</ol>
+    {!points.length && <p className="voices-person-no-points">暂无可核对的当期要点。</p>}
+    <footer>策展摘录 · 原件未逐条核验</footer>
   </article>;
 }
 
-export function LatestVoices() {
-  const saved = useSyncExternalStore(subscribe, readSaved, () => "");
-  const [fresh, setFresh] = useState<VoiceSnapshot | null>(null);
+function CategorySection({ category, people, compact }: { category: CuratedCategory; people: CuratedPerson[]; compact: boolean }) {
+  if (!people.length) return null;
+  const groups = category.groups?.length ? category.groups : [{ id: "", name: "" }];
+  return <section id={`voices-category-${category.id}`} className="voices-category" aria-label={category.name}>
+    <header className="voices-category-head"><div><span className="section-eyebrow">PEOPLE / {category.id.toUpperCase()}</span><h2>{category.name}</h2><p>{category.desc}</p></div><strong>{people.length} 位</strong></header>
+    {groups.map((group) => { const members = people.filter((person) => group.id ? person.grp === group.id : true); return members.length ? <div key={group.id || category.id} className="voices-subgroup">{group.name && <h3>{group.name} <small>{members.length} 位</small></h3>}<div className="voices-people-grid">{members.map((person) => <PersonCard key={person.id} person={person} compact={compact} />)}</div></div> : null; })}
+  </section>;
+}
+
+export function LatestVoices({ initialSnapshot }: { initialSnapshot: CuratedVoiceSnapshot | null }) {
+  const [snapshot, setSnapshot] = useState(initialSnapshot);
+  const [query, setQuery] = useState("");
+  const [tag, setTag] = useState<CuratedTag | "all">("all");
+  const [compact, setCompact] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const snapshot = useMemo(() => fresh ?? parseSaved(saved), [fresh, saved]);
+  const [notice, setNotice] = useState("");
+  const [jumpTo, setJumpTo] = useState<{ id: string } | null>(null);
+  const visible = useMemo(() => snapshot ? filterCuratedPeople(snapshot.data.people, query, tag) : [], [snapshot, query, tag]);
+  const visiblePoints = visible.reduce((sum, person) => sum + person.points.length, 0);
+
+  useEffect(() => {
+    if (!jumpTo) return;
+    document.getElementById(`voices-category-${jumpTo.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [jumpTo, visible]);
 
   async function refresh() {
-    setBusy(true); setError("");
+    setBusy(true); setError(""); setNotice("");
     try {
       const response = await fetch("/api/voices", { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "观点更新失败");
-      if (!Array.isArray(data.items) || !Array.isArray(data.missing) || typeof data.asOf !== "string" || typeof data.windowStart !== "string") throw new Error("返回的数据格式不正确");
-      const next = data as VoiceSnapshot;
-      setFresh(next); setExpanded({});
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); window.dispatchEvent(new Event("awe-voices-change")); }
-      catch { setError("已更新，但浏览器未能保存本次结果。"); }
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "观点更新失败"); }
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "策展数据读取失败");
+      if (!result.data || !Array.isArray(result.data.people) || !result.summary || !Array.isArray(result.summary.categories)) throw new Error("策展数据格式不正确");
+      setSnapshot(result as CuratedVoiceSnapshot);
+      setNotice(`已重读策展数据；新鲜度按 ${result.summary.checkedAt} 核算。`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "策展数据读取失败"); }
     finally { setBusy(false); }
   }
 
+  function jump(categoryId: string) {
+    if (!visible.some((person) => person.cat === categoryId)) {
+      setQuery(""); setTag("all"); setNotice("已清除筛选，显示目标分类。");
+    }
+    setJumpTo({ id: categoryId });
+  }
+
   return <div className="app-shell voices-shell"><AppSidebar currentPath="/voices" />
-    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>最新风向</strong></div><div className="topbar-actions"><span className="sample-pill">按人物分组 · 近三个月</span><FundCharterLink /></div></header>
-      <div className="voices-content"><div className="voices-hero"><div><span className="section-eyebrow">AWE / LATEST VOICES · V1.4</span><h1>最新风向</h1><p>跟踪关键人物近期公开观点。每条摘要附有媒体来源和发布日期。</p></div><button className="primary-button" type="button" onClick={() => void refresh()} disabled={busy}>{busy ? "正在核对来源…" : "↻ 更新观点"}</button></div>
-        <div className="voices-status"><span>{snapshot ? `上次更新 ${displayDate(snapshot.asOf)} · 窗口自 ${displayDate(snapshot.windowStart)} 起` : "尚无本地快照 · 点击“更新观点”开始"}</span><span>{snapshot ? `已收录 ${snapshot.items.length} 条 · 查询 ${snapshot.searched} 位人物` : "仅显示可追溯的近期内容"}</span></div>
-        {error && <p className="voices-alert" role="alert">{error} {snapshot ? "已保留上次结果。" : ""}</p>}
-        {snapshot && snapshot.missing.length > 0 && <p className="voices-alert" role="status">本次有 {snapshot.missing.length} 项人物检索或来源请求失败，可能遗漏观点：{snapshot.missing.join("、")}。</p>}
-        <section className="voices-brief"><div><span className="section-eyebrow">THIS PERIOD</span><h2>本期值得注意</h2></div><p>{snapshot?.items.length ? `本次核对到 ${snapshot.items.length} 条公开媒体摘要，覆盖 ${new Set(snapshot.items.map((item) => item.personId)).size} 位追踪人物。逐条打开来源，核对完整语境与当时身份。` : "更新后按人物分组阅读近期表态。若来源不足，页面会保留明确空状态。"}</p></section>
-        <div className="voices-groups">{VOICE_GROUPS.map((group, index) => { const items = snapshot?.items.filter((item) => item.groupId === group.id) ?? []; const shown = expanded[group.id] ? items : items.slice(0, 5); const active = new Set(items.map((item) => item.personId)); const summary = snapshot?.groupSummaries?.find((entry) => entry.groupId === group.id); return <section key={group.id} className="voices-group" aria-labelledby={`voices-${group.id}`}><div className="voices-group-head"><span className="voices-number">{String(index + 1).padStart(2, "0")}</span><div><span className="section-eyebrow">PEOPLE / {group.id.toUpperCase()}</span><h2 id={`voices-${group.id}`}>{group.title}</h2><p>{group.description}</p></div><strong>{items.length} 条近期观点</strong></div>
-          <div className="voices-group-summary"><div><strong>中文速览</strong><small>{summary?.translated ? "依据近期条目标题机器翻译，请以原文核对" : "来源不足时不生成观点"}</small></div><p>{summary?.text ?? (snapshot ? "点击更新观点，生成本组中文速览。" : "更新后显示本组人物观点摘要。")}</p>{summary?.sourceIds.length ? <div className="voices-summary-sources">依据：{summary.sourceIds.map((id, sourceIndex) => { const item = items.find((candidate) => candidate.id === id); return item ? <a key={id} href={item.url} target="_blank" rel="noopener noreferrer">{item.person} 来源 {sourceIndex + 1} ↗</a> : null; })}</div> : null}</div>
-          {shown.length ? <div className="voices-grid">{shown.map((item) => <VoiceCard key={item.id} item={item} />)}</div> : <div className="voices-empty">{snapshot ? "当前公开索引中暂无符合近三个月条件的可核验观点。" : "更新后显示近期观点。"}</div>}
-          {items.length > 5 && <button type="button" className="voices-expand" onClick={() => setExpanded((current) => ({ ...current, [group.id]: !current[group.id] }))}>{expanded[group.id] ? "收起" : `展开更多 · 余下 ${items.length - 5} 条`}</button>}
-          <div className="voices-roster"><strong>追踪名单</strong>{group.people.map((person) => <span key={person.id} className={snapshot && !active.has(person.id) ? "quiet" : ""}>{person.name}{snapshot && !active.has(person.id) ? " · 暂无近期观点" : ""}</span>)}</div>
-        </section>; })}</div>
-        <p className="voices-footnote">中文速览是媒体标题的机器翻译，不是逐字引语或独立研究结论。媒体摘要可能不完整；日期为来源发布日期，不一定等于实际发言日。川普原帖经第三方公开归档发现，原文链接指向 Truth Social，单次归档只覆盖最新一部分帖子。请以原文为准。</p>
+    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>最新风向</strong></div><div className="topbar-actions"><span className="sample-pill">按人物 · 策展快照</span><FundCharterLink /></div></header>
+      <div className="voices-content voices-v110"><div className="voices-hero"><div><span className="section-eyebrow">AWE / LATEST VOICES · V1.10</span><h1>最新风向</h1><p>谁在什么时候，基于什么数字，给出了什么判断。这里展示分歧，不计算“大佬情绪指数”。</p></div><button className="primary-button" type="button" onClick={() => void refresh()} disabled={busy}>{busy ? "正在重读…" : "↻ 更新策展数据"}</button></div>
+        <div className="voices-status" role="status"><span>{snapshot ? `${snapshot.summary.people} 位人物 · ${snapshot.summary.points} 条要点 · ${snapshot.data.window[0]} ~ ${snapshot.data.window[1]}` : "策展快照暂不可用"}</span><span>{snapshot ? `快照 ${snapshot.data.as_of} · 当前可见 ${visible.length} 位 / ${visiblePoints} 条` : "请点击更新重试"}</span></div>
+        <p className="voices-source-caveat">本页导入外部提供的策展快照；来源字段只标明出口，原件未逐条核验。引语、数字和身份请回原始发布核对。</p>
+        {error && <p className="voices-alert" role="alert">{error}；已保留当前页面内容。</p>}{notice && <p className="voices-notice" role="status">{notice}</p>}
+        {snapshot && <>
+          <section className="voices-mainline" aria-label="本期主线"><div className="voices-mainline-head"><span className="section-eyebrow">EDITORIAL / {snapshot.data.as_of}</span><h2>{snapshot.data.brief.title}</h2><p>整理者的判断，与下方当事人的摘录分开阅读。</p></div><div className="voices-mainline-list">{snapshot.data.brief.items.map((item, index) => <details key={`${index}-${item.h}`}><summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.h}</strong></summary><p>{item.t}</p></details>)}</div></section>
+          <section className="voices-temperature" aria-label="六类人物温度条"><div className="voices-temperature-head"><h2>六类观点分布</h2><span>多 / 中 / 空 · 按人物计数，不代表市场共识</span></div><div className="voices-temperature-grid">{snapshot.summary.categories.map((category) => <button key={category.id} type="button" onClick={() => jump(category.id)} aria-label={`${category.name} · ${category.people} 位 · 多 ${category.bull} 中 ${category.neutral} 空 ${category.bear}`}><strong>{category.name}</strong><span>{category.people} 位</span><small>{category.bull} / {category.neutral} / {category.bear}</small></button>)}</div></section>
+          <section className="voices-controls" aria-label="人物筛选"><label>搜索<input type="search" aria-label="搜索人物与观点" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="姓名、机构、立场或要点正文" /></label><div className="voices-tag-filter" aria-label="立场筛选">{tagOptions.map((option) => <button key={option.value} type="button" aria-pressed={tag === option.value} onClick={() => setTag(option.value)}>{option.label}</button>)}</div><label className="voices-compact-toggle"><input type="checkbox" checked={compact} onChange={(event) => setCompact(event.target.checked)} />只看结论</label></section>
+          <div className="voices-visible-count">当前可见 {visible.length} / {snapshot.summary.people} 位人物 · {visiblePoints} 条要点{query || tag !== "all" ? "（已筛选）" : ""}</div>
+          {snapshot.summary.stale.length > 0 && <details className="voices-freshness"><summary>{snapshot.summary.stale.length} 位人物超过 30 天未更新 · 基准日 {snapshot.summary.checkedAt}</summary><div>{snapshot.summary.stale.map((person) => <span key={person.id}>{person.cn} · {person.latest} · {person.days} 天</span>)}</div></details>}
+          {!!snapshot.warnings.length && <p className="voices-alert" role="status">数据校验有 {snapshot.warnings.length} 项提醒，详见版本记录。</p>}
+          <div className="voices-categories">{snapshot.data.cats.map((category) => <CategorySection key={category.id} category={category} people={visible.filter((person) => person.cat === category.id)} compact={compact} />)}</div>
+          {!visible.length && <div className="voices-empty">当前筛选下没有人物。请调整关键词或立场。</div>}
+        </>}
       </div></main></div>;
 }
