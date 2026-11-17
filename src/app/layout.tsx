@@ -11,6 +11,7 @@ import "./canary.css";
 import "./investment-framework.css";
 import "./fund-charter.css";
 import "./latest-voices.css";
+import "./sitewide-ui.css";
 
 export const metadata: Metadata = {
   title: "Enterprise AWE Trading Terminal",
