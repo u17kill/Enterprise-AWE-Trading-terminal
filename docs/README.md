@@ -27,3 +27,7 @@
 | V1.10（最新风向策展升级，待验收） | [人物视角、数据与交互设计](superpowers/specs/2026-11-09-v110-latest-voices-curated-design.md) · [实施计划](superpowers/plans/2026-11-09-v110-latest-voices-curated.md) | [V1.10 交付与限制](v1.10-status.md) · [十条来源抽查](v1.10-source-audit.md) · [桌面预览](v1.10-preview-1440.png) · [窄屏预览](v1.10-preview-390.png) | [草稿 PR #27](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/27) |
 
 新版本开始时创建对应的需求文档和交付记录；开发中及时补充决定与限制；修复版本内 bug 时记录原因、改动与验证。提交前同步 README 索引及 PR，确保 GitHub 记录与代码一致。
+
+## V1.11 持仓地图重构（待验收）
+
+[交付记录](v1.11-status.md) · [需求原文](superpowers/specs/2026-11-16-v111-portfolio-books-source.md) · [实施方案](superpowers/plans/2026-11-16-v111-portfolio-books.md)
