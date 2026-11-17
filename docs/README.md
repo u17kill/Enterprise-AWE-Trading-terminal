@@ -30,4 +30,4 @@
 
 ## V1.11 持仓地图重构（待验收）
 
-[交付记录](v1.11-status.md) · [需求原文](superpowers/specs/2026-11-16-v111-portfolio-books-source.md) · [实施方案](superpowers/plans/2026-11-16-v111-portfolio-books.md)
+[交付记录](v1.11-status.md) · [需求原文](superpowers/specs/2026-11-16-v111-portfolio-books-source.md) · [实施方案](superpowers/plans/2026-11-16-v111-portfolio-books.md) · [草稿 PR #28](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/28)
