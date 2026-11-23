@@ -39,3 +39,9 @@
 | 版本 | 需求与计划 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
 | V1.13（市场总览重构，用户已验收） | [完整需求](market-overview-requirements.md) · [实施计划](superpowers/plans/2026-11-24-market-overview.md) | [交付、验证与数据边界](v1.13-status.md) | [PR #30](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/30) |
+
+## V1.14 资产风向
+
+| 版本 | 需求与方案 | 交付记录 | GitHub |
+| --- | --- | --- | --- |
+| V1.14（待验收） | [施工图](asset-direction-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v114-asset-direction.md) | [交付、验证与限制](v1.14-status.md) | codex/v1.14-asset-direction |

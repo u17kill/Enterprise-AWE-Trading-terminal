@@ -11,3 +11,4 @@ coverage/
 
 scripts/market-engine/__pycache__/
 .next-market-preview/
+scripts/asset-direction/__pycache__/
