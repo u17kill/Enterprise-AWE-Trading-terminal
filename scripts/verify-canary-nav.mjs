@@ -19,6 +19,9 @@ try{
    const size=await nav.evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth,left:n.getBoundingClientRect().left,right:n.getBoundingClientRect().right,viewport:innerWidth}));
    assert(size.scroll<=size.width+1,JSON.stringify({path,...size}));
    assert(size.left>=0&&size.right<=size.viewport+1,JSON.stringify({path,...size}));
+   const title=await page.locator('main h1').boundingBox();
+   const tabs=await nav.boundingBox();
+   assert(title&&tabs&&title.y+title.height<=tabs.y,`${path}: page title must be above tabs at ${width}px`);
   }
   await page.setViewportSize({width:1440,height:1000});
   console.log(path,'eight links, unique active state, desktop/mobile passed');

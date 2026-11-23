@@ -165,7 +165,8 @@ export function CanaryDashboard() {
 
   return <div className="app-shell canary-shell"><AppSidebar currentPath="/canary" />
   <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> 金丝雀指标 <span>/</span> <strong>指标大全</strong></div><div className="topbar-actions"><span className="sample-pill">手动刷新 · 本地保存</span><FundCharterLink /></div></header>
-    <div className="canary-content"><CanaryPageNav currentPath="/canary"/><div className="canary-hero"><div><span className="section-eyebrow">AWE / MARKET INTELLIGENCE</span><h1>指标大全</h1><p>宏观先行，再看美股风险与 A 股资金。让风险变化有出处、有日期，也有解释。</p></div><div className="canary-hero-actions"><button type="button" onClick={refresh} disabled={busy}>{busy ? "正在核对数据…" : "↻ 更新指标"}</button><span>{snapshot ? `上次更新 ${displayDate(snapshot.refreshedAt)} · 已有 ${updated} 项读数` : "点击更新获取已接入指标"}</span><a href="/api/longbridge/connect?return=%2Fcanary">连接 Longbridge · 读取 VIX 与期权指标</a></div></div>
+    <div className="canary-content"><div className="canary-hero"><div><span className="section-eyebrow">AWE / MARKET INTELLIGENCE</span><h1>指标大全</h1><p>宏观先行，再看美股风险与 A 股资金。让风险变化有出处、有日期，也有解释。</p></div><div className="canary-hero-actions"><button type="button" onClick={refresh} disabled={busy}>{busy ? "正在核对数据…" : "↻ 更新指标"}</button><span>{snapshot ? `上次更新 ${displayDate(snapshot.refreshedAt)} · 已有 ${updated} 项读数` : "点击更新获取已接入指标"}</span><a href="/api/longbridge/connect?return=%2Fcanary">连接 Longbridge · 读取 VIX 与期权指标</a></div></div>
+      <CanaryPageNav currentPath="/canary"/>
       {feedback && <p className="canary-feedback" role="status">{feedback}</p>}
       {orderFeedback && <p className="canary-feedback" role="status">{orderFeedback}</p>}
       <div className="canary-legend"><span><i className="legend-live" />有效读数</span><span><i className="legend-old" />旧数据</span><span><i className="legend-pending" />待接入</span><small>数值显示在卡片上；点开可看使用说明、来源与限制。CDS 留待后续版本。</small></div>
