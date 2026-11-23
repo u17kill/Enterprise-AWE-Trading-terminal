@@ -50,4 +50,4 @@
 
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
-| V1.15（待验收） | [完整需求](temperature-suite-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v115-temperature-suite.md) · [实施计划](superpowers/plans/2026-11-24-v115-temperature-suite.md) | [交付、修复、验证与数据限制](v1.15-status.md) | [草稿 PR #32](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/32) |
+| V1.15（待验收，含八页统一横向切换栏） | [完整需求](temperature-suite-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v115-temperature-suite.md) · [实施计划](superpowers/plans/2026-11-24-v115-temperature-suite.md) | [交付、修复、导航补充、验证与数据限制](v1.15-status.md) | [草稿 PR #32](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/32) |
