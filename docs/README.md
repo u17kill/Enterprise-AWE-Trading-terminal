@@ -44,4 +44,4 @@
 
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
-| V1.14（待验收） | [施工图](asset-direction-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v114-asset-direction.md) | [交付、验证与限制](v1.14-status.md) | codex/v1.14-asset-direction |
+| V1.14（待验收） | [施工图](asset-direction-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v114-asset-direction.md) | [交付、验证与限制](v1.14-status.md) | [草稿 PR #31](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/31) |
