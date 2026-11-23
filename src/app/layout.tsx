@@ -8,6 +8,7 @@ import "./leader-holdings.css";
 import "./options-calculator.css";
 import "./master-philosophy.css";
 import "./canary.css";
+import "./canary-page-nav.css";
 import "./investment-framework.css";
 import "./fund-charter.css";
 import "./latest-voices.css";
