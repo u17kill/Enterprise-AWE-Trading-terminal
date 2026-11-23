@@ -8,3 +8,6 @@ coverage/
 .pnpm-store/
 *.tsbuildinfo
 .local/
+
+scripts/market-engine/__pycache__/
+.next-market-preview/

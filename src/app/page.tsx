@@ -1,3 +1,3 @@
-import { Dashboard } from "../components/dashboard";
+import { MarketOverview } from "../components/market-overview";
 
-export default function Home() { return <Dashboard />; }
+export default function Home() { return <MarketOverview />; }
