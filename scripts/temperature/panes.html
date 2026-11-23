@@ -1,0 +1,239 @@
+<div id="pane1"><div class="temperature-note" id="metaLine"></div>
+
+<div class="sbar">
+  <div class="l">标的 <b id="momN">—</b> 个　｜　最近交易日 <b id="momDate">—</b>　｜　口径 <b>位置 · 拥挤 · 动能</b>（各 0–100 分）</div>
+  <div class="r"><span class="st" id="momSt">点「刷新动能」重取日线并重算</span>
+    <button class="btn" id="momBtn"><span class="dot"></span><span id="momBtnTxt">刷新动能</span></button></div>
+</div>
+
+<div class="quick">
+  <div class="q"><b>①</b><span><b>分数是状态读数，历史排名另算。</b>把样本期内每个交易日按“过热程度”从冷到热排队，分项来自历史分位，总分另经加权与平滑。0 = 历史最冷的一天，100 = 最热的一天。</span></div>
+  <div class="q"><b>②</b><span><b>分数高不代表要跌，低不代表要涨。</b>它回答“现在有多热”，不回答“明天往哪走”。样本内读数越高，后续收益反而略好——这是动量效应，不是反转。</span></div>
+  <div class="q"><b>③</b><span><b>一定要看三个分项，不能只看总分。</b>同样是 40 分，“跌透了没人气”和“涨高了劲头没了”完全不同。总分告诉你多热闹，分项告诉你热闹在哪一头。</span></div>
+</div>
+
+<div class="grid2" id="cards"></div>
+
+<div class="sec">
+  <div class="sec-h"><h2>三个模块分别是什么意思</h2><div class="note">每个模块都是 0–100 分，独立看，不要合并</div></div>
+  <div class="sec-desc">这三个模块回答的是三个不同的问题，不是同一个指标的三种算法。它们的区别用一句话就能分清：<b>位置</b>说“在哪儿”，<b>拥挤</b>说“场子有多热闹”，<b>动能</b>说“正在往哪走、走得多快”。</div>
+  <div class="guides" id="guides"></div>
+  <div class="card" id="levCard" style="padding:15px 20px;margin-top:16px;display:none"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>0–100 的分数到底怎么读</h2></div>
+  <div class="sec-desc" id="scaleDesc"></div>
+  <div class="card" style="padding:16px 20px;margin-bottom:16px">
+    <div style="font-size:12px;font-weight:600;margin-bottom:10px">同一个分数，可以有两副面孔</div>
+    <div class="compare">
+      <div class="ci" style="background:#faf9f6">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:12.5px;font-weight:600">情形 A</span>
+          <span style="font-size:22px;font-weight:600;font-family:ui-monospace,Consolas,monospace">40.9</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--ink2);margin:6px 0 7px;font-family:ui-monospace,Consolas,monospace">位置 11　拥挤 40　动能 90</div>
+        <div style="font-size:12px">跌透了、没人气，但下跌已经刹住</div>
+        <div style="font-size:11.5px;color:#3b6d11;margin-top:3px">→ 处在底部区域，风险已经释放大半</div>
+      </div>
+      <div class="ci" style="background:#faf9f6">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:12.5px;font-weight:600">情形 B</span>
+          <span style="font-size:22px;font-weight:600;font-family:ui-monospace,Consolas,monospace">40.9</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--ink2);margin:6px 0 7px;font-family:ui-monospace,Consolas,monospace">位置 60　拥挤 45　动能 20</div>
+        <div style="font-size:12px">位置还高、人气一般，但劲头已经没了</div>
+        <div style="font-size:11.5px;color:#a32d2d;margin-top:3px">→ 处在顶部区域，上涨正在失去动力</div>
+      </div>
+    </div>
+    <div class="cap">总分一模一样，处境完全相反。这就是为什么必须把三根分项拆开看，只盯总分会被误导。</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card" style="padding:16px 20px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">分数的三档含义</div>
+      <table style="font-size:11.5px">
+        <tbody>
+          <tr><td style="width:70px"><b>接近 0</b></td><td style="text-align:left" class="dim">历史上最冷的一批日子：跌得深、没人交易，或者还在猛跌</td></tr>
+          <tr><td><b>接近 50</b></td><td style="text-align:left" class="dim">历史中位数：不好也不坏，多数时间都在这个位置</td></tr>
+          <tr><td><b>接近 100</b></td><td style="text-align:left" class="dim">历史上最热的一批日子：涨得多、人挤人，或者还在猛冲</td></tr>
+        </tbody>
+      </table>
+      <div class="cap">分数只说明“当前位置在历史上少见还是常见”，不说明“接下来会怎样”。</div>
+    </div>
+    <div class="card" style="padding:16px 20px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">为什么要转成分位，而不是直接用原始值</div>
+      <div style="font-size:12px;color:var(--ink2)">
+        原始值不可比。换手率 2% 对科创 50 已经算高，对创业板指只算正常——两者换手率中位数差了近 3 倍（1.11% vs 3.19%）。<br>
+        所以每个子项都先换成“在这个指数自己历史上排第几”，再加权。这样 70 分在两只指数上，才都代表同样程度的“偏热”。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>五个档位</h2><div class="note">“历史占比”指样本期内落在该档的交易日比例</div></div>
+  <div class="sec-desc">
+    档位只是给分数划的区间，方便口头描述。<b>历史占比这一列很关键</b>：它告诉你这个档位在样本里出现过多少次。占比极小的档位（比如科创 50 的极端超卖只占 0.6%）意味着样本只有个位数，那一档的统计结论不能用。
+  </div>
+  <div class="card" style="padding:8px 4px"><table class="bkdef" id="bkDefTable"></table></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>历史读数与指数走势</h2>
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div class="sec-desc" style="margin-top:8px">黑实线是复合读数（左轴 0–100），灰虚线是指数收盘价（右轴）。<b>两条线经常不同步</b>——价格创新高而读数没跟上，说明这波上涨的“热度”不如上一波，通常是动能衰竭的早期迹象。</div>
+  <div class="card" style="padding:14px 12px 6px">
+    <div id="chart"></div>
+    <dl class="legend">
+      <div><i style="background:#1f6feb"></i>≤15 极端超卖</div>
+      <div><i style="background:#6aa9f0"></i>15–30 警戒超卖</div>
+      <div><i style="background:#b4b2a9"></i>30–70 正常</div>
+      <div><i style="background:#e08b3a"></i>70–85 警戒超买</div>
+      <div><i style="background:#d64545"></i>≥85 极端超买</div>
+    </dl>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>分档检验：落在每一档之后，历史上发生了什么</h2><div class="note" id="bkNote"></div></div>
+  <div class="sec-desc">
+    这张表是给指标做“体检”的。<b>做法</b>：找出历史上所有落在某一档的交易日，然后统计这些日子之后的走势。<br>
+    <b>怎么读</b>：如果某档的“后续 20 日”明显高于其他档，说明这一档之后市场偏强；如果“20 日均最深回撤”特别大，说明这一档之后波动更凶险。注意<b>“交易日数”太小的档位没有统计意义</b>，看方向别当结论。
+  </div>
+  <div class="card" style="padding:8px 4px"><table id="bkTable"></table></div>
+  <div class="cap" id="bkCap"></div>
+</div>
+
+<div class="two">
+  <div class="sec" style="margin-top:0">
+    <div class="sec-h"><h2>年度高低点读数对照</h2></div>
+    <div class="sec-desc" style="margin-bottom:8px">每年收盘最高和最低那天的读数。这是检验指标“认不认得顶和底”的最直观方法：如果高点读数普遍高、低点读数普遍低，指标才算有效。</div>
+    <div class="card" style="padding:8px 4px"><table id="yrTable"></table></div>
+  </div>
+  <div class="sec" style="margin-top:0">
+    <div class="sec-h"><h2>极端状态事件（持续 ≥3 日）</h2></div>
+    <div class="sec-desc" style="margin-bottom:8px">连续 3 天以上停在极端档的时段。<b>持续天数</b>说明这类状态能维持多久——太短（1–2 天）说明只是噪音，不构成一段行情。</div>
+    <div class="card" style="padding:8px 4px"><table id="evTable"></table></div>
+    <div class="cap" id="evCap"></div>
+  </div>
+</div>
+
+<div class="foot" id="footNote"></div>
+
+</div><!-- /pane1 -->
+
+<div id="pane2" style="display:none">
+
+<div class="sbar">
+  <div class="l">估值标的 <b id="valN">—</b> 个　｜　数据截至 <b id="valDate">—</b>　｜　口径 <b>PE-TTM 分位</b>（自算，与蛋卷历史百分位一致）</div>
+  <div class="r"><span class="st" id="valSt">点「刷新估值」重取 PE 与分位</span>
+    <button class="btn" id="valBtn"><span class="dot"></span><span id="valBtnTxt">刷新估值</span></button></div>
+</div>
+
+<div class="quick">
+  <div class="q"><b>①</b><span><b>这一页回答的是另一个问题。</b>第一页看“多热”（动能分析），这一页看“多贵”（估值水平）。热度会骗人，估值不会突然变——它更适合判断中长期位置。</span></div>
+  <div class="q"><b>②</b><span><b>分位是横向比较的唯一可靠口径。</b>PE 绝对值 105 和 30 不能直接比，因为行业结构与盈利质量不同；但“在自己历史上排第几”可以比。</span></div>
+  <div class="q"><b>③</b><span><b>低估值不等于该买。</b>估值低只说明价格相对盈利便宜，它还可以更便宜——2022 年创业板指 PE 跌到 23 倍附近之后仍有漫长的磨底。它是必要条件，不是充分条件。</span></div>
+</div>
+
+<div class="sec" style="margin-top:0">
+  <div class="sec-h"><h2>把两页放在一起看</h2><div class="note">动能分析 vs 长期估值</div></div>
+  <div class="sec-desc">这是整个看板最该看的一处对照。同样都是“跌得很深”，性质可能完全相反：一种是<b>跌下来也变便宜了</b>，另一种是<b>股价跌了但盈利跌得更快，所以并没有变便宜</b>。</div>
+  <div class="compare" id="compareBox"></div>
+  <div class="cap">“短期位置”来自第一页的位置模块（价格离平均成本多远）；PE 分位来自本页。两者结论一致时，信号可信度更高。</div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>当前估值水平</h2><div class="note" id="vSrc"></div></div>
+  <div class="vgrid" id="vCards"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2 id="vChartTitle">PE 历史走势与指数价格</h2>
+    <div class="tabs" id="vtabs"></div>
+  </div>
+  <div class="sec-desc" style="margin-top:8px">
+    左轴是市盈率（PE-TTM），右轴是指数收盘价，横轴是时间。<b>怎么看</b>：PE 往下走而价格没跌，说明盈利在增长、估值被消化；PE 跟着价格一起掉，说明是纯粹的杀估值。<br>
+    三条水平虚线分别是历史 20% 分位、中位数、80% 分位——PE 落在下方虚线附近算便宜，落在上方虚线附近算贵。
+  </div>
+  <div class="card" style="padding:14px 12px 6px">
+    <div id="vchart"></div>
+    <dl class="legend" style="grid-template-columns:repeat(5,1fr)">
+      <div><i style="background:#2c2c2a"></i>PE-TTM（左轴）</div>
+      <div><i style="background:#b9b6ab"></i>指数收盘（右轴）</div>
+      <div><i style="background:#6aa9f0"></i>P20 便宜线</div>
+      <div><i style="background:#c9c7bd"></i>历史中位</div>
+      <div><i style="background:#e08b3a"></i>P80 偏贵线</div>
+    </dl>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>估值指标汇总</h2></div>
+  <div class="card" style="padding:8px 4px"><table id="vTable"></table></div>
+  <div class="cap">分位为自算值（当前 PE 在过去 N 年样本中的百分位），与蛋卷页面展示的“历史百分位”口径一致，差异在四舍五入范围内。科创 50 指数 2019-12 才发布，样本不足 10 年，故其“长期分位”实为成立以来分位。</div>
+</div>
+
+<div class="foot" id="valFoot"></div>
+
+</div><!-- /pane2 -->
+
+<div id="pane3" style="display:none">
+<div class="sbar">
+  <div class="l">复盘标的交易日 <b id="sDate">—</b>　｜　情绪温度 <b id="sTemp">—</b>　｜　<span id="sBand">—</span></div>
+  <div class="r">
+    <span class="st" id="sSt">点「刷新情绪」取最近一个收盘交易日</span>
+    <button class="btn" id="sBtn"><span class="dot"></span><span id="sBtnTxt">刷新情绪</span></button>
+  </div>
+</div>
+
+<div id="sentiBody"></div>
+
+</div><!-- /pane3 -->
+
+<div id="pane4" style="display:none">
+
+<div class="sbar">
+  <div class="l">美股交易日 <b id="uDate">—</b>　｜　<span id="uPhase">—</span>　｜　
+    标的 <b id="uUni">—</b> 只　｜　恐惧贪婪 <b id="uFng">—</b></div>
+  <div class="r">
+    <span class="st" id="uSt">点「刷新美股」取最新快照</span>
+    <button class="btn" id="uBtn"><span class="dot"></span><span id="uBtnTxt">刷新美股</span></button>
+  </div>
+</div>
+
+<div id="usBody"></div>
+
+</div><!-- /pane4 -->
+
+<div id="pane5" style="display:none">
+
+<div class="sbar">
+  <div class="l">港股交易日 <b id="hDate">—</b>　｜　<span id="hPhase">—</span>　｜　
+    标的 <b id="hUni">—</b> 只　｜　沽空 <b id="hShort">—</b></div>
+  <div class="r">
+    <span class="st" id="hSt">点「刷新港股」取最新快照</span>
+    <button class="btn" id="hBtn"><span class="dot"></span><span id="hBtnTxt">刷新港股</span></button>
+  </div>
+</div>
+
+<div id="hkBody"></div>
+
+</div><!-- /pane5 -->
+
+<div id="pane6" style="display:none">
+
+<div class="sbar">
+  <div class="l">交易日 <b id="aDate">—</b>　｜　五地 <b>日 · 韩 · 台 · 印 · 新</b>　｜　口径 <b>位置 + 动能</b>（不做量能与估值）</div>
+  <div class="r">
+    <span class="st" id="aSt">点「刷新亚太」取最新日线</span>
+    <button class="btn" id="aBtn"><span class="dot"></span><span id="aBtnTxt">刷新亚太</span></button>
+  </div>
+</div>
+
+<div id="apBody"></div>
+
+</div><!-- /pane6 -->
