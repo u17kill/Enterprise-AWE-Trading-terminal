@@ -12,6 +12,7 @@ import "./investment-framework.css";
 import "./fund-charter.css";
 import "./sitewide-ui.css";
 import "./market-overview.css";
+import "./investment-tools.css";
 
 export const metadata: Metadata = {
   title: "Enterprise AWE Trading Terminal",

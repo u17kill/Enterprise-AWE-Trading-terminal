@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
 import {AppSidebar} from './app-sidebar';
-import {FundCharterLink} from './fund-charter-link';
+import {ToolsPageNav} from './tools-page-nav';
 import {PortfolioMatrixVisuals} from './portfolio-matrix-visuals';
 import {calculateMatrixTotals} from '../lib/portfolio-matrix-totals';
 import {validateBook} from '../lib/portfolio-books-validation';
@@ -66,8 +66,9 @@ export function PortfolioBooks({initial,emptyCore,emptySat,initialReview}:Props)
  const visualTotals=calculateMatrixTotals({...matrix,items:matrix.items.map(i=>({...i,amount:amountCents(i.amount)===null?'':i.amount}))});
  const coreSlices=(['regionId','style','name'] as const).map(key=>{const totals:Record<string,number>={};for(const a of s.funds.flatMap(f=>f.allocated))totals[a[key]]=(totals[a[key]]||0)+a.cents;return {key,totals};});
  const days=Math.floor((Date.now()-Date.parse(review.as_of))/86400000),drift=s.total/(review.anchor.total_wan*1000000)-1;
- return <div className="app-shell"><AppSidebar currentPath="/portfolio"/><main className="main-content"><header className="topbar"><div className="breadcrumb">投资工具 / 当前持仓</div><FundCharterLink/></header><div className="pb-page">
+ return <div className="app-shell"><AppSidebar currentPath="/portfolio"/><main className="main-content"><div className="pb-page">
   <div className="pb-heading"><div><span className="section-eyebrow">PORTFOLIO / CORE + SATELLITE</span><h1>{mode==='total'?'总仓':mode==='core'?'核心仓':'卫星仓'}</h1><p>填写金额的结构地图 · 非市值 · 固定记账汇率 1 USD = 7.00 CNY</p></div><nav aria-label="持仓视图">{(['total','core','sat'] as const).map(v=><button key={v} aria-pressed={mode===v} onClick={()=>switchMode(v)}>{v==='total'?'总仓':v==='core'?'核心仓':'卫星仓'}</button>)}</nav></div>
+  <ToolsPageNav currentPath="/portfolio"/>
   {(['core','sat'] as const).map(book=><div key={book}>{!snap[book].matrix&&<p className="pb-warning">{book==='core'?'核心仓':'卫星仓'}文件缺失，没有可计算的数据。</p>}{initial[book].error&&<p role="alert">{initial[book].error}</p>}{conflicts[book]&&<div className="pb-warning">{book==='core'?'核心仓':'卫星仓'}文件与本机草稿不同，请选择（另一份先备份）：<button disabled={busy[book]} onClick={()=>void persist(book,conflicts[book]!.matrix,snap[book].revision,true)}>用本机覆盖文件</button><button disabled={busy[book]} onClick={()=>chooseFile(book)}>用文件覆盖本机</button><button onClick={()=>exportBook(conflicts[book]!.matrix,book+'-conflict-draft')}>导出本机草稿</button></div>}{errors[book]&&<div role="alert" className="pb-warning">{errors[book]} {!conflicts[book]&&<button disabled={busy[book]} onClick={()=>void persist(book,books[book])}>重试保存</button>}</div>}</div>)}
   {mode==='total'&&<div className="pb-toolbar"><span>数据截至 · 核心 {snap.core.as_of?.slice(0,10)||'未获取'} / 卫星 {snap.sat.as_of?.slice(0,10)||'未获取'}</span>{(['core','sat'] as const).map(book=><span key={book}><button onClick={()=>exportBook(books[book],book==='core'?'core':'matrix')}>导出{book==='core'?'核心仓':'卫星仓'}</button><label className="pb-import">导入{book==='core'?'核心仓':'卫星仓'}<input type="file" accept=".json" disabled={busy[book]||!!conflicts[book]} onChange={e=>void importFile(book,e.target.files?.[0])}/></label></span>)}</div>}
   {mode==='total'?<>

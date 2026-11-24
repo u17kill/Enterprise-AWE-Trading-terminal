@@ -56,4 +56,4 @@
 
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
-| V1.16（用户已验收，含指标大全顶栏一致性修复） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | [草稿 PR #33](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/33) |
+| V1.16（主体已验收，含顶栏及投资工具交互优化） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | [草稿 PR #33](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/33) |
