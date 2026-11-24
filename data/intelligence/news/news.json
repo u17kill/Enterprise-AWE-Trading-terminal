@@ -1,0 +1,1493 @@
+{
+ "as_of": "2026-11-24",
+ "window": {
+  "top": [
+   "2026-11-17T11:40:26+08:00",
+   "2026-11-24T11:40:26+08:00"
+  ],
+  "flow": [
+   "2026-11-17T11:40:26+08:00",
+   "2026-11-24T11:40:26+08:00"
+  ],
+  "days": 7
+ },
+ "brief": {
+  "auto": true,
+  "items": [
+   {
+    "h": "进出口行发行1年期债券，规模130亿元，发行利率1.2680%，预期1.2700…",
+    "t": "进出口行发行1年期债券，规模130亿元，发行利率1.2680%，预期1.2700%，投标倍数2.72倍，边际倍数1.62倍。",
+    "src": "华尔街见闻",
+    "date": "2026-11-24T11:14:00+08:00",
+    "bucket": "top"
+   },
+   {
+    "h": "Six key questions raised by Jensen Huang…",
+    "t": "As Jensen Huang returns to Nvidia, questions remained around the board's reversa…",
+    "src": "CNBC",
+    "date": "2026-11-24T11:05:49+08:00",
+    "bucket": "top"
+   },
+   {
+    "h": "Shares in Chinese Cobalt Producers Jump…",
+    "t": "Shares in Chinese cobalt producers surged after the Democratic Republic of Congo…",
+    "src": "Bloomberg",
+    "date": "2026-11-24T11:17:56+08:00",
+    "bucket": "top"
+   },
+   {
+    "h": "特朗普将于美东时间周三下午4点在佛罗里达州同北约秘书长会面",
+    "t": "特朗普将于美东时间周三下午4点在佛罗里达州同北约秘书长会面。",
+    "src": "华尔街见闻",
+    "date": "2026-11-24T11:10:33+08:00",
+    "bucket": "top"
+   },
+   {
+    "h": "美联储监察机构据悉调查理事鲍曼是否违反“静默期”规定",
+    "t": "据知情人士透露，美联储内部监察机构正在调查理事米歇尔·鲍曼，重点是她今年6月参加美国银行为客户举办的一场私人晚宴，是否违反了美联储的“静默期”规定。",
+    "src": "环球市场播报",
+    "date": "2026-11-24T11:08:50+08:00",
+    "bucket": "top"
+   }
+  ],
+  "rule": "取头条带前五，不足则按时效 · 同报家数 · 是否人写补齐，每桶最多一条；一句话取自原文首句，未改写"
+ },
+ "buckets": [
+  {
+   "id": "macro",
+   "name": "宏观政策",
+   "desc": "利率 · 财政 · 数据",
+   "rule": "只收央行、财政部、统计局口径"
+  },
+  {
+   "id": "geo",
+   "name": "地缘与贸易",
+   "desc": "关税 · 冲突 · 外交",
+   "rule": "只收两国以上的互动"
+  },
+  {
+   "id": "us",
+   "name": "美国国内",
+   "desc": "监管 · 劳工 · 司法",
+   "rule": "政策之外、但会改行业成本的事"
+  },
+  {
+   "id": "cn",
+   "name": "中国国内",
+   "desc": "产业 · 地产 · 就业",
+   "rule": "同上，政策与跨国摩擦之外"
+  },
+  {
+   "id": "ai",
+   "name": "AI 与科技",
+   "desc": "按主体分，不看话题",
+   "rule": "主体是科技公司才算，哪怕它在讲别的"
+  },
+  {
+   "id": "industry",
+   "name": "传统产业",
+   "desc": "医药 · 消费 · 汽车",
+   "rule": "主体是传统公司，哪怕内容在讲 AI"
+  },
+  {
+   "id": "wire",
+   "name": "快讯流",
+   "desc": "没命中分类 · 按时间倒序",
+   "rule": "关键词一个都没中的，原样列出，不硬塞进别的桶"
+  }
+ ],
+ "items": [
+  {
+   "id": "a002",
+   "auto": true,
+   "place": "top",
+   "t": "进出口行发行1年期债券，规模130亿元，发行利率1.2680%，预期1.2700%，投标倍数2.72倍，边际倍数1.62倍",
+   "tcn": "进出口行发行1年期债券，规模130亿元，发行利率1.2680%，预期1.2700%，投标倍数2.72倍，边际倍数1.62倍。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:14:00+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204668",
+   "n_src": 2,
+   "lang": "zh",
+   "rank": 1
+  },
+  {
+   "id": "a008",
+   "auto": true,
+   "place": "top",
+   "t": "Six key questions raised by Jensen Huang's return to Nvidia",
+   "tcn": "As Jensen Huang returns to Nvidia, questions remained around the board's reversal, Trump's…",
+   "src": "CNBC",
+   "date": "2026-11-24T11:05:49+08:00",
+   "url": "https://www.cnbc.com/2026/11/24/nvidia-jensen-huang-politics-market.html",
+   "n_src": 2,
+   "lang": "en",
+   "rank": 2
+  },
+  {
+   "id": "a001",
+   "auto": true,
+   "place": "top",
+   "t": "Shares in Chinese Cobalt Producers Jump After Congo Bans Exports",
+   "tcn": "Shares in Chinese cobalt producers surged after the Democratic Republic of Congo slapped a…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T11:17:56+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/shares-in-chinese-cobalt-producers-jump-after-congo-bans-exports",
+   "n_src": 1,
+   "lang": "en",
+   "rank": 3
+  },
+  {
+   "id": "a003",
+   "auto": true,
+   "place": "top",
+   "t": "特朗普将于美东时间周三下午4点在佛罗里达州同北约秘书长会面",
+   "tcn": "特朗普将于美东时间周三下午4点在佛罗里达州同北约秘书长会面。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:10:33+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204667",
+   "n_src": 1,
+   "lang": "zh",
+   "rank": 4
+  },
+  {
+   "id": "a004",
+   "auto": true,
+   "place": "top",
+   "t": "美联储监察机构据悉调查理事鲍曼是否违反“静默期”规定",
+   "tcn": "据知情人士透露，美联储内部监察机构正在调查理事米歇尔·鲍曼，重点是她今年6月参加美国银行为客户举办的一场私人晚宴，是否违反了美联储的“静默期”规定。",
+   "src": "环球市场播报",
+   "date": "2026-11-24T11:08:50+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvh1997409.shtml",
+   "n_src": 1,
+   "lang": "zh",
+   "rank": 5
+  },
+  {
+   "id": "a005",
+   "auto": true,
+   "place": "top",
+   "t": "AI眼镜概念表现活跃，明月镜片、天键股份涨超10%，共达电声此前涨停，歌尔股份、龙旗科技、瀛通通讯涨超6%",
+   "tcn": "AI眼镜概念表现活跃，明月镜片、天键股份涨超10%，共达电声此前涨停，歌尔股份、龙旗科技、瀛通通讯涨超6%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:08:17+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204666",
+   "n_src": 1,
+   "lang": "zh",
+   "rank": 6
+  },
+  {
+   "id": "a006",
+   "auto": true,
+   "place": "top",
+   "t": "Japanese Bonds Rally Across Curve as Domestic Stocks Surge",
+   "tcn": "Japanese government bonds rallied across the curve after a three-day holiday, with gains h…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T11:07:20+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/japanese-bonds-rally-across-curve-as-domestic-stocks-surge",
+   "n_src": 1,
+   "lang": "en",
+   "rank": 7
+  },
+  {
+   "id": "a007",
+   "auto": true,
+   "place": "top",
+   "t": "比特币未能守住涨势 风险资产反弹强化美联储加息空间预期",
+   "tcn": "尽管黄仁勋重返英伟达CEO岗位的消息推动全球股市飙升，但比特币未能维持涨势，投资者正在聚焦加密货币阻力因素。 周二亚洲早盘，该全球最大数字资产下跌约2%...",
+   "src": "环球市场播报",
+   "date": "2026-11-24T11:07:10+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvk7889213.shtml",
+   "n_src": 1,
+   "lang": "zh",
+   "rank": 8
+  },
+  {
+   "id": "a012",
+   "auto": true,
+   "place": "wire",
+   "t": "渣打据悉调查一名银行高管 先前接获对其行为的投诉",
+   "tcn": "据知情人士透露，渣打集团今年稍早曾调查其企业及投资银行业务首席执行官的行为，此前匿名电邮指控这名高级银行家偏袒部分人士，并在银行内部排挤一些高管。",
+   "src": "环球市场播报",
+   "date": "2026-11-24T11:01:34+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvn0214543.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a013",
+   "auto": true,
+   "place": "wire",
+   "t": "深圳中小学秋假结束 深圳铁路累计到发旅客246万人次",
+   "tcn": "11月17日至20日为深圳中小学秋假。据统计，秋假4天时间内，深圳铁路累计到发旅客246.40万人次，其中发送126.75万人次，到达119.65万人次。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:01:20+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204663",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a014",
+   "auto": true,
+   "place": "wire",
+   "t": "隔夜SHIBOR报1.2740%，上涨1.20个基点",
+   "tcn": "隔夜SHIBOR报1.2740%，上涨1.20个基点。 7天SHIBOR报1.3960%，上涨2.30个基点。 3个月SHIBOR报1.4000%，上涨0.00个基点。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:01:00+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204662",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a017",
+   "auto": true,
+   "place": "wire",
+   "t": "太古股份：无意进一步减持国泰航空股份，国泰航空仍是集团核心业务",
+   "tcn": "太古股份：无意进一步减持国泰航空股份，国泰航空仍是集团核心业务。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:50:42+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204656",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a024",
+   "auto": true,
+   "place": "wire",
+   "t": "广州：延长“卖旧买新”专项补贴申领条件中居民个人购买新建商品住宅并完成网签的时间",
+   "tcn": "广州市住房和城乡建设局发布优化商品住房“卖旧买新”专项补贴政策的通知。延长“卖旧买新”专项补贴申领条件中居民个人购买新建商品住宅并完成网签的时间。《广州市住房和城乡建设局关于商品住…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:32:34+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204649",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a025",
+   "auto": true,
+   "place": "wire",
+   "t": "截至早盘收盘，日经225指数涨4%，东证指数涨2.5%",
+   "tcn": "截至早盘收盘，日经225指数涨4%，东证指数涨2.5%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:31:26+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204648",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a026",
+   "auto": true,
+   "place": "wire",
+   "t": "上海钢联发布数据显示，今日MMLC电池级碳酸锂（早盘）中间价报90500元/吨，较上日16:30价格下跌250元/吨",
+   "tcn": "上海钢联发布数据显示，今日MMLC电池级碳酸锂（早盘）中间价报90500元/吨，较上日16:30价格下跌250元/吨。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:31:00+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204647",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a028",
+   "auto": true,
+   "place": "wire",
+   "t": "大众金融控股现飙涨超76% 获大众银行私有化通过将于12月9日撤销股份上市地位",
+   "tcn": "大众金融控股（00626）早盘飙涨超76%，截至发稿，股价上涨76.24%，现报2.485港元，成交额3921.083万港元。 11月23日晚，大众金融控股发布公告称...",
+   "src": "新浪港股",
+   "date": "2026-11-24T10:26:16+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxve5185521.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a029",
+   "auto": true,
+   "place": "wire",
+   "t": "兑吧盘中涨超11% 公司定位已切换为AI-Native内容平台",
+   "tcn": "兑吧（01753）盘中涨超11%，截至发稿，股价回落现涨3.55%，报0.88港元，成交额591.60万港元。 国家广播电视总局数据显示，2026年1—9月上线微短剧共49万部..…",
+   "src": "新浪港股",
+   "date": "2026-11-24T10:24:39+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxvh1960427.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a030",
+   "auto": true,
+   "place": "wire",
+   "t": "黄金自一年多低点反弹，或将迎来震荡筑底",
+   "tcn": "文章来源：汇通财经黄金（XAU/USD）在周二亚洲早盘自一年多低点反弹至约 3650美元，日线级别的抄底反弹正在延续。此前该贵金属曾跌至一年多以来的最低区域...",
+   "src": "市场资讯",
+   "date": "2026-11-24T10:23:00+08:00",
+   "url": "https://finance.sina.com.cn/money/nmetal/hjzx/2026-11-24/doc-inizuxvn0189824.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a034",
+   "auto": true,
+   "place": "wire",
+   "t": "华为宣布鸿蒙操作系统终端设备数突破1亿",
+   "tcn": "11月24日，华为宣布搭载HarmonyOS 5/6/7的手机、平板和电脑设备，已经正式突破一个亿，可获取的应用和服务超46万，注册开发者超1200万。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:19:59+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204645",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a037",
+   "auto": true,
+   "place": "wire",
+   "t": "军工板块表现活跃，晨曦航空涨超10%，北方长龙、广联航空、晟楠科技、佳力奇、爱乐达等跟涨",
+   "tcn": "军工板块表现活跃，晨曦航空涨超10%，北方长龙、广联航空、晟楠科技、佳力奇、爱乐达等跟涨。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:14:58+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204643",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a038",
+   "auto": true,
+   "place": "wire",
+   "t": "印尼基准股指上涨1.3%",
+   "tcn": "印尼基准股指上涨1.3%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:03:12+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204642",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a041",
+   "auto": true,
+   "place": "wire",
+   "t": "粤港湾智算早盘涨超8% 公司拟回购最多2亿港元股份",
+   "tcn": "粤港湾智算（01396）盘中涨超9%，截至发稿，股价上涨8.16%，现报7.63港元，成交额780.14万港元。 近日，粤港湾智算公布，董事会已决议不时于公开市场回购总值最多2亿港…",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:54:22+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxvk7836267.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a042",
+   "auto": true,
+   "place": "wire",
+   "t": "金饰克价涨回1100元",
+   "tcn": "11月24日，国内黄金饰品价格对比显示，多家黄金珠宝品牌公布的境内足金首饰价格较昨日有所上调，老庙黄金报价1098元/克，较昨日涨10元；周大福报价1103元/克，较昨日涨12元；…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:54:13+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204639",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a043",
+   "auto": true,
+   "place": "wire",
+   "t": "Lula Fiscal Plan Approved in Bid to Calm Market After Real Tanks",
+   "tcn": "Brazil’s lower house approved President Luiz Inácio Lula da Silva’s plan to curb public sp…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T09:53:02+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/lula-fiscal-plan-approved-in-bid-to-calm-market-after-real-tanks",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a045",
+   "auto": true,
+   "place": "wire",
+   "t": "芯碁微装盘中涨逾13% 获控股股东提议回购公司股份",
+   "tcn": "芯碁微装（09630）盘初涨逾13%，截至发稿，股价上涨8.61%，现报161.40港元，成交额4291.024万港元。 芯碁微装发布公告，公司控股股东、实际控制人...",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:52:35+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxvk7834963.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a046",
+   "auto": true,
+   "place": "wire",
+   "t": "机器人概念股震荡拉升，同星科技、龙软科技、福莱新材、锋龙股份、浙江荣泰、振邦智能、宁波东力等近20股涨停，横河精密、恒工精密、德尔股份等多股",
+   "tcn": "机器人概念股震荡拉升，同星科技、龙软科技、福莱新材、锋龙股份、浙江荣泰、振邦智能、宁波东力等近20股涨停，横河精密、恒工精密、德尔股份等多股涨超10%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:51:56+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204637",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a048",
+   "auto": true,
+   "place": "wire",
+   "t": "AI硬件股早盘集体走高 罗博特科大涨超20%胜宏科技涨超12%",
+   "tcn": "AI硬件股早盘集体走高，罗博特科（03757）上涨20.18%，报171.50港元；胜宏科技（02476）上涨12.69%，报105.20港元；中际旭创（03308）上涨9.64%…",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:49:50+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxve5146869.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a049",
+   "auto": true,
+   "place": "wire",
+   "t": "揽月着陆器飞行任务有序推进，载人登月任务将开展多项关键试验",
+   "tcn": "今天（11月24日）上午，神舟二十四号载人飞行任务新闻发布会在酒泉卫星发射中心召开。发言人介绍，经过工程全线的努力奋斗，月球探测工程目前已取得了一批阶段性重要成果。在不久的将来，工…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:45:39+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204635",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a053",
+   "auto": true,
+   "place": "wire",
+   "t": "长征十号运载火箭技术将进行飞行试验验证，揽月着陆器首次飞行任务正按计划有序推进",
+   "tcn": "长征十号运载火箭技术将进行飞行试验验证，揽月着陆器首次飞行任务正按计划有序推进。（新华社）",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:45:06+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204634",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a054",
+   "auto": true,
+   "place": "wire",
+   "t": "棉花下游成品走货不佳 生猪短期或震荡偏强",
+   "tcn": "文章来源：兴业期货 研报正文 【棉花】 美棉方面，ICE期棉收跌，美棉出口销售疲软、全球棉纺采购谨慎，收割偏快、可交割比例下行与晚茬质量问题并存，整体偏弱。",
+   "src": "新浪财经",
+   "date": "2026-11-24T09:43:36+08:00",
+   "url": "https://finance.sina.com.cn/money/future/fmnews/2026-11-24/doc-inizuxve5154013.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a060",
+   "auto": true,
+   "place": "wire",
+   "t": "猪肉股快速拉升，金新农走出8天5板，金字火腿、京基智农、天域生物、罗牛山、天邦食品跟涨",
+   "tcn": "猪肉股快速拉升，金新农走出8天5板，金字火腿、京基智农、天域生物、罗牛山、天邦食品跟涨。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:34:58+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204628",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a064",
+   "auto": true,
+   "place": "wire",
+   "t": "神舟二十四号飞行任务期间计划开展90项科学实验和技术试验项目，主要涉及空间生命科学、空间材料科学、微重力流体物理与燃烧科学、基础物理、航天医",
+   "tcn": "神舟二十四号飞行任务期间计划开展90项科学实验和技术试验项目，主要涉及空间生命科学、空间材料科学、微重力流体物理与燃烧科学、基础物理、航天医学、航天新技术等领域。（央视新闻）",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:31:51+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204624",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a065",
+   "auto": true,
+   "place": "wire",
+   "t": "中证转债指数开盘上涨0.98%",
+   "tcn": "中证转债指数开盘上涨0.98%。联瑞转债、奥士转债、欧通转债、澳弘转债、华懋转债涨幅居前，分别涨11.95%、7.78%、7.35%、7.27%、6.87%。爱科转债、炬申转债、艾…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:31:22+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204623",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a066",
+   "auto": true,
+   "place": "wire",
+   "t": "Copper Smelters Face Worsening Squeeze as Negotiations Stall",
+   "tcn": "Copper smelters are bracing for a period of extreme financial pressure as closely-watched…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T09:29:41+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/copper-smelters-face-worsening-squeeze-as-negotiations-stall",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a068",
+   "auto": true,
+   "place": "wire",
+   "t": "国债期货开盘，30年期主力合约跌0.17%，10年期主力合约跌0.04%，5年期主力合约跌0.05%，2年期主力合约跌0.01%",
+   "tcn": "国债期货开盘，30年期主力合约跌0.17%，10年期主力合约跌0.04%，5年期主力合约跌0.05%，2年期主力合约跌0.01%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:29:03+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204622",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a072",
+   "auto": true,
+   "place": "wire",
+   "t": "光大期货：有色金属类日报11.24",
+   "tcn": "铜： （展大鹏，从业资格号：F3013795；交易咨询资格号：Z0013582） 隔夜内外铜价震荡走高，国内精炼铜现货进口窗口持续打开，Comex-LME铜价差至-158美元/盎司…",
+   "src": "市场资讯",
+   "date": "2026-11-24T09:25:38+08:00",
+   "url": "https://finance.sina.com.cn/money/future/fmnews/2026-11-24/doc-inizuxvh1894336.shtml",
+   "n_src": 5,
+   "lang": "zh"
+  },
+  {
+   "id": "a076",
+   "auto": true,
+   "place": "wire",
+   "t": "金石资本集团于11月24日起停牌 待刊发内幕消息",
+   "tcn": "金石资本集团（01160）发布公告，应公司要求，股份已自2026年11月24日上午九时正起暂停在联交所买卖，以待刊发公告，而该公告构成公司的内幕消息。",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:21:00+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/ggscyd/2026-11-24/doc-inizuxvn0131408.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a078",
+   "auto": true,
+   "place": "wire",
+   "t": "微创医疗接获联交所复牌指引",
+   "tcn": "微创医疗（00853）发布公告，于2026年11月17日，本公司接获联交所发出的函件，当中载列恢复买卖股份的以下指引（复牌指引）：",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:20:01+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/ggscyd/2026-11-24/doc-inizuxvh1888269.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a080",
+   "auto": true,
+   "place": "wire",
+   "t": "锦欣生殖于11月23日斥资约335.46万港元回购154.95万股",
+   "tcn": "锦欣生殖（01951）发布公告，于2026年11月23日该公司斥资约335.46万港元回购154.95万股，回购价格为每股2.125至2.2港元。",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:19:00+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/ggscyd/2026-11-24/doc-inizuxvn0129708.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a083",
+   "auto": true,
+   "place": "wire",
+   "t": "航天员朱杨柱执行一年期在轨驻留试验任务",
+   "tcn": "今天（11月24日）上午，神舟二十四号载人飞行任务新闻发布会在酒泉卫星发射中心召开。根据当前评估情况，任务总指挥部决定由航天员朱杨柱执行一年期在轨驻留试验任务。此次试验对工程现行航…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:14:30+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204610",
+   "n_src": 2,
+   "lang": "zh"
+  },
+  {
+   "id": "a084",
+   "auto": true,
+   "place": "wire",
+   "t": "巴基斯坦航天员在轨期间主要承担中巴合作空间科学实验任务，重点完成实验样品及实验单元的安装，并按计划开展在轨实验",
+   "tcn": "巴基斯坦航天员在轨期间主要承担中巴合作空间科学实验任务，重点完成实验样品及实验单元的安装，并按计划开展在轨实验。（新华社）",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:12:51+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204608",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a085",
+   "auto": true,
+   "place": "wire",
+   "t": "Malaysia Index Rejig Puts Tech, Power Stocks in Focus for 2027",
+   "tcn": "Malaysia is gearing up for the first major overhaul of its equity benchmark in 17 years, a…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T09:12:37+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/malaysia-index-rejig-puts-tech-power-stocks-in-focus-for-2027",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a087",
+   "auto": true,
+   "place": "wire",
+   "t": "日经225指数涨幅扩大至5%",
+   "tcn": "日经225指数涨幅扩大至5%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:11:09+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204607",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a088",
+   "auto": true,
+   "place": "wire",
+   "t": "神舟二十四号载人飞船入轨后，将优先采用3.5小时自主快速交会对接策略，对接于天和核心舱前向端口，形成三船三舱组合体",
+   "tcn": "神舟二十四号载人飞船入轨后，将优先采用3.5小时自主快速交会对接策略，对接于天和核心舱前向端口，形成三船三舱组合体。（新华社）",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:10:26+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204606",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a047",
+   "auto": true,
+   "place": "us",
+   "t": "Venezuela Presidential Election Negotiations: Key Electoral Reform Lags",
+   "tcn": "Venezuela’s government and a faction of the opposition agreed to overhaul rules governing…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T09:51:36+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/venezuela-presidential-election-negotiations-key-electoral-reform-lags",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a077",
+   "auto": true,
+   "place": "us",
+   "t": "快讯：恒指高开1.09% 恒科指涨2.05% AI相关概念股集体大涨 中际旭创涨15%",
+   "tcn": "美股周一大幅造好，受惠于辉达董事局重新聘任黄仁勋为集团首席执行官，大大提振市场气氛，三大指数收市均录得显著升幅。美元进一步向上，美国十年期债息回升至4.93厘水平...",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:20:45+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxvk7803737.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a103",
+   "auto": true,
+   "place": "us",
+   "t": "Amazon faces FAA probe after delivery drone strikes Michigan fiber cable, garage",
+   "tcn": "An Amazon drone \"struck a fiber cable, a residential garage, and became entangled in power…",
+   "src": "CNBC",
+   "date": "2026-11-24T08:56:10+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/amazon-drone-crash-michigan-faa-investigation.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a106",
+   "auto": true,
+   "place": "us",
+   "t": "美国司法部长Blanche谈黄仁勋之事：我认为相关决定是正确的",
+   "tcn": "美国司法部长Blanche谈黄仁勋之事：我认为相关决定是正确的。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T08:46:45+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204587",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a110",
+   "auto": true,
+   "place": "us",
+   "t": "美国司法部长Blanche：特朗普就黄仁勋的事情与许多人谈过，包括我",
+   "tcn": "美国司法部长Blanche：特朗普就黄仁勋的事情与许多人谈过，包括我。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T08:45:11+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204583",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a132",
+   "auto": true,
+   "place": "us",
+   "t": "CrowdStrike CEO defends Zscaler acquisition, calls it a 'winning combination'",
+   "tcn": "CrowdStrike CEO George Kurtz defended the company's $44 billion acquisition of Zscaler.",
+   "src": "CNBC",
+   "date": "2026-11-24T07:53:20+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/crowdstrike-zscaler-deal-ceo-george-kurtz.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a154",
+   "auto": true,
+   "place": "us",
+   "t": "Startup Options Exchange Asks SEC to Approve Two New Venues",
+   "tcn": "Options Xchange Group Inc., a startup bourse focused on equity derivatives, is seeking to…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T07:08:44+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/startup-options-exchange-asks-sec-to-approve-two-new-venues",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a178",
+   "auto": true,
+   "place": "us",
+   "t": "美国商品期货交易委员会（CFTC）：加密资产可被计入财务资源要求",
+   "tcn": "美国商品期货交易委员会（CFTC）：加密资产可被计入财务资源要求。 须持有足以覆盖至少12个月运营成本的财务资源。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T06:24:53+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204535",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a196",
+   "auto": true,
+   "place": "us",
+   "t": "据美国证券交易委员会（SEC）文件，Meta Platforms在诉讼期间暂停发行C类普通股",
+   "tcn": "据美国证券交易委员会（SEC）文件，Meta Platforms在诉讼期间暂停发行C类普通股。 马克・扎克伯格同意豁免C类普通股股息的支付期限要求。 Meta Platforms将…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T05:56:29+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204523",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a230",
+   "auto": true,
+   "place": "us",
+   "t": "Investors are missing the bigger picture in CrowdStrike's deal to buy Zscaler",
+   "tcn": "CrowdStrike's quarterly results, released alongside the deal's announcement, show a compan…",
+   "src": "CNBC",
+   "date": "2026-11-24T04:26:39+08:00",
+   "url": "https://www.cnbc.com/investingclub/2026/11/23/crowdstrikes-zscaler-deal-investors-are-missing-the-bigger-picture.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a299",
+   "auto": true,
+   "place": "us",
+   "t": "Futures rally after Wall Street's nightmare week",
+   "tcn": "Investors look to buy the dip as technology stocks lead early gains for the Nasdaq",
+   "src": "CNBC",
+   "date": "2026-11-23T19:10:34+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/futures-rally-after-wall-streets-nightmare-week-.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a019",
+   "auto": true,
+   "place": "ai",
+   "t": "英国启动大规模AI辅助乳腺癌筛查试验",
+   "tcn": "英国剑桥大学23日发布公报说，英国已在剑桥郡率先启动一项人工智能（AI）辅助乳腺癌筛查试验，评估AI能否帮助医生更早发现乳腺癌，并减轻放射科医生判读乳腺X线筛查影像的工作负担。这项…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:41:59+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204653",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a020",
+   "auto": true,
+   "place": "ai",
+   "t": "三星电子131名高管获晋升，过半来自半导体业务部门",
+   "tcn": "三星电子周二宣布了年度高管人事调整，此次晋升的对象主要包括在公司利润丰厚的半导体业务中助力实现创纪录收益的高管。",
+   "src": "环球市场播报",
+   "date": "2026-11-24T10:39:16+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvh1974254.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a021",
+   "auto": true,
+   "place": "ai",
+   "t": "Copper Resumes Decline as Investors Look Beyond Drama at Nvidia",
+   "tcn": "Copper resumed a decline after a spike driven by Jensen Huang’s return to Nvidia Corp., wi…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T10:38:19+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/copper-resumes-decline-as-investors-look-beyond-drama-at-nvidia",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a031",
+   "auto": true,
+   "place": "ai",
+   "t": "What Jensen Huang’s return means for Nvidia’s Colette Kress",
+   "tcn": "Kress steered the company through billions in AI financing deals and during Huang's sudden…",
+   "src": "CNBC",
+   "date": "2026-11-24T10:21:06+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/nvidia-jensen-huang-returns-colette-kress-cfo.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a032",
+   "auto": true,
+   "place": "ai",
+   "t": "Jensen Huang cheered by Nvidia employees after return, pledges to be a better CEO",
+   "tcn": "Nvidia's Jensen Huang admitted to an affair in a note to employees on Nov. 8 and resigned…",
+   "src": "CNBC",
+   "date": "2026-11-24T10:20:44+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/jensen-huang-nvidia-ceo-return.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a033",
+   "auto": true,
+   "place": "ai",
+   "t": "Asian Nvidia-related stocks jump after Huang's return, with Taiwan's near price limits",
+   "tcn": "Investors piled back into the tech market, following the reinstatement of Nvidia CEO Jense…",
+   "src": "CNBC",
+   "date": "2026-11-24T10:20:36+08:00",
+   "url": "https://www.cnbc.com/2026/11/24/nvidia-jensen-huang-asia-chip-stocks.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a035",
+   "auto": true,
+   "place": "ai",
+   "t": "黄仁勋重返英伟达提振AI股，韩国股市大幅反弹",
+   "tcn": "周二，受华尔街科技股大涨带动，韩国股市从近期10个月低点反弹，此前黄仁勋重返英伟达CEO职位，引发了遭重挫的人工智能股的解脱性反弹。",
+   "src": "环球市场播报",
+   "date": "2026-11-24T10:18:31+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvn0185199.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a039",
+   "auto": true,
+   "place": "ai",
+   "t": "联想集团盘中涨超11% 大摩强调联想业绩超预期",
+   "tcn": "联想集团（00992）盘中涨超11%。截至发稿，股价上涨7.05%，现报18.83港元，成交额16.219亿港元。 英伟达宣布黄仁勋恢复担任总裁、首席执行官及董事会成员。",
+   "src": "新浪港股",
+   "date": "2026-11-24T10:01:59+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxve5160275.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a040",
+   "auto": true,
+   "place": "ai",
+   "t": "整点回顾：市场早间高开震荡，创业板指一度涨超4%，算力硬件、半导体芯片、机器人、消费电子等方向领涨，个股呈现普涨态势，沪深京三市超4700股",
+   "tcn": "整点回顾：市场早间高开震荡，创业板指一度涨超4%，算力硬件、半导体芯片、机器人、消费电子等方向领涨，个股呈现普涨态势，沪深京三市超4700股飘红，开盘半小时成交6494亿，较上日此…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:00:20+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204641",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a050",
+   "auto": true,
+   "place": "ai",
+   "t": "晋景新能早盘涨超11% 公司布局高性能GPU算力集群",
+   "tcn": "晋景新能（01783）盘初涨超21%，截至发稿，股价上涨11.30%，现报3.35港元，成交额1616.66万港元。 随着美国“AI行动计划”推进及全球AI投资扩容...",
+   "src": "新浪港股",
+   "date": "2026-11-24T09:45:37+08:00",
+   "url": "https://finance.sina.com.cn/stock/hkstock/marketalerts/2026-11-24/doc-inizuxvh1918531.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a044",
+   "auto": true,
+   "place": "macro",
+   "t": "日本10年期国债收益率下行6个基点至2.725%",
+   "tcn": "日本10年期国债收益率下行6个基点至2.725%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:52:43+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204638",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a073",
+   "auto": true,
+   "place": "macro",
+   "t": "中国央行进行5,160亿元人民币隔夜逆回购操作，操作利率1.25%",
+   "tcn": "中国央行进行5,160亿元人民币隔夜逆回购操作，操作利率1.25%。 中国央行公开市场今日净投放165亿元人民币。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:21:45+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204616",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a090",
+   "auto": true,
+   "place": "macro",
+   "t": "美联储“三把手”放话：通胀持续过高 必要时或连续加息！",
+   "tcn": "美东时间周一（23日），纽约联储主席威廉姆斯（John Williams)表示，央行需要对通胀问题保持“前瞻性”，而且在降低物价方面仍有许多工作要做。他不排除FOMC在必要时连续加…",
+   "src": "东方财富",
+   "date": "2026-11-24T09:09:42+08:00",
+   "url": "http://forex.eastmoney.com/news/1131,202611243938160185.html",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a142",
+   "auto": true,
+   "place": "macro",
+   "t": "RBC Has Ideas For Canada to Unlock Tech GDP Gains as NVIDIA Rallies",
+   "tcn": "Plus: Why COP talks failed",
+   "src": "Bloomberg",
+   "date": "2026-11-24T07:30:00+08:00",
+   "url": "https://www.bloomberg.com/news/newsletters/2026-11-23/rbc-has-ideas-for-canada-to-unlock-tech-gdp-gains-as-nvidia-rallies",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a163",
+   "auto": true,
+   "place": "macro",
+   "t": "美联储三把手：如有需要，不排除连续加息的可能性",
+   "tcn": "美国纽约联储主席（享有FOMC永久投票权，号称美联储三把手）威廉姆斯：不排除FOMC在必要时连续加息的可能性。 针对未来（多次）会议都不排除任何选项。 数据将决定利率行动的时机和步…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T06:56:25+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204546",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a165",
+   "auto": true,
+   "place": "macro",
+   "t": "Trump Wins New Chance to Ask Judge to Toss Hush Money Case",
+   "tcn": "A US appeals court gave President Donald Trump another shot at getting his state case move…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T06:47:50+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/trump-wins-new-chance-to-ask-us-judge-to-toss-hush-money-verdict",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a174",
+   "auto": true,
+   "place": "macro",
+   "t": "提醒：日内请重点关注（以下均为北京时间）",
+   "tcn": "① 08:30 日本11月制造业、服务业、综合PMI初值； ② 港股收盘之后 小米集团、B站发布业绩报告； ③ 17:00 德国11月IFO商业景气指数，欧洲央行管委Olaf Ka…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T06:30:08+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204538",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a192",
+   "auto": true,
+   "place": "macro",
+   "t": "美洲开发银行称委内瑞拉未来五年外部融资需求超445亿美元",
+   "tcn": "美洲开发银行（ IDB）在其官网发布的一份文件中估计，委内瑞拉在未来五年内的外部融资需求将超过445亿美元。 美洲开发银行表示：“即便假设该国经济活动和财政收入逐步复苏”，其外部融…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T06:03:55+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204548",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a220",
+   "auto": true,
+   "place": "macro",
+   "t": "报道：美联储监察长调查理事鲍曼是否违反沟通规则",
+   "tcn": "美联储内部监察机构正在调查美联储理事米歇尔·鲍曼（Michelle Bowman）出席美国银行举办的一场私人晚宴时，是否违反了该央行（与联邦公开市场委员会FOMC货币政策会议相关）…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T05:06:19+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204508",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a224",
+   "auto": true,
+   "place": "macro",
+   "t": "Fed's John Williams indicates higher interest rates likely 'over time' to address inflation",
+   "tcn": "The influential central banker expressed confidence that inflation will get closer to the…",
+   "src": "CNBC",
+   "date": "2026-11-24T05:02:17+08:00",
+   "url": "https://www.cnbc.com/2026/11/23/john-williams-fed-inflation-rate-hikes.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a281",
+   "auto": true,
+   "place": "macro",
+   "t": "Flights cancelled in Belgium due to cost-of-living strike",
+   "tcn": "A series of strikes have hit Belgium in recent months as the prime minister struggles to a…",
+   "src": "BBC",
+   "date": "2026-11-23T21:34:02+08:00",
+   "url": "https://www.bbc.co.uk/news/articles/cwdr155e2d05o?at_medium=RSS&at_campaign=rss",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a009",
+   "auto": true,
+   "place": "geo",
+   "t": "Prosecutors Say Omar Search Warrant Concerned Decades-Old Acts",
+   "tcn": "Federal prosecutors investigating Representative Ilhan Omar told a judge they believe she…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T11:05:36+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/prosecutors-say-omar-search-warrant-concerned-decades-old-acts",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a010",
+   "auto": true,
+   "place": "geo",
+   "t": "Singapore Won’t Be Conduit to Skirt US Chip Curbs, Wong Says",
+   "tcn": "Prime Minister Lawrence Wong doesn’t want Singapore to be used as a route for companies se…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T11:03:46+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/singapore-won-t-be-conduit-to-skirt-us-chip-curbs-wong-says",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a022",
+   "auto": true,
+   "place": "geo",
+   "t": "U.S. adds Megaspeed to trade blacklist over export control concerns amid Nvidia controversy",
+   "tcn": "The U.S. has added Megaspeed and six other companies to its trade blacklist over concerns…",
+   "src": "CNBC",
+   "date": "2026-11-24T10:37:39+08:00",
+   "url": "https://www.cnbc.com/2026/11/24/us-adds-megaspeed-to-trade-blacklist-over-export-control-concerns-.html",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a116",
+   "auto": true,
+   "place": "geo",
+   "t": "US Senate Probes Vance Role in Vitol Choice for Venezuela Oil",
+   "tcn": "A US senator is investigating the role Vice President JD Vance played in awarding a lucrat…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T08:11:51+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-24/us-senate-probes-vance-role-in-vitol-choice-for-venezuela-oil",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a141",
+   "auto": true,
+   "place": "geo",
+   "t": "South Korea Scrambles Jets As Russian Warplanes Enter Air Zone",
+   "tcn": "South Korea scrambled fighter jets and briefly ordered residents of an island off its east…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T07:31:22+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/south-korea-briefly-issues-air-raid-warning-over-russian-plane",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a155",
+   "auto": true,
+   "place": "geo",
+   "t": "Latest Oil Market News and Analysis for Nov. 24",
+   "tcn": "Oil steadied after sliding more than 3% in the previous session on cautious optimism over…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T07:04:12+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/latest-oil-market-news-and-analysis-for-nov-24",
+   "n_src": 2,
+   "lang": "en"
+  },
+  {
+   "id": "a161",
+   "auto": true,
+   "place": "geo",
+   "t": "The Chinese AI Aspirants Drawing Big Bets to Take on DeepSeek",
+   "tcn": "From Alibaba Group Holding Ltd.’s recently departed AI architect to a former intern at Byt…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T07:00:00+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/the-chinese-ai-aspirants-drawing-big-bets-to-take-on-deepseek",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a164",
+   "auto": true,
+   "place": "geo",
+   "t": "Circular Financing Will Now Be Under a Microscope After Jensen Huang’s Return, Warns Gary Marcus",
+   "tcn": "Gary Marcus discusses whether Jensen Huang’s return to Nvidia - and the reported involveme…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T06:50:51+08:00",
+   "url": "https://www.bloomberg.com/news/videos/2026-11-23/expect-more-bearishness-after-nvidia-ceo-return-marcus-video",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a177",
+   "auto": true,
+   "place": "geo",
+   "t": "Reinstating Nvidia's Huang Is a Terrible Mistake, Says Elson",
+   "tcn": "Charles Elson, University of Delaware founding director of the Weinburg center for corpora…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T06:24:58+08:00",
+   "url": "https://www.bloomberg.com/news/videos/2026-11-23/reinstating-huang-is-a-terrible-mistake-says-elson-video",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a179",
+   "auto": true,
+   "place": "geo",
+   "t": "AI芯片供应链收紧 国产超节点迎发展机遇窗口",
+   "tcn": "近日，三星开始穿透严查代工的传闻流出。上海证券报记者向国内晶圆代工厂、芯片设计公司等多方求证获悉，该传闻并不准确，但传闻背后，是美国商务部工业和安全局（BIS）于11月16日出台新…",
+   "src": "东方财富",
+   "date": "2026-11-24T06:21:51+08:00",
+   "url": "http://finance.eastmoney.com/news/1354,202611243937741211.html",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a189",
+   "auto": true,
+   "place": "geo",
+   "t": "美国财长贝森特：金融机构往往是阻止与伊朗政权有关联的资金进入美国经济的第一道防线",
+   "tcn": "美国财长贝森特：金融机构往往是阻止与伊朗政权有关联的资金进入美国经济的第一道防线。 财政部将继续切断该政权赖以资助其军事、武器项目和恐怖代理人的资金生命线。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T06:09:55+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204525",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a190",
+   "auto": true,
+   "place": "geo",
+   "t": "Zoom Projects Revenue That Misses Estimates on Stagnant Growth",
+   "tcn": "Zoom Communications Inc. gave a revenue forecast for the current quarter that at the midpo…",
+   "src": "Bloomberg",
+   "date": "2026-11-24T06:04:06+08:00",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-23/zoom-projects-revenue-that-misses-estimates-on-stagnant-growth",
+   "n_src": 1,
+   "lang": "en"
+  },
+  {
+   "id": "a011",
+   "auto": true,
+   "place": "cn",
+   "t": "恒指、恒生科技指数均转跌",
+   "tcn": "恒指、恒生科技指数均转跌。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:02:58+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204664",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a015",
+   "auto": true,
+   "place": "cn",
+   "t": "整点回顾：市场早间高开震荡，创业板指涨幅居前，光伏板块异动拉升，正泰电源涨停，AI应用端持续走高，值得买、遥望科技双双封板，个股涨多跌少，沪",
+   "tcn": "整点回顾：市场早间高开震荡，创业板指涨幅居前，光伏板块异动拉升，正泰电源涨停，AI应用端持续走高，值得买、遥望科技双双封板，个股涨多跌少，沪深京三市超4100股飘红，开盘一个半小时…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T11:00:12+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204661",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a016",
+   "auto": true,
+   "place": "cn",
+   "t": "沪深两市成交额突破1万亿，较上日此时放量超2300亿",
+   "tcn": "沪深两市成交额突破1万亿，较上日此时放量超2300亿。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:59:35+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204660",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a018",
+   "auto": true,
+   "place": "cn",
+   "t": "A股AI应用端持续走高，值得买、遥望科技双双涨停，青木科技涨超10%，天龙集团、壹网壹创、光云科技等纷纷冲高",
+   "tcn": "A股AI应用端持续走高，值得买、遥望科技双双涨停，青木科技涨超10%，天龙集团、壹网壹创、光云科技等纷纷冲高。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:44:50+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204655",
+   "n_src": 2,
+   "lang": "zh"
+  },
+  {
+   "id": "a023",
+   "auto": true,
+   "place": "cn",
+   "t": "A股光伏板块异动拉升，正泰电源涨停，首航新能涨超10%，阳光电源、迈为股份、东方日升、固德威、锦浪科技跟涨",
+   "tcn": "A股光伏板块异动拉升，正泰电源涨停，首航新能涨超10%，阳光电源、迈为股份、东方日升、固德威、锦浪科技跟涨。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:33:00+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204651",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a027",
+   "auto": true,
+   "place": "cn",
+   "t": "10月份东京市中心二手公寓价格自2013年以来首次同比下跌",
+   "tcn": "据房地产研究公司东京勘亭周二发布的数据显示，今年10月份东京市中心二手公寓的价格较上年同期有所下降，这是自 2013 年 3 月以来首次出现同比下降。",
+   "src": "环球市场播报",
+   "date": "2026-11-24T10:26:38+08:00",
+   "url": "https://finance.sina.com.cn/stock/usstock/c/2026-11-24/doc-inizuxvh1962284.shtml",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a036",
+   "auto": true,
+   "place": "cn",
+   "t": "上海浦东新区：支持安全可控建设和运营数字人民币跨境、离岸和区块链基础设施",
+   "tcn": "《上海市浦东新区促进离岸金融业务发展若干规定（草案）》公开征求意见。其中提到，支持依托数字人民币国际运营中心，在安全可控前提下建设和运营数字人民币跨境、离岸和区块链基础设施，稳妥推…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T10:17:58+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204644",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a055",
+   "auto": true,
+   "place": "cn",
+   "t": "A股AI漫剧概念延续涨势，横店影视、上海电影均2连板，幸福蓝海、光线传媒、华智数媒、慈文传媒涨幅居前",
+   "tcn": "A股AI漫剧概念延续涨势，横店影视、上海电影均2连板，幸福蓝海、光线传媒、华智数媒、慈文传媒涨幅居前。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:42:57+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204633",
+   "n_src": 2,
+   "lang": "zh"
+  },
+  {
+   "id": "a059",
+   "auto": true,
+   "place": "cn",
+   "t": "创业板指涨超4%",
+   "tcn": "创业板指涨超4%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:35:23+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204629",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a070",
+   "auto": true,
+   "place": "cn",
+   "t": "A股三大指数全线高开，创业板指大涨3.9%",
+   "tcn": "上证指数开盘报3567.84点，涨0.82%。 深证成指开盘报10708.62点，涨2.43%。 创业板指开盘报2368.70点，涨3.88%。 沪深300开盘报4004.04点，…",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:25:41+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204619",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a071",
+   "auto": true,
+   "place": "cn",
+   "t": "三大指数均大幅高开，沪指高开0.82%，深成指高开2.43%，创业板指高开3.88%",
+   "tcn": "三大指数均大幅高开，沪指高开0.82%，深成指高开2.43%，创业板指高开3.88%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:25:39+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204618",
+   "n_src": 1,
+   "lang": "zh"
+  },
+  {
+   "id": "a075",
+   "auto": true,
+   "place": "cn",
+   "t": "恒指高开1.09%，恒生科技指数涨2.05%",
+   "tcn": "香港恒生指数开盘报22627.29点。智谱、MINIMAX涨近15%，联想涨超10%，天数智芯涨近8%，华虹宏力、阿里巴巴涨超4%。",
+   "src": "华尔街见闻",
+   "date": "2026-11-24T09:21:09+08:00",
+   "url": "https://wallstreetcn.com/livenews/3204615",
+   "n_src": 2,
+   "lang": "zh"
+  }
+ ],
+ "n_items": 100,
+ "n_top": 8,
+ "n_auto": 100,
+ "n_curated": 0,
+ "n_drop": {
+  "curated": 44,
+  "raw": 32,
+  "capped": 291
+ },
+ "raw": {
+  "fetched_at": "2026-11-24T11:20:18+08:00",
+  "n_pool": 423
+ },
+ "stats": [
+  {
+   "id": "macro",
+   "name": "宏观政策",
+   "n": 11,
+   "latest": "2026-11-24T09:52:43+08:00"
+  },
+  {
+   "id": "geo",
+   "name": "地缘与贸易",
+   "n": 12,
+   "latest": "2026-11-24T11:05:36+08:00"
+  },
+  {
+   "id": "us",
+   "name": "美国国内",
+   "n": 11,
+   "latest": "2026-11-24T09:51:36+08:00"
+  },
+  {
+   "id": "cn",
+   "name": "中国国内",
+   "n": 12,
+   "latest": "2026-11-24T11:02:58+08:00"
+  },
+  {
+   "id": "ai",
+   "name": "AI 与科技",
+   "n": 10,
+   "latest": "2026-11-24T10:41:59+08:00"
+  },
+  {
+   "id": "industry",
+   "name": "传统产业",
+   "n": 0,
+   "latest": ""
+  },
+  {
+   "id": "wire",
+   "name": "快讯流",
+   "n": 36,
+   "latest": "2026-11-24T11:01:34+08:00"
+  }
+ ],
+ "fresh": {
+  "ref": "2026-11-24T11:40:26+08:00",
+  "newest": "2026-11-24T11:17:56+08:00",
+  "age_h": 0.4,
+  "n": 100
+ },
+ "sources": [
+  {
+   "id": "cnbc_top",
+   "name": "CNBC",
+   "ok": true,
+   "n": 30,
+   "newest": "2026-11-24T11:05:49+08:00"
+  },
+  {
+   "id": "cnbc_econ",
+   "name": "CNBC",
+   "ok": true,
+   "n": 30,
+   "newest": "2026-11-24T07:28:19+08:00"
+  },
+  {
+   "id": "cnbc_tech",
+   "name": "CNBC",
+   "ok": true,
+   "n": 30,
+   "newest": "2026-11-24T10:37:39+08:00"
+  },
+  {
+   "id": "bbc_biz",
+   "name": "BBC",
+   "ok": true,
+   "n": 56,
+   "newest": "2026-11-24T09:11:54+08:00"
+  },
+  {
+   "id": "bbc_world",
+   "name": "BBC",
+   "ok": true,
+   "n": 21,
+   "newest": "2026-11-24T09:21:41+08:00"
+  },
+  {
+   "id": "bbbc_tech",
+   "name": "BBC",
+   "ok": true,
+   "n": 21,
+   "newest": "2026-11-24T07:16:08+08:00"
+  },
+  {
+   "id": "mw_top",
+   "name": "MarketWatch",
+   "ok": true,
+   "n": 10,
+   "newest": "2026-11-24T09:01:00+08:00"
+  },
+  {
+   "id": "mw_bul",
+   "name": "MarketWatch",
+   "ok": true,
+   "n": 10,
+   "newest": "2026-11-24T08:18:30+08:00"
+  },
+  {
+   "id": "wscn_global",
+   "name": "华尔街见闻",
+   "ok": true,
+   "n": 40,
+   "newest": "2026-11-24T11:14:00+08:00"
+  },
+  {
+   "id": "wscn_a",
+   "name": "华尔街见闻",
+   "ok": true,
+   "n": 40,
+   "newest": "2026-11-24T11:08:17+08:00"
+  },
+  {
+   "id": "wscn_us",
+   "name": "华尔街见闻",
+   "ok": true,
+   "n": 30,
+   "newest": "2026-11-24T11:10:33+08:00"
+  },
+  {
+   "id": "bloom_mkts",
+   "name": "Bloomberg",
+   "ok": true,
+   "n": 20,
+   "newest": "2026-11-24T11:17:56+08:00"
+  },
+  {
+   "id": "bloom_pol",
+   "name": "Bloomberg",
+   "ok": true,
+   "n": 20,
+   "newest": "2026-11-24T11:05:36+08:00"
+  },
+  {
+   "id": "bloom_tech",
+   "name": "Bloomberg",
+   "ok": true,
+   "n": 20,
+   "newest": "2026-11-24T09:45:36+08:00"
+  },
+  {
+   "id": "ft_cn",
+   "name": "FT中文网",
+   "ok": false,
+   "n": 20,
+   "err": "内容过旧"
+  },
+  {
+   "id": "eastmoney",
+   "name": "东方财富",
+   "ok": true,
+   "n": 91,
+   "newest": "2026-11-24T09:09:42+08:00"
+  },
+  {
+   "id": "sina_roll",
+   "name": "新浪财经",
+   "ok": true,
+   "n": 30,
+   "newest": "2026-11-24T11:08:50+08:00"
+  }
+ ]
+}

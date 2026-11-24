@@ -20,18 +20,27 @@ export async function readBook(book:Book,dir=directory()) {
   const errors=validateBook(book,matrix);return {ok:!errors.length,matrix:errors.length?null:matrix,revision:hash(raw),as_of:(await stat(path)).mtime.toISOString(),book,currency:book==='core'?'CNY':'USD',error:errors.join('；')||null,warn:[] as string[]};}
  catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {ok:true,matrix:null,revision:'missing',as_of:null,book,currency:book==='core'?'CNY':'USD',error:null,warn:['文件缺失']};throw error;}
 }
+const saveQueues=new Map<string,Promise<unknown>>();
 export async function saveBook(book:Book,matrix:BookData,revision:string,dir=directory()) {
+ const previous=saveQueues.get(dir)||Promise.resolve();
+ const next=previous.catch(()=>{}).then(()=>writeBook(book,matrix,revision,dir));
+ saveQueues.set(dir,next);
+ try{return await next;}finally{if(saveQueues.get(dir)===next)saveQueues.delete(dir);}
+}
+async function writeBook(book:Book,matrix:BookData,revision:string,dir:string) {
  const errors=validateBook(book,matrix);if(errors.length)throw new Error('数据校验失败：'+errors.join('；'));
- await mkdir(dir,{recursive:true});const path=join(dir,filename(book)),lock=path+'.lock';
+ await mkdir(dir,{recursive:true});const path=join(dir,filename(book)),lock=join(dir,'portfolio-books.lock');
  const handle=await open(lock,'wx').catch(()=>{throw new Error('另一保存正在进行，请稍后重试');});
  const temp=path+'.'+randomUUID()+'.tmp';
  try {
   const old=await readBook(book,dir);if(old.revision!==revision)throw new Error('CONFLICT');
   const backups=join(dir,'backups');await mkdir(backups,{recursive:true});
-  if(old.revision!=='missing')await copyFile(path,join(backups,`${filename(book)}-${Date.now()}-${randomUUID()}.json`));
-  await writeFile(temp,JSON.stringify(matrix,null,2)+'\n','utf8');await rename(temp,path);
+  const backup=old.revision!=='missing'?`${filename(book)}-${Date.now()}-${randomUUID()}.json`:null;
+  if(backup)await copyFile(path,join(backups,backup));
+  const content=JSON.stringify(matrix,null,2)+'\n';
+  await writeFile(temp,content,'utf8');await rename(temp,path);
   const files=(await readdir(backups)).filter(n=>n.startsWith(filename(book)+'-')).sort().reverse();
   for(const f of files.slice(30))await unlink(join(backups,f)).catch(()=>{});
-  return await readBook(book,dir);
+  return {...await readBook(book,dir),path,bytes:Buffer.byteLength(content,'utf8'),backup};
  } finally {await unlink(temp).catch(()=>{});await handle.close();await unlink(lock);}
 }
