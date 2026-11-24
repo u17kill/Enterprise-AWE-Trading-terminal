@@ -56,4 +56,4 @@
 
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
-| V1.16（待验收） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | 分支 `codex/v1.16-intelligence-rebuild`，PR待创建 |
+| V1.16（待验收） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | [草稿 PR #33](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/33) |
