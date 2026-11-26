@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-const pages=[['/chart/SPX','图表空间'],['/portfolio','当前持仓'],['/options','期权计算']] as const;
+const pages=[['/chart/SPX','图表空间'],['/portfolio','当前持仓'],['/options','期权计算'],['/notes','个人笔记']] as const;
 
 export function ToolsPageNav({currentPath}:{currentPath:string}){
  const chart=currentPath.startsWith('/chart/');

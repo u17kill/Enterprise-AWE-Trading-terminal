@@ -9,6 +9,12 @@ coverage/
 *.tsbuildinfo
 .local/
 
+# Private notes and recovery snapshots stay on this computer, even if a data root is misconfigured.
+**/notes.json
+**/notes.json.*
+**/notes-backups/
+!**/fixtures/notes.json
+
 scripts/market-engine/__pycache__/
 .next-market-preview/
 scripts/asset-direction/__pycache__/
