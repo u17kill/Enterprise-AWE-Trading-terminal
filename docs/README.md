@@ -66,3 +66,10 @@
 | V1.17（待验收） | [单份宪法增删改、排序与本机保存](superpowers/specs/2026-11-26-v117-editable-fund-charter.md) · [计划](superpowers/plans/2026-11-26-v117-editable-fund-charter.md) | [交付、草稿恢复、冲突保护与验证](v1.17-status.md) | [草稿PR #34](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/34) |
 
 V1.17跨项目交接：[独立开发需求与完整原文](handoffs/基金宪法-跨项目开发需求文档.md) · [完整初始数据JSON](handoffs/基金宪法-完整初始数据.json)。
+
+
+## V1.18 个人笔记
+
+| 版本 | 需求与方案 | 当前状态 | GitHub |
+| --- | --- | --- | --- |
+| V1.18（设计待核对，未实施） | [泳道卡片、本机私有存储与保存保护](superpowers/specs/2026-11-26-v118-personal-notes-design.md) | [确认范围与后续验证](v1.18-status.md) | PR待创建 |
