@@ -63,4 +63,4 @@
 
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
-| V1.17（待验收） | [单份宪法增删改、排序与本机保存](superpowers/specs/2026-11-26-v117-editable-fund-charter.md) · [计划](superpowers/plans/2026-11-26-v117-editable-fund-charter.md) | [交付、草稿恢复、冲突保护与验证](v1.17-status.md) | PR待创建 |
+| V1.17（待验收） | [单份宪法增删改、排序与本机保存](superpowers/specs/2026-11-26-v117-editable-fund-charter.md) · [计划](superpowers/plans/2026-11-26-v117-editable-fund-charter.md) | [交付、草稿恢复、冲突保护与验证](v1.17-status.md) | [草稿PR #34](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/34) |
