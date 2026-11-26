@@ -1,8 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AppSidebar } from "./app-sidebar";
+import {ToolsPageNav} from './tools-page-nav';
 
 describe("two-level app navigation", () => {
+  it('places personal notes in tools and the common tool switcher',()=>{
+    const sidebar=render(<AppSidebar currentPath="/notes"/>);
+    expect(screen.getByRole('button',{name:/投资工具/})).toHaveAttribute('aria-expanded','true');
+    expect(screen.getByRole('link',{name:'个人笔记'})).toHaveAttribute('href','/notes');sidebar.unmount();
+    render(<ToolsPageNav currentPath="/notes"/>);
+    expect(screen.getAllByRole('link')).toHaveLength(4);
+    expect(screen.getByRole('link',{name:'个人笔记'})).toHaveAttribute('aria-current','page');
+  });
   it("opens the active group and retains existing destinations", () => {
     render(<AppSidebar currentPath="/canary/momentum" />);
     expect(screen.getByRole("button", { name: /金丝雀指标/ })).toHaveAttribute("aria-expanded", "true");

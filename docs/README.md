@@ -72,4 +72,4 @@ V1.17跨项目交接：[独立开发需求与完整原文](handoffs/基金宪法
 
 | 版本 | 需求与方案 | 当前状态 | GitHub |
 | --- | --- | --- | --- |
-| V1.18（设计待核对，未实施） | [泳道卡片、本机私有存储与保存保护](superpowers/specs/2026-11-26-v118-personal-notes-design.md) | [确认范围与后续验证](v1.18-status.md) | [草稿PR #35](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/35) |
+| V1.18（个人笔记，待验收） | [泳道卡片、本机私有存储与保存保护](superpowers/specs/2026-11-26-v118-personal-notes-design.md) | [确认范围与后续验证](v1.18-status.md) | [草稿PR #35](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/35) |
