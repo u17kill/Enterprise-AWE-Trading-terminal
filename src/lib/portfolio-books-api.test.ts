@@ -9,3 +9,9 @@ it('returns successful revision when the opposite book is corrupt',async()=>{
  try{await writeFile(join(dir,'portfolio-matrix.json'),'{broken');const response=await bookRequest(new Request('http://127.0.0.1:3108/api/core',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({matrix:core,revision:'missing'})}),'core');expect(response.status).toBe(200);const result=await response.json();expect(result.ok).toBe(true);expect(result.revision).not.toBe('missing');expect(result.sum.coreTotal).toBe(530000000);}
  finally{if(previous===undefined)delete process.env.AWE_PORTFOLIO_DATA_DIR;else process.env.AWE_PORTFOLIO_DATA_DIR=previous;await rm(dir,{recursive:true,force:true});}
 });
+it('rejects null bodies and missing revisions as validation errors before creating files',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'awe-api-invalid-'));const previous=process.env.AWE_PORTFOLIO_DATA_DIR;process.env.AWE_PORTFOLIO_DATA_DIR=dir;
+ try{for(const body of ['null',JSON.stringify({matrix:core})]){
+  const response=await bookRequest(new Request('http://127.0.0.1:3108/api/core',{method:'POST',body}),'core');expect(response.status).toBe(400);
+ }}finally{if(previous===undefined)delete process.env.AWE_PORTFOLIO_DATA_DIR;else process.env.AWE_PORTFOLIO_DATA_DIR=previous;await rm(dir,{recursive:true,force:true});}
+});

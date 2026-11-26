@@ -10,7 +10,8 @@ export async function bookRequest(request:Request,book:Book){
   if(request.method==='GET')return Response.json(await readBook(book),{headers:{'Cache-Control':'no-store'}});
   const text=await request.text();if(text.length>1000000)return Response.json({ok:false,error:'数据过大'},{status:413});
   let input;try{input=JSON.parse(text);}catch{return Response.json({ok:false,error:'JSON 无效'},{status:400});}
-  const errors=validateBook(book,input.matrix);if(errors.length)return Response.json({ok:false,error:errors.join('；')},{status:400});
+  const errors=validateBook(book,input?.matrix);if(errors.length)return Response.json({ok:false,error:errors.join('；')},{status:400});
+  if(typeof input.revision!=='string'||!input.revision)return Response.json({ok:false,error:'缺少文件版本，请先读取源文件再保存'},{status:400});
   const saved=await saveBook(book,input.matrix,input.revision);
   const other=await readBook(book==='core'?'sat':'core').catch(()=>({matrix:null}));
   const core=(book==='core'?saved.matrix:other.matrix) as CoreBook|null;

@@ -12,8 +12,13 @@ vi.mock("../../../../lib/longbridge-mcp", () => ({
 
 import { POST } from "./route";
 
-beforeEach(() => callLongbridgeTool.mockReset());
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  // Historic quote fixtures must be evaluated on their observation date.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-26T16:00:00Z"));
+  callLongbridgeTool.mockReset();
+});
+afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("manual Longbridge refresh", () => {
   it("fills Nikkei, KOSPI and gold cards from their named public sources", async () => {

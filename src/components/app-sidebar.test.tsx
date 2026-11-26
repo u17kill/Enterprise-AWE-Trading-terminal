@@ -12,6 +12,11 @@ describe("two-level app navigation", () => {
     expect(screen.getByRole("link", { name: "财经日历" })).toHaveAttribute("href", "/calendar");
     expect(screen.getByRole("link", { name: "大佬持仓" })).toHaveAttribute("href", "/holdings");
     expect(screen.getByRole("link", { name: "机构研报" })).toHaveAttribute("href", "/research");
+    expect(screen.getByRole("link", { name: "市场新闻" })).toHaveAttribute("href", "/news");
+    expect(screen.getByRole("link", { name: "专家观点" })).toHaveAttribute("href", "/voices");
+    expect(screen.queryByRole("link", { name: "当前持仓" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /投资工具/ }));
+    expect(screen.getByRole("link", { name: "当前持仓" })).toHaveAttribute("href", "/portfolio");
   });
   it("keeps the top-level dashboard and both retained pages and all six replacement pages", () => {
     render(<AppSidebar currentPath="/" />);

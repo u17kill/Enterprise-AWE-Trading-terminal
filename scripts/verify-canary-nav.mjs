@@ -12,6 +12,7 @@ try{
   await nav.locator(`a[href="${path}"]`).click();
   await page.waitForURL(base+path);
   await nav.locator(`a[href="${path}"][aria-current="page"]`).waitFor();
+  assert.equal(await page.locator('main .topbar').count(),0,`${path}: no separate workspace header`);
   assert.equal(await nav.locator('a').count(),8);
   assert.equal(await nav.locator('[aria-current="page"]').count(),1);
   for(const width of [1440,390]){

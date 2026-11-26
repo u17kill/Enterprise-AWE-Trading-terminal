@@ -4,7 +4,8 @@ import { AppSidebar } from "./app-sidebar";
 
 
 import { useId, useMemo, useState } from "react";
-import { FundCharterLink } from "./fund-charter-link";
+import { ToolsPageHeading } from "./tools-page-heading";
+import { ToolsPageNav } from "./tools-page-nav";
 import { OptionsPayoffChart } from "./options-payoff-chart";
 import { analyzeScenario, type PayoffSummary } from "../lib/options-payoff";
 import { getStrategy, STRATEGIES, type ScenarioInput, type Strategy } from "../lib/options-strategies";
@@ -72,8 +73,9 @@ export function OptionsCalculator() {
 
   return <div className="app-shell options-shell">
     <AppSidebar currentPath="/options" />
-    <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> <strong>期权计算</strong></div><div className="topbar-actions"><span className="sample-pill">手动输入 · 到期情景</span><FundCharterLink /></div></header>
-      <div className="options-content"><div className="options-hero"><span className="section-eyebrow">AWE / OPTIONS LAB · V0.8</span><h1>期权计算</h1><p>先看懂策略的盈亏形状，再代入自己的价格。所有结果均为同一到期日的情景计算。</p></div>
+    <main className="main-content">
+      <div className="options-content tools-page-content"><ToolsPageHeading title="期权计算" description="先看懂策略的盈亏形状，再代入自己的价格。所有结果均为同一到期日的情景计算。"/>
+        <ToolsPageNav currentPath="/options"/>
         <div className="options-scope"><strong>十二种策略 · 到期盈亏</strong><span>价格与权利金均手动输入；图表不使用实时行情，也不预测到期前价格。</span></div>
         <section className="options-catalog" aria-label="期权策略目录"><div className="options-section-head"><div><span className="section-eyebrow">STRATEGY LIBRARY</span><h2>选择策略</h2></div><p>蓝线为使用示例参数绘制的到期盈亏形状</p></div><div className="options-strategy-grid">{STRATEGIES.map((item) => <ExampleCard key={item.id} strategy={item} active={item.id === selectedId} onSelect={() => selectStrategy(item)} />)}</div></section>
         <section id="options-workspace" className="options-workspace" aria-label="当前策略计算结果"><div className="options-section-head"><div><span className="section-eyebrow">PAYOFF WORKSPACE</span><h2>{strategy.name} <small>{strategy.english}</small></h2></div><a href={strategy.sourceUrl} target="_blank" rel="noopener noreferrer" className="options-source">策略教育来源 ↗</a></div>

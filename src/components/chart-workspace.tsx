@@ -9,8 +9,9 @@ import { aggregateCandles, generateSampleCandles, movingAverage, type Interval }
 import { atr, bollinger, macd, rsi } from "../lib/indicators";
 import { IndicatorPane } from "./indicator-pane";
 import { MarketRefreshControl } from "./market-refresh-control";
-import { Brand } from "./brand";
-import { FundCharterLink } from "./fund-charter-link";
+import { AppSidebar } from "./app-sidebar";
+import { ToolsPageHeading } from "./tools-page-heading";
+import { ToolsPageNav } from "./tools-page-nav";
 import { useLongbridgeMarket } from "../lib/use-longbridge-market";
 
 type Point = { index: number; price: number };
@@ -186,10 +187,13 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
         y: Math.max(30, Math.min(viewport.height - 10, Math.min(selectedPoints.a.y, selectedPoints.b.y) - 18)) }
     : null;
 
-  return <div className="workspace-shell">
-    <header className="workspace-topbar"><Brand /><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath={`/chart/${symbol.id}`} onRefresh={() => market.refresh([symbol.id], symbol.id)} /><div className="workspace-links"><Link className="workspace-back" href="/holdings">大佬持仓</Link><Link className="workspace-back" href="/options">期权计算</Link><Link className="workspace-back" href="/philosophy">大师哲学</Link><Link className="workspace-back" href="/canary">金丝雀指标</Link><Link className="workspace-back" href="/voices">最新风向</Link><Link className="workspace-back" href="/framework">投资框架</Link><Link className="workspace-back" href="/news">市场动态</Link><Link className="workspace-back" href="/calendar">财经日历</Link><Link className="workspace-back" href="/">← 返回总览看板</Link><FundCharterLink /></div></header>
-    <main className="workspace-main chart-workspace-main">
-       <div className="workspace-intro"><div><span className="section-eyebrow">CHART WORKSPACE / {symbol.id}</span><h1>{symbol.name} <span className="asset-symbol">{symbol.id}</span></h1><p>{symbol.englishName} · {symbol.category}</p></div><span className="workspace-demo">ⓘ {liveCandles ? symbol.id === "US10Y" ? "美国财政部日度数据" : symbol.id === "BTCUSD" ? "Coinbase BTC/USD" : "Longbridge 按需更新" : showSample ? "演示数据 · 非实时行情" : "等待真实数据"}</span></div>
+  return <div className="app-shell workspace-shell tools-shell">
+    <AppSidebar currentPath={`/chart/${symbol.id}`}/>
+
+    <main className="main-content workspace-main chart-workspace-main tools-page-content">
+      <ToolsPageHeading title="图表空间" description="行情、技术指标与已保存的研究绘图" actions={<MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath={`/chart/${symbol.id}`} onRefresh={() => market.refresh([symbol.id], symbol.id)} />}/>
+      <ToolsPageNav currentPath={`/chart/${symbol.id}`}/>
+       <div className="workspace-intro"><div><span className="section-eyebrow">CHART WORKSPACE / {symbol.id}</span><h2>{symbol.name} <span className="asset-symbol">{symbol.id}</span></h2><p>{symbol.englishName} · {symbol.category}</p></div><span className="workspace-demo">ⓘ {liveCandles ? symbol.id === "US10Y" ? "美国财政部日度数据" : symbol.id === "BTCUSD" ? "Coinbase BTC/USD" : "Longbridge 按需更新" : showSample ? "演示数据 · 非实时行情" : "等待真实数据"}</span></div>
       {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
       {market.result?.unsupported.includes(symbol.id) && <p className="market-feedback">Longbridge 暂未返回此资产的行情；请切换到已支持的资产。</p>}
       <div className="workspace-grid"><section className={`chart-panel color-${symbol.color}`} aria-label="K 线图表工作区">

@@ -1,0 +1,276 @@
+<div id="pane11" style="display:none">
+
+<div class="pmhead">
+  <div class="hl">
+    <div class="t" id="pmTitle">总仓</div>
+    <div class="d" id="pmDesc">核心仓（人民币）+ 卫星仓（美元 × <b>7.00</b>）= 总仓。两个仓分开记账、分开维护，
+      这里只做折算后的合并读数：美元部分按<b>固定汇率 7.00</b> 折成人民币，不取实时价——
+      汇率一动，历史合计就跟着变，月度对比就没意义了。</div>
+  </div>
+  <div class="r" id="pmHeadBtn">
+    <button class="btn" id="pmExp">导出</button>
+    <button class="btn" id="pmImp">导入</button>
+  </div>
+</div>
+
+<div class="pmtabs" id="pmModeBar">
+  <div class="seg2" id="pmSeg2">
+    <button data-m="total" class="on">总仓</button>
+    <button data-m="core">核心仓</button>
+    <button data-m="sat">卫星仓</button>
+  </div>
+  <div class="hint" id="pmModeHint">折算口径：<b>1 美元 = 7.00 人民币</b>，固定值。总仓只做合计与按策略/地区的切分，编辑请进各自的仓。</div>
+</div>
+
+<div id="pmTotalView"></div>
+
+<div id="pmBookView" style="display:none">
+
+<div class="pmbar">
+  <div class="l"><span>卡片 <b id="pmN">—</b> 张</span><span>计入 <b id="pmC">—</b></span><span>观察 <b id="pmW">—</b></span><span>期权 <b id="pmO">—</b></span><span>备注不可计算 <b id="pmU">—</b></span></div>
+  <div class="r">
+    <span class="st" id="pmSave">正在读取源文件…</span>
+    <button class="btn" id="pmNew">+ 添加标的</button>
+  </div>
+</div>
+
+<div class="pmfail" id="pmFail" style="display:none"></div>
+
+<div class="sec" style="margin-top:20px">
+  <div class="sec-h">
+    <h2>汇总</h2>
+    <div class="note">三种拆分是同一总额的不同切法，右列同为 Σ，<b>彼此不可相加</b></div>
+  </div>
+  <div class="pmsum" id="pmSum"></div>
+  <div class="pmviz" id="pmViz"></div>
+  <div class="pmopt" id="pmOpt"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>矩阵</h2>
+    <div class="note" id="pmMapNote">点卡片编辑标的，<b>点主题名可改名 / 换策略 / 删除</b>，段头的「＋ 主题」加新主题；<b>删掉主题的卡片会进「未归类」，不计入合计</b>；<b>蓝色虚线＝期权</b>，双击空格子可新增</div>
+  </div>
+  <div class="pmtools">
+    <div class="sbox">
+      <span style="color:#8a8880">&#9906;</span>
+      <input id="pmQ" placeholder="搜索代码、公司名或备注" autocomplete="off">
+    </div>
+    <span class="hits" id="pmHits"></span>
+    <div class="r">
+      <div class="dens" id="pmDens">
+        <button data-d="compact" class="on">紧凑</button><button data-d="comfy">舒适</button>
+      </div>
+    </div>
+  </div>
+  <div class="pmwrap" id="pmWrap"><div class="pmsegs" id="pmGrid"></div></div>
+  <div class="pmlist" id="pmList"></div>
+</div>
+
+<div class="pmfoot" id="pmFoot">
+  <b>口径</b>　合计只累加「已持仓 + 计划加仓」中完整写成「数字 k」的备注，按 1k = 1,000 美元计，
+  不做汇率换算；<b>Σ 是备注合计，不是资产价值</b>。
+  纯文字、<code>put 115</code>、区间 <code>2.7k–5</code>、没有 k 的裸数字都不计入，也不会被当作 0。
+  <b>日韩台印</b> 是合并地区，不构成单一国家统计。
+  期权数量与标的另列，永不并入普通仓位金额；备注里出现 put / call <b>不会</b>自动改状态。
+</div>
+
+</div><!-- /pmBookView -->
+
+<!-- 核心仓（v1.38.0）：基金 → 资产 两层。
+     卫星仓记的是个股，一只票一行，单层就够；基金不行——一只「多策略基金」里
+     装着红利 40% / 商品 50% / 黄金 10%，国家与风格落在资产那层。
+     所以这一块不共用卫星仓的矩阵 DOM：矩阵装不下「基金」这层容器。 -->
+<div id="pmCoreView" style="display:none">
+
+<div class="pmbar">
+  <div class="l"><span>基金 <b id="pmcFN">—</b> 只</span><span>资产 <b id="pmcAN">—</b> 项</span>
+    <span>合计 <b id="pmcTT">—</b></span></div>
+  <div class="r">
+    <span class="st" id="pmcSave">正在读取源文件…</span>
+    <button class="btn" id="pmcNew">+ 添加基金</button>
+  </div>
+</div>
+
+<div class="pmfail" id="pmcFail" style="display:none"></div>
+
+<div class="sec" style="margin-top:20px">
+  <div class="sec-h">
+    <h2>汇总</h2>
+    <div class="note">基金金额按各资产权重摊到<b>资产层</b>，国家 / 风格 / 资产类别都按摊完的金额统计</div>
+  </div>
+  <div class="pmsum" id="pmcSum"></div>
+  <div class="pmviz" id="pmcViz"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>基金 · 资产</h2>
+    <div class="note">点基金名改名称与金额，点资产行改国家 / 风格 / 权重；<b>权重可留空＝等分</b>，
+      不必凑满 100（不凑满就按比例归一化）</div>
+  </div>
+  <div class="cfunds" id="pmcList"></div>
+</div>
+
+<div class="pmfoot" id="pmcFoot">
+  <b>口径</b>　基金金额是<b>人民币</b>：<b>50k</b> 记作 50,000 元。<b>统计一律在资产层</b>——
+  一只基金的钱按各资产权重切开，再按国家 / 风格 / 资产名称汇总；权重空着就按资产个数等分，
+  填了但没凑满 100 就按比例归一化。<b>Σ 是卡片金额合计，不是市值、不是成本、也不是盈亏</b>。
+  同一只基金里的资产相加永远等于这只基金的金额，一分的零头也补在金额最大的那一项上。
+</div>
+
+</div><!-- /pmCoreView -->
+
+<!-- 基金抽屉 -->
+<div class="pmdr" id="pmcFDr">
+  <div class="dh">
+    <div class="t" id="pmcFT">新增基金</div>
+    <button class="x" id="pmcFX" title="关闭">×</button>
+  </div>
+  <div class="db">
+    <div class="fld">
+      <label>基金名称</label>
+      <input type="text" id="pmcFName" placeholder="多策略基金" autocomplete="off">
+    </div>
+    <div class="fld">
+      <label>持仓金额（人民币）</label>
+      <input type="text" id="pmcFAmt" placeholder="50k＝50,000 元；也可以先留空" autocomplete="off">
+      <div class="hint">只认「数字 k」这一种写法：50k / 12.5k。留空或写文字都不计入合计，但不会丢。</div>
+    </div>
+    <div class="fld">
+      <label>备注（可选）</label>
+      <input type="text" id="pmcFNote" placeholder="例如：定投中 / 2026-11 建仓" autocomplete="off">
+    </div>
+    <div class="calc" id="pmcFCalc">—</div>
+  </div>
+  <div class="df">
+    <button class="btn" id="pmcFDel">删除基金</button>
+    <div class="r">
+      <button class="btn" id="pmcFCancel">取消</button>
+      <button class="btn" id="pmcFSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 资产抽屉 -->
+<div class="pmdr" id="pmcADr">
+  <div class="dh">
+    <div class="t" id="pmcAT">新增资产</div>
+    <button class="x" id="pmcAX" title="关闭">×</button>
+  </div>
+  <div class="db">
+    <div class="fld">
+      <label>资产名称</label>
+      <input type="text" id="pmcAName" placeholder="红利 / 商品 / 黄金 / 宽基" autocomplete="off">
+      <div class="hint">这一层才是统计单位：国家饼图、风格温度计、资产格子图都按它切。</div>
+    </div>
+    <div class="fld">
+      <label>国家 / 市场</label>
+      <select id="pmcAReg"></select>
+    </div>
+    <div class="fld">
+      <label>风格</label>
+      <div class="seg" id="pmcASeg">
+        <button data-s="attack">进攻</button>
+        <button data-s="balance">均衡</button>
+        <button data-s="defense">防御</button>
+      </div>
+      <div class="hint">这就是总仓温度计里那三段，和卫星仓的策略是同一组 id，所以两边能直接相加。</div>
+    </div>
+    <div class="fld">
+      <label>占这只基金的权重（%）</label>
+      <input type="text" id="pmcAW" placeholder="40；留空＝与其他资产等分" autocomplete="off">
+      <div class="hint">不必凑满 100。三个资产填 40 / 50 / 10 和填 4 / 5 / 1 是同一件事。</div>
+    </div>
+    <div class="calc" id="pmcACalc">—</div>
+  </div>
+  <div class="df">
+    <button class="btn" id="pmcADel">删除资产</button>
+    <div class="r">
+      <button class="btn" id="pmcACancel">取消</button>
+      <button class="btn" id="pmcASave">保存</button>
+    </div>
+  </div>
+</div>
+<div class="pmmask" id="pmcMask"></div>
+
+<div class="pmdr th" id="pmThDr">
+  <div class="dh">
+    <div class="t" id="pmThT">编辑主题</div>
+    <button class="x" id="pmThX" title="关闭">×</button>
+  </div>
+  <div class="db">
+    <div class="fld">
+      <label>主题名称</label>
+      <input type="text" id="pmThName" placeholder="AI 算力" autocomplete="off">
+      <div class="hint">改名只换显示的文字。主题 id 不动，所以列里的卡片、金额、历史都对得上。</div>
+    </div>
+    <div class="fld">
+      <label>归属策略</label>
+      <select id="pmThGrp"></select>
+      <div class="hint">换策略＝整列搬到那一段，卡片跟着走，三段合计自动重算。</div>
+    </div>
+    <div class="calc" id="pmThCalc">—</div>
+    <div class="warnrow" id="pmThWarn" style="display:none"></div>
+  </div>
+  <div class="df">
+    <button class="btn" id="pmThDel">删除主题</button>
+    <div class="r">
+      <button class="btn" id="pmThCancel">取消</button>
+      <button class="btn" id="pmThSave">保存</button>
+    </div>
+  </div>
+</div>
+<div class="pmmask" id="pmMask"></div>
+<div class="pmdr" id="pmDr">
+  <div class="dh">
+    <div class="t" id="pmDrT">编辑标的</div>
+    <button class="x" id="pmDrX" title="关闭">×</button>
+  </div>
+  <div class="db">
+    <div class="fld">
+      <label>代码 / 简称</label>
+      <input type="text" id="pmSym" placeholder="NVDA" autocomplete="off">
+    </div>
+    <div class="fld">
+      <label>公司或资产名称</label>
+      <input type="text" id="pmName" placeholder="英伟达（可留空）" autocomplete="off">
+    </div>
+    <div class="fld">
+      <label>所属主题</label>
+      <select id="pmCol"></select>
+    </div>
+    <div class="fld">
+      <label>地区</label>
+      <select id="pmReg"></select>
+    </div>
+    <div class="fld">
+      <label>状态</label>
+      <div class="seg" id="pmSeg">
+        <button data-s="held">已持仓</button>
+        <button data-s="watch">观察中</button>
+        <button data-s="add">计划加仓</button>
+        <button data-s="option">期权</button>
+      </div>
+      <div class="hint">颜色只表达状态；备注里写 put / call 不会自动改这里。</div>
+    </div>
+    <div class="fld">
+      <label>仓位备注</label>
+      <input type="text" id="pmAmt" placeholder="1.5k / put 720 / 待回踩再看" autocomplete="off">
+      <div class="hint">只有完整写成「数字 k」才计入合计，原文一律照常保存。</div>
+    </div>
+    <div class="calc" id="pmCalc">—</div>
+    <div class="warnrow" id="pmWarn" style="display:none"></div>
+  </div>
+  <div class="df">
+    <button class="btn" id="pmDel">删除</button>
+    <div class="r">
+      <button class="btn" id="pmCancel">取消</button>
+      <button class="btn" id="pmSave2">保存</button>
+    </div>
+  </div>
+</div>
+<div class="pmtoast" id="pmToast"></div>
+<input type="file" id="pmFile" accept=".json,application/json" style="display:none">
+
+</div><!-- /pane11 -->

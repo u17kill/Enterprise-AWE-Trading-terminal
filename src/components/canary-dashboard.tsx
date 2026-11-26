@@ -5,7 +5,6 @@ import { AppSidebar } from "./app-sidebar";
 
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
-import { FundCharterLink } from "./fund-charter-link";
 import { buildCanaryAnalysis, CANARY_INDICATORS, CANARY_STORAGE_KEY, mergeCanarySnapshot, parseCanarySnapshot, type CanaryAnalysis, type CanaryIndicator, type CanaryReading, type CanarySnapshot } from "../lib/canary";
 import { moveCanaryIndicator, normalizeCanaryOrder, type CanaryOrder } from "../lib/canary-order";
 import type { CanaryBand } from "../lib/canary";
@@ -164,7 +163,7 @@ export function CanaryDashboard() {
   };
 
   return <div className="app-shell canary-shell"><AppSidebar currentPath="/canary" />
-  <main className="main-content"><header className="topbar"><div className="breadcrumb">工作台 <span>/</span> 金丝雀指标 <span>/</span> <strong>指标大全</strong></div><div className="topbar-actions"><span className="sample-pill">手动刷新 · 本地保存</span><FundCharterLink /></div></header>
+  <main className="main-content">
     <div className="canary-content"><div className="canary-hero"><div><span className="section-eyebrow">AWE / MARKET INTELLIGENCE</span><h1>指标大全</h1><p>宏观先行，再看美股风险与 A 股资金。让风险变化有出处、有日期，也有解释。</p></div><div className="canary-hero-actions"><button type="button" onClick={refresh} disabled={busy}>{busy ? "正在核对数据…" : "↻ 更新指标"}</button><span>{snapshot ? `上次更新 ${displayDate(snapshot.refreshedAt)} · 已有 ${updated} 项读数` : "点击更新获取已接入指标"}</span><a href="/api/longbridge/connect?return=%2Fcanary">连接 Longbridge · 读取 VIX 与期权指标</a></div></div>
       <CanaryPageNav currentPath="/canary"/>
       {feedback && <p className="canary-feedback" role="status">{feedback}</p>}

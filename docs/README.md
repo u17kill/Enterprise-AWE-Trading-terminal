@@ -51,3 +51,9 @@
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
 | V1.15（待验收，含八页统一横向切换栏） | [完整需求](temperature-suite-requirements.md) · [确认方案](superpowers/specs/2026-11-24-v115-temperature-suite.md) · [实施计划](superpowers/plans/2026-11-24-v115-temperature-suite.md) | [交付、修复、导航及标题顺序、验证与数据限制](v1.15-status.md) | [草稿 PR #32](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/32) |
+
+## V1.16 市场情报五页与当前持仓
+
+| 版本 | 需求与方案 | 交付记录 | GitHub |
+| --- | --- | --- | --- |
+| V1.16（主体已验收，含顶栏、投资工具交互及标题一致性优化） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | [草稿 PR #33](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/33) |

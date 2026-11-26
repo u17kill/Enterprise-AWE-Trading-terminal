@@ -21,7 +21,7 @@ export function validateBook(book:Book,raw:unknown):string[] {
  } else {
   const m=raw as PortfolioMatrix;
   for(const c of m.columns)if(!m.groups.some(g=>g.id===c.groupId))errors.push('主题所属策略无效');
-  for(const i of m.items)if(typeof i.amount!=='string'||!['held','add','watch','option'].includes(i.status)||!m.regions.some(r=>r.id===i.regionId))errors.push(`${i.symbol}: 状态、地区或备注无效`);
+  for(const i of m.items)if(typeof i.columnId!=='string'||typeof i.amount!=='string'||!['held','add','watch','option'].includes(i.status)||!m.regions.some(r=>r.id===i.regionId))errors.push(`${i.symbol}: 状态、地区、主题或备注无效`);
  }
  return errors;
 }

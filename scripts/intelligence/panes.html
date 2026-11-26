@@ -1,0 +1,194 @@
+<div id="pane7" style="display:none">
+
+<div class="sec" style="margin-top:0">
+  <div class="sec-h">
+    <h2>本期主线</h2>
+    <div class="note" id="wNote"></div>
+    <button class="btn" id="wRefBtn" style="flex:none"><span class="dot"></span><span id="wRefTxt">更新观点</span></button>
+  </div>
+  <div id="wRefSt"></div>
+  <div id="wStale"></div>
+  <div class="wbrief" id="wBrief"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>立场分布</h2>
+    <div class="note">按六大类统计，<b>绿为偏多、红为偏空</b>；只反映表态口径，不等于持仓</div>
+  </div>
+  <div class="wtemp" id="wTemp"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>人物卡片</h2>
+    <div class="note" id="wCount"></div>
+  </div>
+  <div class="wbar">
+    <div class="sbox">
+      <span style="color:#8a8880">&#9906;</span>
+      <input id="wQ" aria-label="搜索专家观点" placeholder="搜索人名、机构或关键词：黄仁勋 / 加息 / HBM" autocomplete="off">
+    </div>
+    <div class="wfilter" id="wFilter">
+      <button data-t="all" class="on">全部</button>
+      <button data-t="bull">偏多</button>
+      <button data-t="neutral">中性</button>
+      <button data-t="bear">偏空</button>
+    </div>
+    <div class="r"><button class="btn" id="wTight">只看结论</button></div>
+  </div>
+  <div id="wBody"></div>
+</div>
+
+</div><!-- /pane7 -->
+
+<div id="pane8" style="display:none">
+
+<div class="sec" style="margin-top:0">
+  <div class="sec-h">
+    <h2>本期主轴</h2>
+    <div class="note" id="nNote"></div>
+    <button class="btn" id="nRefBtn" style="flex:none"><span class="dot"></span><span id="nRefTxt">更新新闻</span></button>
+  </div>
+  <div id="nStale"></div>
+  <div class="nwbrief" id="nBrief"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>头条</h2>
+    <div class="note">窗口内最影响定价的事。按重要性排序，同分时较新的在前；标<b>持续</b>的是仍在发酵的大事件</div>
+  </div>
+  <div class="nwtop" id="nTop"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>分类流</h2>
+    <div class="note" id="nCount"></div>
+  </div>
+  <div id="nBody"></div>
+</div>
+
+</div><!-- /pane8 -->
+
+<div id="pane9" style="display:none">
+
+<div class="sbar">
+  <div class="l">覆盖 <b id="rInstN">—</b> 家机构　｜　<b id="rRptN">—</b> 篇报告　｜　窗口 <b id="rWin">—</b>　｜　口径 <b>主题 × 机构</b>（同一格可多篇）</div>
+  <div class="r"><span class="st" id="rSt">策展内容，随版本更新</span><span class="st" id="rRefSt"></span>
+    <button class="btn" id="rRefBtn"><span class="dot"></span><span id="rRefTxt">刷新研报</span></button></div>
+</div>
+
+<div class="sec" style="margin-top:6px">
+  <div class="sec-h">
+    <h2>覆盖矩阵</h2>
+    <div class="note">纵向主题、横向机构；<b>实心格＝本期有稿</b>，点格子只看这一格，点机构名只看这家</div>
+  </div>
+  <div class="rmx" id="rMatrix"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>按主题读</h2>
+    <div class="note" id="rCount"></div>
+  </div>
+  <div class="rbar">
+    <div class="sbox">
+      <span style="color:#8a8880">&#9906;</span>
+      <input id="rQ" aria-label="搜索机构研报" placeholder="搜索标题、结论或关键词：黄金 / 资本开支 / 港股" autocomplete="off">
+    </div>
+    <div class="rstate" id="rState" style="display:none"></div>
+    <div class="r"><button class="btn" id="rReset">看全部</button></div>
+  </div>
+  <div class="rnaved" id="rNav"></div>
+  <div id="rBody"></div>
+</div>
+
+</div><!-- /pane9 -->
+
+<div id="pane10" style="display:none">
+
+<div class="hhead">
+  <div class="hl">
+    <div class="t">大佬持仓</div>
+    <div class="d">这里是 <b>SEC 13F 的公开申报摘要</b>。在美国管理股票超过 1 亿美元的机构，
+      须在每季结束后 <b>45 天内</b>披露该季度末持有的美股多头与期权。所以它<b>不是实时持仓</b>
+      （最长滞后四个半月）、<b>不是完整组合</b>（现金、债券、非美股票与空头都不在表里）、
+      <b>也不是交易信号</b>——它只说明「季末那一天账上有什么」。</div>
+  </div>
+  <div class="r">
+    <button class="btn" id="hUpd"><span class="dot"></span><span id="hUpdTx">更新持仓</span></button>
+    <div class="st" id="hUpdSt">点击后逐家向 SEC 核对</div>
+  </div>
+</div>
+
+<div class="sbar">
+  <div class="l">快照收录 <b id="hInstN">—</b> 家　｜　快照可用 <b id="hOkN">—</b>　｜　主要报告期 <b id="hPer">—</b>　｜　数据源 <b>SEC EDGAR 13F</b></div>
+  <div class="r"><span class="st" id="hAs">—</span></div>
+</div>
+
+<div class="sec" style="margin-top:22px">
+  <div class="sec-h">
+    <h2>季度变化</h2>
+    <div class="note">同一机构相邻两期，逐家算；逐项明细在每张卡详情里</div>
+  </div>
+  <div class="hnote" id="hChange"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>机构目录</h2>
+    <div class="note" id="hCnt">—</div>
+  </div>
+  <div class="hfil">
+    <div class="sbox">
+      <span style="color:#8a8880">&#9906;</span>
+      <input id="hQ" aria-label="搜索申报机构" placeholder="搜索机构、人物、英文名或 CIK" autocomplete="off">
+    </div>
+    <div class="htabs" id="hTabs"></div>
+    <div class="r" id="hRes"></div>
+  </div>
+  <div class="hlay">
+    <div class="hdir" id="hDir"></div>
+    <aside class="hdet" id="hDet"></aside>
+  </div>
+</div>
+
+</div><!-- /pane10 -->
+
+<div id="pane12" style="display:none">
+
+<div class="sec" style="margin-top:0">
+  <div class="sec-h">
+    <h2>当周核心事件</h2>
+    <div class="note" id="calWkNote"></div>
+  </div>
+  <div class="calwk" id="calWeek"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h">
+    <h2>日历</h2>
+    <div class="note" id="calSub"></div>
+  </div>
+  <div class="calbar">
+    <div class="calseg" id="calZoom">
+      <button data-v="year">年</button><button data-v="month" class="on">月</button><button data-v="week">周</button>
+    </div>
+    <div class="calnav">
+      <button id="calPrev" title="上一段">‹</button>
+      <button id="calToday" title="回到今天" style="width:auto;padding:0 9px">今天</button>
+      <button id="calNext" title="下一段">›</button>
+    </div>
+    <div class="caltitle" id="calTitle"></div>
+    <div class="calleg" id="calLeg"></div>
+    <div class="calnote"><b></b>斜纹 + 虚线左边框 = 日期为推测（官方未公告），悬停可看依据</div>
+    <div class="calnote scope">收录口径：美 / 中 / 港 / 台 / 日 / 韩核心公司与全球产业大会；财报覆盖
+      「七巨头 + 台积电 + 三星 + 海力士 + 阿斯麦 + 博通」每家每季，其余按影响力择要——
+      <b style="width:auto;height:auto;border:none;background:none;font-weight:500">没收录不等于没发生</b></div>
+  </div>
+  <div id="calBody"></div>
+</div>
+
+</div><!-- /pane12 -->

@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
+import { IntelligenceHashRoute } from '../components/intelligence-hash-route';
 import "./globals.css";
 import "./chart-workspace.css";
-import "./financial-calendar.css";
 import "./brand.css";
-import "./market-news.css";
-import "./leader-holdings.css";
 import "./options-calculator.css";
 import "./master-philosophy.css";
 import "./canary.css";
 import "./canary-page-nav.css";
+import "./intelligence-page-nav.css";
 import "./investment-framework.css";
 import "./fund-charter.css";
-import "./latest-voices.css";
 import "./sitewide-ui.css";
 import "./market-overview.css";
+import "./investment-tools.css";
 
 export const metadata: Metadata = {
   title: "Enterprise AWE Trading Terminal",
@@ -21,5 +20,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+  return <html lang="zh-CN"><body><IntelligenceHashRoute/>{children}</body></html>;
 }

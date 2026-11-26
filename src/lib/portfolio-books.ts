@@ -45,7 +45,7 @@ export function summarizeBooks(matrix:PortfolioMatrix, core:CoreBook) {
       add(classes,asset.name.includes('股票')?'股票':asset.name,asset.cents);
       if(/国债|黄金|中性|套利|CTA/.test(asset.name)) realDefense+=asset.cents;
       if(asset.name.includes('纳斯达克')) ai+=asset.cents;
-      else if(asset.name.includes('标普500')) ai+=Math.floor(asset.cents*33/100);
+      else if(asset.name.includes('标普500')) ai+=asset.cents/3;
     }
     return {...fund,cents,allocated:assets};
   });
@@ -53,7 +53,7 @@ export function summarizeBooks(matrix:PortfolioMatrix, core:CoreBook) {
   const top5=[...rows].sort((a,b)=>b.cents-a.cents).slice(0,5).reduce((s,r)=>s+r.cents,0);
   const hhi=satellite?rows.reduce((s,r)=>s+(r.cents/satellite)**2,0):0;
   const small=rows.filter(r=>pct(r.cents*BOOK_FX)<0.3);
-  return {total,coreTotal,satellite,regions,styles,classes,funds,rows,invalid,unclassified,
+  return {total,coreTotal,satellite,regions,styles,classes,funds,rows,invalid,unclassified,coreInvalid:funds.filter(f=>f.cents===null).length,
     readings:{'region.cn':pct(regions.cn||0),'style.attack':pct(styles.attack||0),'style.balance':pct(styles.balance||0),'style.defense':pct(styles.defense||0),'band.real_def':pct(realDefense),'factor.ai':pct(ai),'conc.top5':pct(top5,satellite)},
     equivalent:hhi?1/hhi:0,average:rows.length?pct(satellite*BOOK_FX)/rows.length:0,smallCount:small.length,smallCents:small.reduce((s,r)=>s+r.cents*BOOK_FX,0)};
 }
