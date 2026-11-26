@@ -10,6 +10,7 @@ import { atr, bollinger, macd, rsi } from "../lib/indicators";
 import { IndicatorPane } from "./indicator-pane";
 import { MarketRefreshControl } from "./market-refresh-control";
 import { AppSidebar } from "./app-sidebar";
+import { ToolsPageHeading } from "./tools-page-heading";
 import { ToolsPageNav } from "./tools-page-nav";
 import { useLongbridgeMarket } from "../lib/use-longbridge-market";
 
@@ -189,8 +190,8 @@ export function ChartWorkspace({ symbol }: { symbol: MarketSymbol }) {
   return <div className="app-shell workspace-shell tools-shell">
     <AppSidebar currentPath={`/chart/${symbol.id}`}/>
 
-    <main className="main-content workspace-main chart-workspace-main">
-      <header className="tools-chart-heading"><div><span className="section-eyebrow">AWE / INVESTMENT TOOLS</span><h1>图表空间</h1><p>行情、技术指标与已保存的研究绘图</p></div><MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath={`/chart/${symbol.id}`} onRefresh={() => market.refresh([symbol.id], symbol.id)} /></header>
+    <main className="main-content workspace-main chart-workspace-main tools-page-content">
+      <ToolsPageHeading title="图表空间" description="行情、技术指标与已保存的研究绘图" actions={<MarketRefreshControl connected={market.connected} checking={market.checking} refreshing={market.refreshing} returnPath={`/chart/${symbol.id}`} onRefresh={() => market.refresh([symbol.id], symbol.id)} />}/>
       <ToolsPageNav currentPath={`/chart/${symbol.id}`}/>
        <div className="workspace-intro"><div><span className="section-eyebrow">CHART WORKSPACE / {symbol.id}</span><h2>{symbol.name} <span className="asset-symbol">{symbol.id}</span></h2><p>{symbol.englishName} · {symbol.category}</p></div><span className="workspace-demo">ⓘ {liveCandles ? symbol.id === "US10Y" ? "美国财政部日度数据" : symbol.id === "BTCUSD" ? "Coinbase BTC/USD" : "Longbridge 按需更新" : showSample ? "演示数据 · 非实时行情" : "等待真实数据"}</span></div>
       {market.error && <p className="market-feedback error" role="alert">{market.error}</p>}
