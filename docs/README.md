@@ -57,3 +57,12 @@
 | 版本 | 需求与方案 | 交付记录 | GitHub |
 | --- | --- | --- | --- |
 | V1.16（主体已验收，含顶栏、投资工具交互及标题一致性优化） | [完整施工图](intelligence-holdings-requirements.md) · [确认方案与栏目澄清](superpowers/specs/2026-11-24-v116-intelligence-holdings.md) · [实施计划](superpowers/plans/2026-11-24-v116-intelligence-holdings.md) | [交付、原持仓保护、修复与验证](v1.16-status.md) | [草稿 PR #33](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/33) |
+
+
+## V1.17 可编辑基金宪法
+
+| 版本 | 需求与方案 | 交付记录 | GitHub |
+| --- | --- | --- | --- |
+| V1.17（待验收） | [单份宪法增删改、排序与本机保存](superpowers/specs/2026-11-26-v117-editable-fund-charter.md) · [计划](superpowers/plans/2026-11-26-v117-editable-fund-charter.md) | [交付、草稿恢复、冲突保护与验证](v1.17-status.md) | [草稿PR #34](https://github.com/u17kill/Enterprise-AWE-Trading-terminal/pull/34) |
+
+V1.17跨项目交接：[独立开发需求与完整原文](handoffs/基金宪法-跨项目开发需求文档.md) · [完整初始数据JSON](handoffs/基金宪法-完整初始数据.json)。
