@@ -1,10 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import FundCharterPage from "./page";
+import { beforeEach, describe, expect, it } from "vitest";
+import {FundCharterEditor} from '../../components/fund-charter-editor';
+import {defaultCharter} from '../../lib/fund-charter-document';
 
 describe("基金宪法页面", () => {
+  beforeEach(()=>localStorage.clear());
   it("按四大支柱展示完整的十条信条和风险上限", () => {
-    render(<FundCharterPage />);
+    render(<FundCharterEditor initial={{ok:true,document:defaultCharter(),revision:'missing',updatedAt:null}} />);
     expect(screen.getByRole("heading", { name: "投资十大信条" })).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(10);
     expect(screen.getAllByRole("article").map((article) => within(article).getByRole("heading", { level: 3 }).textContent)).toEqual([
